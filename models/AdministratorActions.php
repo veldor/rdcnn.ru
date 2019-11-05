@@ -8,6 +8,7 @@ use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
+use yii\db\StaleObjectException;
 use yii\web\UploadedFile;
 
 class AdministratorActions extends Model
@@ -27,11 +28,33 @@ class AdministratorActions extends Model
      */
     public $conclusion;
 
+    public static function checkPatients()
+    {
+        $response = [];
+        // верну список пациентов со статусами данных
+        $patientsList = User::find()->where(['<>', 'username', User::ADMIN_NAME])->all();
+        if(!empty($patientsList)){
+            foreach ($patientsList as $item) {
+                // проверю, загружены ли данные по пациенту
+                $patientInfo = [];
+                $patientInfo['id'] = $item->username;
+                $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
+                $patientInfo['conclusion'] = ExecutionHandler::isConclusion($item->username);
+                $response[] = $patientInfo;
+            }
+        }
+        return $response;
+    }
+
+    /**
+     * @param $id
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
     public static function simpleDeleteItem($id)
     {
         $execution = User::findByUsername($id);
         if(!empty($execution)){
-            $execution->delete();
             $conclusionFile = Yii::getAlias('@conclusionsDirectory') . '\\' . $id . '.pdf';
             if(is_file($conclusionFile)){
                 unlink($conclusionFile);
@@ -40,6 +63,7 @@ class AdministratorActions extends Model
             if(is_file($executionFile)){
                 unlink($executionFile);
             }
+            $execution->delete();
             // если пользователь залогинен и это не админ- выхожу из учётной записи
             if(!Yii::$app->user->can('manage')){
                 Yii::$app->user->logout(true);

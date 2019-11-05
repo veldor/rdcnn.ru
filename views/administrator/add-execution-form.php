@@ -19,7 +19,7 @@ try {
         ->hint('Номер обследования пациента')
         ->label('Номер обследования');
 
-    echo $form->field($model, 'executionResponse', ['template' =>
+/*    echo $form->field($model, 'executionResponse', ['template' =>
         '<div class="col-sm-5">{label}</div><div class="col-sm-7">{input}{error}{hint}</div>'])->widget(FileInput::class, [
         'options' => ['accept' => 'application/pdf'],
         'pluginOptions' => [
@@ -38,7 +38,7 @@ try {
             'browseLabel' =>  'Выберите файл с данными обследования',
             'showUpload' => false
         ]
-    ]);
+    ]);*/
 } catch (Exception $e) {
 }
 

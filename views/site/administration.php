@@ -34,8 +34,8 @@ if (!empty($executions)) {
                     <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить заключение'><span class='text-info glyphicon glyphicon-file'></span><input id="addConclusion" data-id='<?= $execution->username ?>' class='hidden loader' type='file' accept='application/pdf' name='AdministratorActions[conclusion]'></label></form>
                     <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить обследование'><span class='text-info glyphicon glyphicon-folder-close'></span><input id="addExecution" data-id='<?= $execution->username ?>' class='hidden loader' type='file' accept='application/zip' name='AdministratorActions[execution]'></label></form>
             </td>
-            <td><?= ExecutionHandler::isConclusion($execution->username) ? "<span class='glyphicon glyphicon-ok text-success'></span>" : "<span class='glyphicon glyphicon-remove text-danger'></span>"?></td>
-            <td><?= ExecutionHandler::isExecution($execution->username) ? "<span class='glyphicon glyphicon-ok text-success'></span>" : "<span class='glyphicon glyphicon-remove text-danger'></span>"?></td>
+            <td data-conclusion="<?= $execution->username ?>"><?= ExecutionHandler::isConclusion($execution->username) ? "<span class='glyphicon glyphicon-ok text-success'></span>" : "<span class='glyphicon glyphicon-remove text-danger'></span>"?></td>
+            <td data-execution="<?= $execution->username ?>"><?= ExecutionHandler::isExecution($execution->username) ? "<span class='glyphicon glyphicon-ok text-success'></span>" : "<span class='glyphicon glyphicon-remove text-danger'></span>"?></td>
             <td>
                 <a class='btn btn-default activator' data-action='change-password'
                    data-id='<?= $execution->username ?>' data-toggle='tooltip' data-placement='auto'
@@ -59,5 +59,5 @@ echo Html::beginForm(['/site/logout'], 'post')
 
 ?>
 
-<textarea class="hidden" id="forPasswordCopy"></textarea>
+<label><textarea class="hidden" id="forPasswordCopy"></textarea></label>
 

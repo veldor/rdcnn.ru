@@ -1,3 +1,4 @@
+let checkInterval;
 $(function () {
     let copyPassTextarea = $('textarea#forPasswordCopy');
 
@@ -58,4 +59,38 @@ $(function () {
             }
         }
     });
+
+    checkPatientDataFilling();
+    // запущу проверку наличия пациентов
+    checkInterval = setInterval(function () {
+        checkPatientDataFilling();
+    }, 10000);
 });
+
+function checkPatientDataFilling() {
+    sendSilentAjax('get', '/patients/check', function (answer) {
+        for (let i in answer){
+            if(answer.hasOwnProperty(i)){
+                let item = answer[i];
+                let conclusionContainer = $('td[data-conclusion="' + item['id'] +'"]');
+                if(conclusionContainer.length){
+                    if(item['conclusion']){
+                        conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success'></span>");
+                    }
+                    else{
+                        conclusionContainer.html("<span class='glyphicon glyphicon-remove text-danger'></span>");
+                    }
+                }
+                let executionContainer = $('td[data-execution="' + item['id'] +'"]');
+                if(executionContainer.length){
+                    if(item['execution']){
+                        executionContainer.html("<span class='glyphicon glyphicon-ok text-success'></span>");
+                    }
+                    else{
+                        executionContainer.html("<span class='glyphicon glyphicon-remove text-danger'></span>");
+                    }
+                }
+            }
+        }
+    });
+}

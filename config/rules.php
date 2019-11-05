@@ -6,4 +6,5 @@ return [
     'execution/add' => 'administrator/add-execution',
     'person/<executionNumber:[0-9a-zA-Z]+>' => 'site/index',
     'availability/check' => 'site/availability-check',
+    'patients/check' => 'administrator/patients-check'
 ];
