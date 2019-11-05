@@ -18,6 +18,7 @@ $(function () {
 
         switch (action) {
             case 'change-password':
+
                 makeInformerModal('Смена пароля пользователя', 'Изменить пароль пользователя? Предыдущий пароль перестанет действовать, новый пароль нужно будет каким-то образом сообщить пользователю.', function () {
                     sendAjax('post', '/administrator/change-password', function (data) {
                         let message = data['message'] ? data['message'] : 'Операция успешно завершена';
