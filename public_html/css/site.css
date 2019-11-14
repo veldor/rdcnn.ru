@@ -185,7 +185,7 @@ div#ourLogo{
     background-position: center;
     background-repeat: no-repeat;
 }
-body{
+body.background{
     background-image: url("/images/main_background.jpg");
     background-attachment: fixed;
     background-repeat: no-repeat;

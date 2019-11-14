@@ -31,7 +31,6 @@ if(Yii::$app->user->can('manage')) {
 }
 else{
     ?>
-
     <h1 class="text-center text-danger">Страница не найдена</h1>
     <p>Возможно, истекло время хранения ваших данных или произошла какая-то ошибка. Вы можете <a href="/" class="btn btn-default"><span class="glyphicon glyphicon-log-in text-success"></span><span class="text-success"> повторно зайти</span></a> или позвонить нам <a href="tel:+78312020200" class="btn btn-default"><span class="glyphicon glyphicon-earphone text-success"></span><span class="text-success"> +7(831)20-20-200</span></a></p>
 <?php

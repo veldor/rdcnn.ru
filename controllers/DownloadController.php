@@ -44,7 +44,7 @@ class DownloadController extends Controller
                     $file = Yii::getAlias('@executionsDirectory') . '\\' . $execution->username . '.zip';
                     // проверю, если есть файл результатов сканирования- выдам его на загрузку
                     if(is_file($file)){
-                        Yii::$app->response->xSendFile($file, 'Файлы обследования МРТ №' . $execution->username . '.zip');
+                        Yii::$app->response->sendFile($file, 'Файлы обследования МРТ №' . $execution->username . '.zip');
                     }
                 }
             }
@@ -61,7 +61,7 @@ class DownloadController extends Controller
                         if(is_file($file)){
                             // запишу данные о скачивании
                             Table_statistics::plusExecutionDownload($executionNumber);
-                            Yii::$app->response->xSendFile($file, 'Файлы обследования МРТ №' . $execution->username . '.zip');
+                            Yii::$app->response->sendFile($file, 'Файлы обследования МРТ №' . $execution->username . '.zip');
                         }
                     }
                 }
@@ -81,7 +81,7 @@ class DownloadController extends Controller
                     $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $execution->username . '.pdf';
                     // проверю, если есть файл результатов сканирования- выдам его на загрузку
                     if(is_file($file)){
-                        Yii::$app->response->xSendFile($file, 'Заключение врача по обследованию №' . $execution->username. '.pdf');
+                        Yii::$app->response->sendFile($file, 'Заключение врача по обследованию №' . $execution->username. '.pdf');
                     }
                 }
             }
@@ -97,13 +97,17 @@ class DownloadController extends Controller
                         // проверю, если есть файл результатов сканирования- выдам его на загрузку
                         if(is_file($file)){
                             Table_statistics::plusConclusionDownload($executionNumber);
-                            Yii::$app->response->xSendFile($file, 'Заключение врача по обследованию №' . $execution->username. '.pdf');
+                            Yii::$app->response->sendFile($file, 'Заключение врача по обследованию №' . $execution->username. '.pdf');
                         }
                     }
                 }
             }
         }
     }
+
+    /**
+     *
+     */
     public function actionPrintConclusion(){
         // если это запись администратора- загружу запись. Для этого узнаю, с какой страницы был переход
         if(Yii::$app->user->can('manage')){

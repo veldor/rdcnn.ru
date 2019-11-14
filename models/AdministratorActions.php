@@ -46,6 +46,20 @@ class AdministratorActions extends Model
         return $response;
     }
 
+    public static function selectCenter()
+    {
+        $center =  Yii::$app->request->post('center');
+        $session = Yii::$app->session;
+        $session['center'] = $center;
+    }
+
+    public static function selectTime()
+    {
+        $time =  Yii::$app->request->post('timeInterval');
+        $session = Yii::$app->session;
+        $session['timeInterval'] = $time;
+    }
+
     /**
      * @param $id
      * @throws Throwable

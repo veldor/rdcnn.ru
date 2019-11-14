@@ -14,8 +14,8 @@ $config = [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
-        '@executionsDirectory' => dirname(__DIR__) . '\executions',
-        '@conclusionsDirectory' => dirname(__DIR__) . '\conclusions',
+        '@executionsDirectory' => \app\priv\Info::EXEC_FOLDER,
+        '@conclusionsDirectory' => \app\priv\Info::CONC_FOLDER,
     ],
     'components' => [
         'request' => [

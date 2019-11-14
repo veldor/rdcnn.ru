@@ -24,12 +24,12 @@ class AdministratorController extends Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function () {
-                    return $this->redirect('/error', 404);
+                    return $this->redirect('/error', 301);
                 },
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check'],
+                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check'],
                         'roles' => ['manager'],
                         'ips' => Info::ACCEPTED_IPS,
                     ],
@@ -122,5 +122,10 @@ class AdministratorController extends Controller
     public function actionPatientsCheck(){
         Yii::$app->response->format = Response::FORMAT_JSON;
         return AdministratorActions::checkPatients();
+    }
+
+    public function actionFilesCheck($executionNumber){
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return ExecutionHandler::checkFiles($executionNumber);
     }
 }

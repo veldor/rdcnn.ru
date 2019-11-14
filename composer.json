@@ -19,7 +19,8 @@
         "yiisoft/yii2-bootstrap": "~2.0.0",
         "yiisoft/yii2-swiftmailer": "~2.0.0",
         "kartik-v/yii2-widget-fileinput": "@dev",
-        "nirvana-msu/yii2-showloading": "1.0.*@dev"
+        "nirvana-msu/yii2-showloading": "1.0.*@dev",
+      "ext-zip": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",
