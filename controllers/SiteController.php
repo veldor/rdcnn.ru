@@ -136,6 +136,11 @@ class SiteController extends Controller
         }
         // если пользователь админ
         if (Yii::$app->user->can('manage')) {
+
+            // очищу неиспользуемые данные
+
+            AdministratorActions::clearGarbage();
+
             $this->layout = 'administrate';
             if(Yii::$app->request->isPost){
                 // выбор центра, обследования которого нужно отображать

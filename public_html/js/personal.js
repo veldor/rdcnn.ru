@@ -1,4 +1,6 @@
 let checkInterval;
+let addConc;
+let isAddConc = false;
 $(function () {
         // назначу переменные для кнопок
     let downloadConclusionBtn = $('#downloadConclusionBtn');
@@ -46,6 +48,16 @@ $(function () {
             if(data['timeLeft']){
                 availabilityTimeDivContainer.removeClass('hidden');
                 availabilityTimeContainer.html(data['timeLeft'])
+            }
+            if(data['addConc']){
+                // проверю, есть ли уже ссылки на скачивание дополнительных заключений
+                if(isAddConc && addConc !== data['addConc']){
+                    location.reload();
+                }
+                else{
+                    addConc = data['addConc'];
+                    isAddConc = true;
+                }
             }
             // проверю, если есть файлы обследования- активирую пункты о скачивании
         }

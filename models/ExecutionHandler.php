@@ -20,16 +20,21 @@ class ExecutionHandler extends Model
     public static function checkAvailability()
     {
         // получу информацию о пациенте
-        $id = Yii::$app->user->identity->username;
+        if (Yii::$app->user->can('manage')) {
+            $referer =  $_SERVER['HTTP_REFERER'];
+            $id = explode("/", $referer)[4];
+        }
+        else
+            $id = Yii::$app->user->identity->username;
         $isExecution = !!ExecutionHandler::isExecution($id);
         $isConclusion = !!ExecutionHandler::isConclusion($id);
         $timeLeft = 0;
         // посмотрю, сколько времении ещё будет доступно обследование
-        $startTime = Table_availability::findOne(['userId' => $id]);
+        $startTime = User::findByUsername($id)->created_at;
         if(!empty($startTime)){
             // найдено время старта
             $now = time();
-            $lifetime = $startTime->startTime + Info::DATA_SAVING_TIME;
+            $lifetime = $startTime + Info::DATA_SAVING_TIME;
             if($now < $lifetime){
                 $timeLeft = Utils::secondsToTime($lifetime - $now);
             }
@@ -39,7 +44,9 @@ class ExecutionHandler extends Model
             }
         }
 
-        return ['status' => 1, 'execution' => $isExecution, 'conclusion' => $isConclusion, 'timeLeft' => $timeLeft];
+        $addConc = ExecutionHandler::isAdditionalConclusions($id);
+
+        return ['status' => 1, 'execution' => $isExecution, 'conclusion' => $isConclusion, 'timeLeft' => $timeLeft, 'addConc' => $addConc];
     }
 
     public static function checkFiles($executionNumber)
@@ -90,6 +97,34 @@ class ExecutionHandler extends Model
             return rmdir($path);
         }
         return false;
+    }
+
+    public static function isAdditionalConclusions(string $username)
+    {
+        $searchPattern = '/' . $username . '-[0-9]+\.pdf/';
+        $existentFiles = scandir(Info::CONC_FOLDER);
+        $addsQuantity = 0;
+        foreach ($existentFiles as $existentFile){
+            if(preg_match($searchPattern, $existentFile)){
+                $addsQuantity++;
+            }
+        }
+        return $addsQuantity;
+    }
+
+    public static function deleteAddConcs($id)
+    {
+        if(self::isAdditionalConclusions($id)){
+            $searchPattern = '/' . $id . '-[0-9]+\.pdf/';
+            $existentFiles = scandir(Info::CONC_FOLDER);
+            foreach ($existentFiles as $existentFile){
+                if(preg_match($searchPattern, $existentFile)){
+                    if(is_file($existentFile)){
+                        unlink($existentFile);
+                    }
+                }
+            }
+        }
     }
 
     public static function toLatin($executionNumber)

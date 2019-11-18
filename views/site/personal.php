@@ -17,6 +17,25 @@ ShowLoadingAsset::register($this);
 
 $this->title = "РДЦ, обследование " . $execution->username;
 
+/*$pdf = new FPDI();
+
+$pdf->AddPage();
+
+$pdf->setSourceFile(\app\priv\Info::CONC_FOLDER . '\1.pdf');
+// import page 1
+$tplIdx = $pdf->importPage(3);
+$pdf->Image(\app\priv\Info::SERVER_ROOT . '/public_html/images/main_background.jpg', 0, 0, );
+//use the imported page and place it at point 0,0; calculate width and height
+//automaticallay and ajust the page size to the size of the imported page
+$pdf->useTemplate($tplIdx, 0, 0, 500, 500, true);
+//set position in pdf document
+$pdf->SetXY(20, 20);
+//$pdf->Image(\app\priv\Info::SERVER_ROOT . '/public_html/images/main_background.jpg', 0, 0, );
+//force the browser to download the output
+$pdf->Output('gift_coupon_generated.pdf', 'D');
+
+die();*/
+
 ?>
 
 <div id="ourLogo"></div>
@@ -36,6 +55,18 @@ $this->title = "РДЦ, обследование " . $execution->username;
     echo "<a id='downloadConclusionBtn' class='btn btn-primary btn-lg btn-block margin " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' href='" . Url::toRoute('download/conclusion') . "' role='button'><span class='glyphicon glyphicon-cloud-download'></span> Загрузить заключение врача</a>";
 
     echo "<a id='printConclusionBtn' class='btn btn-primary  btn-lg btn-block margin " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' target='_blank' href='" . Url::toRoute('download/print-conclusion') . "' role='button'><span class='glyphicon glyphicon-print'></span> Распечатать заключение врача</a>";
+
+    // проверю наличие дополнительных заключений
+    if($addsQuantity = ExecutionHandler::isAdditionalConclusions($execution->username)){
+        $addsCounter = 2;
+        while ($addsQuantity > 0){
+            echo "<a id='downloadConclusionBtn' class='btn btn-primary btn-lg btn-block margin " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' href='" . Url::toRoute('download/conclusion/' . ($addsCounter -1)) . "' role='button'><span class='glyphicon glyphicon-cloud-download'></span> Загрузить заключение №{$addsCounter}</a>";
+
+            echo "<a id='printConclusionBtn' class='btn btn-primary  btn-lg btn-block margin " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' target='_blank' href='" . Url::toRoute('download/print-conclusion/' . ($addsCounter -1)) . "' role='button'><span class='glyphicon glyphicon-print'></span> Распечатать заключение №{$addsCounter}</a>";
+            $addsCounter++;
+            --$addsQuantity;
+        }
+    }
 
     echo "<a id='conclusionNotReadyBtn' class='btn btn-primary  btn-lg btn-block margin disabled " . (ExecutionHandler::isConclusion($execution->username) ? 'hidden' : '') . "' role='button'>Заключение врача ещё не готово</a>";
 

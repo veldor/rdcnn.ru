@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\priv\Info;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -60,6 +61,21 @@ class AdministratorActions extends Model
         $session['timeInterval'] = $time;
     }
 
+    public static function clearGarbage()
+    {
+        // получу список всех пациентов
+        $patients = User::findAllRegistered();
+        // определю время жизни учётной записи
+        $lifetime = time() - Info::DATA_SAVING_TIME;
+        if(!empty($patients)){
+            foreach ($patients as $patient) {
+                if($patient->created_at < $lifetime){
+                    self::simpleDeleteItem($patient->username);
+                }
+            }
+        }
+    }
+
     /**
      * @param $id
      * @throws Throwable
@@ -72,6 +88,7 @@ class AdministratorActions extends Model
             $conclusionFile = Yii::getAlias('@conclusionsDirectory') . '\\' . $id . '.pdf';
             if(is_file($conclusionFile)){
                 unlink($conclusionFile);
+                ExecutionHandler::deleteAddConcs($execution->username);
             }
             $executionFile = Yii::getAlias('@executionsDirectory') . '\\' . $id . '.zip';
             if(is_file($executionFile)){
