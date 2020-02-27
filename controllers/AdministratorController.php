@@ -32,7 +32,7 @@ class AdministratorController extends Controller
                         'allow' => true,
                         'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage'],
                         'roles' => ['manager'],
-                        'ips' => Info::ACCEPTED_IPS,
+                        //'ips' => Info::ACCEPTED_IPS,
                     ],
                 ],
             ],
