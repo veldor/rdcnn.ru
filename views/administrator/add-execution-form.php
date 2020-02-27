@@ -10,7 +10,7 @@ use yii\widgets\ActiveForm;
 /* @var $this View */
 /* @var $model ExecutionHandler */
 
-$form = ActiveForm::begin(['id' => 'complexPayment', 'options' => ['class' => 'form-horizontal bg-default', 'enctype' => 'multipart/form-data'], 'enableAjaxValidation' => false, 'validateOnSubmit'  => false, 'action' => ['/execution/add']]);
+$form = ActiveForm::begin(['id' => 'addPatientForm', 'options' => ['class' => 'form-horizontal bg-default', 'enctype' => 'multipart/form-data'], 'enableAjaxValidation' => false, 'validateOnSubmit'  => false, 'action' => ['/execution/add']]);
 
 try {
 //    echo $form->field($model, 'executionNumber', ['template' =>

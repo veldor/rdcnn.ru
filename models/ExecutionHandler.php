@@ -21,24 +21,22 @@ class ExecutionHandler extends Model
     {
         // получу информацию о пациенте
         if (Yii::$app->user->can('manage')) {
-            $referer =  $_SERVER['HTTP_REFERER'];
+            $referer = $_SERVER['HTTP_REFERER'];
             $id = explode("/", $referer)[4];
-        }
-        else
+        } else
             $id = Yii::$app->user->identity->username;
         $isExecution = !!ExecutionHandler::isExecution($id);
         $isConclusion = !!ExecutionHandler::isConclusion($id);
         $timeLeft = 0;
         // посмотрю, сколько времении ещё будет доступно обследование
         $startTime = User::findByUsername($id)->created_at;
-        if(!empty($startTime)){
+        if (!empty($startTime)) {
             // найдено время старта
             $now = time();
             $lifetime = $startTime + Info::DATA_SAVING_TIME;
-            if($now < $lifetime){
+            if ($now < $lifetime) {
                 $timeLeft = Utils::secondsToTime($lifetime - $now);
-            }
-            else{
+            } else {
                 AdministratorActions::simpleDeleteItem($id);
                 return ['status' => 2];
             }
@@ -52,38 +50,73 @@ class ExecutionHandler extends Model
     public static function checkFiles($executionNumber)
     {
         $executionDir = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber;
-        if(is_dir($executionDir)){
-            $fileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '.zip';
-            // Initialize archive object
-            $zip = new ZipArchive();
-            $zip->open($fileWay, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-            // Create recursive directory iterator
-            $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($executionDir),
-                RecursiveIteratorIterator::LEAVES_ONLY
-            );
-            foreach ($files as $name => $file)
-            {
-                // Skip directories (they would be added automatically)
-                if (!$file->isDir())
-                {
-                    // Get real and relative path for current file
-                    $filePath = $file->getRealPath();
-                    $relativePath = substr($filePath, strlen($executionDir) + 1);
-                    // Add current file to archive
-                    $zip->addFile($filePath, $relativePath);
-                }
-            }
-            // Zip archive will be created only after closing object
-            $zip->close();
-            ExecutionHandler::rmRec($executionDir);
-            return ['status' => 1, 'header' => '<h2 class="text-center text-success">Успех</h2>', 'view' =>  '<p class="text-success text-center">Папка найдена и успешно обработана</p>'];
+        if (is_dir($executionDir)) {
+            // скопирую в папку содержимое dicom-просмотровщика
+            $viewer_dir = Yii::getAlias('@dicomViewerDirectory');
+            self::recurse_copy($viewer_dir, $executionDir);
+            $fileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '_tmp.zip';
+            $trueFileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '.zip';
+            // создам архив и удалю исходное
+            shell_exec('cd /d ' . $executionDir . ' && "' . Info::WINRAR_FOLDER . '"  a -afzip -r -df  ' . $fileWay . ' .');
+            // удалю пустую директорию
+            // переименую файл
+            rename($fileWay, $trueFileWay);
+            rmdir($executionDir);
+            /*            $fileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '_tmp.zip';
+                        $trueFileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '.zip';
+                        // Initialize archive object
+                        $zip = new ZipArchive();
+                        $zip->open($fileWay, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+                        // теперь добавлю в архив просмотрщики для разных систем
+                        $viewer_dir = Yii::getAlias('@dicomViewerDirectory');
+                        $files = new RecursiveIteratorIterator(
+                            new RecursiveDirectoryIterator($viewer_dir),
+                            RecursiveIteratorIterator::LEAVES_ONLY
+                        );
+                        foreach ($files as $name => $file)
+                        {
+                            // Skip directories (they would be added automatically)
+                            if (!$file->isDir())
+                            {
+                                // Get real and relative path for current file
+                                $filePath = $file->getRealPath();
+                                $relativePath = substr($filePath, strlen($executionDir) + 1);
+                                // Add current file to archive
+                                $zip->addFile($filePath, $relativePath);
+                            }
+                        }
+
+
+                        // Create recursive directory iterator
+                        $files = new RecursiveIteratorIterator(
+                            new RecursiveDirectoryIterator($executionDir),
+                            RecursiveIteratorIterator::LEAVES_ONLY
+                        );
+                        foreach ($files as $name => $file)
+                        {
+                            // Skip directories (they would be added automatically)
+                            if (!$file->isDir())
+                            {
+                                // Get real and relative path for current file
+                                $filePath = $file->getRealPath();
+                                $relativePath = substr($filePath, strlen($executionDir) + 1);
+                                // Add current file to archive
+                                $zip->addFile($filePath, $relativePath);
+                            }
+                        }
+                        // Zip archive will be created only after closing object
+                        $zip->close();
+                        ExecutionHandler::rmRec($executionDir);
+                        // изменить название файла на оригинальное
+                        rename($fileWay, $trueFileWay);*/
+            return ['status' => 1, 'header' => '<h2 class="text-center text-success">Успех</h2>', 'message' => '<p class="text-success text-center">Папка найдена и успешно обработана</p>'];
         }
-        return ['status' => 1, 'header' => '<h2 class="text-center text-danger">Неудача</h2>', 'view' =>  '<p class="text-center text-danger">Папка не найдена</p>'];
+        return ['status' => 1, 'header' => '<h2 class="text-center text-danger">Неудача</h2>', 'message' => '<p class="text-center text-danger">Папка не найдена</p>'];
 
     }
 
-    private static function rmRec($path)
+    public static function rmRec($path)
     {
         if (is_file($path)) {
             return unlink($path);
@@ -104,8 +137,8 @@ class ExecutionHandler extends Model
         $searchPattern = '/' . $username . '-[0-9]+\.pdf/';
         $existentFiles = scandir(Info::CONC_FOLDER);
         $addsQuantity = 0;
-        foreach ($existentFiles as $existentFile){
-            if(preg_match($searchPattern, $existentFile)){
+        foreach ($existentFiles as $existentFile) {
+            if (preg_match($searchPattern, $existentFile)) {
                 $addsQuantity++;
             }
         }
@@ -114,12 +147,12 @@ class ExecutionHandler extends Model
 
     public static function deleteAddConcs($id)
     {
-        if(self::isAdditionalConclusions($id)){
+        if (self::isAdditionalConclusions($id)) {
             $searchPattern = '/' . $id . '-[0-9]+\.pdf/';
             $existentFiles = scandir(Info::CONC_FOLDER);
-            foreach ($existentFiles as $existentFile){
-                if(preg_match($searchPattern, $existentFile)){
-                    if(is_file($existentFile)){
+            foreach ($existentFiles as $existentFile) {
+                if (preg_match($searchPattern, $existentFile)) {
+                    if (is_file($existentFile)) {
                         unlink($existentFile);
                     }
                 }
@@ -183,7 +216,6 @@ class ExecutionHandler extends Model
             if (empty($this->executionNumber)) {
                 return ['status' => 2, 'message' => 'Не указан номер обследования'];
             }
-            // todo Сделать замену букв в номере на латиницу
             $this->executionNumber = self::toLatin($this->executionNumber);
             // проверю, не зарегистрировано ли уже обследование
             if (!empty(User::findByUsername($this->executionNumber))) {
@@ -260,5 +292,21 @@ class ExecutionHandler extends Model
             $timer->startTime = time();
             $timer->save();
         }
+    }
+
+    public static function recurse_copy($src, $dst)
+    {
+        $dir = opendir($src);
+        @mkdir($dst);
+        while (false !== ($file = readdir($dir))) {
+            if (($file != '.') && ($file != '..')) {
+                if (is_dir($src . '/' . $file)) {
+                    self::recurse_copy($src . '/' . $file, $dst . '/' . $file);
+                } else {
+                    copy($src . '/' . $file, $dst . '/' . $file);
+                }
+            }
+        }
+        closedir($dir);
     }
 }

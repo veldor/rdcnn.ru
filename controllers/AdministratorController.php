@@ -6,6 +6,7 @@ namespace app\controllers;
 
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
+use app\models\Utils;
 use app\priv\Info;
 use Throwable;
 use Yii;
@@ -29,7 +30,7 @@ class AdministratorController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check'],
+                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage'],
                         'roles' => ['manager'],
                         'ips' => Info::ACCEPTED_IPS,
                     ],
@@ -127,5 +128,11 @@ class AdministratorController extends Controller
     public function actionFilesCheck($executionNumber){
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ExecutionHandler::checkFiles($executionNumber);
+    }
+
+    public function actionClearGarbage(){
+        Utils::clearGarbage();
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return ['status' => 1, 'message' => 'Весь мусор удалён.'];
     }
 }

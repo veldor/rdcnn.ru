@@ -1,6 +1,17 @@
 let checkInterval;
 let addConc;
 let isAddConc = false;
+
+function makeInstruction() {
+    let text = '<h2 class="text-center">Выберите операционную систему</h2>' +
+        '<div class="panel-group" id="accordion"><div class="panel panel-default"><div class="panel-heading"><h3 class="text-center panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapseWin">Windows</a></h3></div><div id="collapseWin" class="panel-collapse collapse"><div class="panel-body text-center"><div class="btn-group-vertical text-center"><a target="_blank" href="https://google.com" class="btn btn-default"><span class="text-info">Читать инструкцию</span></a><a target="_blank"  href="https://youtube.com" class="btn btn-default"><span class="text-success">Смотреть инструкцию</span></a></div></div></div></div>' +
+        '<div class="panel panel-default"><div class="panel-heading"><h3 class="text-center panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapseMac">MacOs</a></h3></div><div id="collapseMac" class="panel-collapse collapse"><div class="panel-body"></div></div></div>' +
+        '<div class="panel panel-default"><div class="panel-heading"><h3 class="text-center panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapseLin">Linux</a></h3></div><div id="collapseLin" class="panel-collapse collapse"><div class="panel-body"></div></div></div>' +
+        '<div class="panel panel-default"><div class="panel-heading"><h3 class="text-center panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapseIos">iOs</a></h3></div><div id="collapseIos" class="panel-collapse collapse"><div class="panel-body"></div></div></div>' +
+        '<div class="panel panel-default"><div class="panel-heading"><h3 class="text-center panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapseAnd">Android</a></h3></div><div id="collapseAnd" class="panel-collapse collapse"><div class="panel-body"></div></div></div></div>';
+    makeModal("<h2 class='text-center'>Я скачал файл, что дальше</h2>", text, false, true, 1000);
+}
+
 $(function () {
         // назначу переменные для кнопок
     let downloadConclusionBtn = $('#downloadConclusionBtn');
@@ -70,5 +81,9 @@ $(function () {
     checkInterval = setInterval(function () {
         checkAvailability();
     }, 60000);
+
+    downloadExecutionBtn.on('click.showTooltip', function () {
+        makeInstruction();
+    });
 });
 

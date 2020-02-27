@@ -7,6 +7,7 @@ use app\models\ExecutionHandler;
 use app\models\LoginForm;
 use app\models\Test;
 use app\models\User;
+use app\models\Utils;
 use app\priv\Info;
 use Yii;
 use yii\base\Exception;
@@ -146,12 +147,15 @@ class SiteController extends Controller
                 // выбор центра, обследования которого нужно отображать
                 AdministratorActions::selectCenter();
                 AdministratorActions::selectTime();
+                AdministratorActions::selectSort();
                 return $this->redirect('site/administrate', 301);
             }
             // получу все зарегистрированные обследования
             $executionsList = User::findAllRegistered();
-
-            return $this->render('administration', ['executions' => $executionsList]);
+            // отсортирую список
+            $executionsList = Utils::sortExecutions($executionsList);
+            $model = new ExecutionHandler(['scenario' => ExecutionHandler::SCENARIO_ADD]);
+            return $this->render('administration', ['executions' => $executionsList, 'model' => $model]);
         } else {
             // редирект на главную
             return $this->redirect('site/index', 301);

@@ -45,7 +45,7 @@ class DownloadController extends Controller
                     $file = Yii::getAlias('@executionsDirectory') . '\\' . $execution->username . '.zip';
                     // проверю, если есть файл результатов сканирования- выдам его на загрузку
                     if (is_file($file)) {
-                        Yii::$app->response->sendFile($file, 'Файлы обследования МРТ №' . $execution->username . '.zip');
+                        Yii::$app->response->sendFile($file, 'MRI_files_' . $execution->username . '.zip');
                     }
                 }
             }
@@ -61,7 +61,7 @@ class DownloadController extends Controller
                         if (is_file($file)) {
                             // запишу данные о скачивании
                             Table_statistics::plusExecutionDownload($executionNumber);
-                            Yii::$app->response->sendFile($file, 'Файлы обследования МРТ №' . $execution->username . '.zip');
+                            Yii::$app->response->sendFile($file, 'MRI_files_' . $execution->username . '.zip');
                         }
                     }
                 }

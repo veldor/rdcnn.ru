@@ -23,6 +23,7 @@ use yii\web\IdentityInterface;
  * @property int $created_at [int(11)]  Дата регистрации
  * @property int $updated_at [int(11)]
  * @property string $access_token [varchar(255)]
+ * @property bool $active [tinyint(1)]  Активность обследования
  */
 class User extends ActiveRecord implements IdentityInterface
 {

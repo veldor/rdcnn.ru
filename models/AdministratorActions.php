@@ -61,6 +61,14 @@ class AdministratorActions extends Model
         $session['timeInterval'] = $time;
     }
 
+
+    public static function selectSort()
+    {
+        $sortBy =  Yii::$app->request->post('sortBy');
+        $session = Yii::$app->session;
+        $session['sortBy'] = $sortBy;
+    }
+
     public static function clearGarbage()
     {
         // получу список всех пациентов
@@ -94,6 +102,8 @@ class AdministratorActions extends Model
             if(is_file($executionFile)){
                 unlink($executionFile);
             }
+            // удалю запись в таблице выдачи разрешений
+            Table_auth_assigment::findOne(["user_id" => $execution->id])->delete();
             $execution->delete();
             // если пользователь залогинен и это не админ- выхожу из учётной записи
             if(!Yii::$app->user->can('manage')){
