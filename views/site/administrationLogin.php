@@ -9,11 +9,10 @@ use yii\bootstrap\ActiveForm;use yii\helpers\Html;use yii\web\View;
 /* @var $model LoginForm */
 
 $this->title = 'Вход для администраторов';
-
 ?>
 
 <div class="site-login">
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1 class="text-center"><?= Html::encode($this->title) ?></h1>
 
 <?php $form = ActiveForm::begin([
     'id' => 'login-form',
@@ -24,10 +23,12 @@ $this->title = 'Вход для администраторов';
     ],
 ]); ?>
 
-<?= $form->field($model, 'password')->passwordInput(['autocomplete' => 'off']) ?>
+    <?= $form->field($model, 'username', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'></div><div class='col-sm-12 text-center'>{error}</div>",])->textInput(['autofocus' => true,])->label("Логин") ?>
+
+    <?= $form->field($model, 'password', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'></button></div><div class='col-sm-12 text-center'>{error}</div>",])->passwordInput() ?>
 
 <div class="form-group">
-    <div class="col-lg-offset-1 col-lg-11">
+    <div class="col-lg-12 text-center">
         <?= Html::submitButton('Войти', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
     </div>
 </div>

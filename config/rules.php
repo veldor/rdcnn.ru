@@ -1,7 +1,7 @@
 <?php
 return [
     'error' => 'site/error',
-    'administrate' => 'site/administrate',
+    'iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8' => 'site/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8',
     'test' => 'site/test',
     'execution/add' => 'administrator/add-execution',
     'person/<executionNumber:[0-9a-zA-Z]+>' => 'site/index',

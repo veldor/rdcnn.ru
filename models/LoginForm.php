@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
+use yii\db\StaleObjectException;
 
 /**
  * LoginForm is the model behind the login form.
@@ -21,7 +22,7 @@ class LoginForm extends Model
     public function scenarios()
     {
         return [
-            self::SCENARIO_ADMIN_LOGIN => ['password'],
+            self::SCENARIO_ADMIN_LOGIN => ['username', 'password'],
             self::SCENARIO_USER_LOGIN => ['username', 'password'],
         ];
     }
@@ -40,7 +41,7 @@ class LoginForm extends Model
         return [
             // username and password are both required
             [['username', 'password'], 'required', 'on' => self::SCENARIO_USER_LOGIN],
-            [['password'], 'required', 'on' => self::SCENARIO_ADMIN_LOGIN],
+            [['username', 'password'], 'required', 'on' => self::SCENARIO_ADMIN_LOGIN],
         ];
     }
 
@@ -120,38 +121,43 @@ class LoginForm extends Model
 
     /**
      * @return bool
-     * @throws Exception
      */
     public function loginAdmin()
     {
+        $blocked = $this->checkBlacklist();
+        if ($blocked) {
+            $blocked->last_try = time();
+            $blocked->save();
+            $this->addError('password', 'Неверный логин или пароль!');
+            return false;
+        }
+
         // получу админа
         $admin = User::getAdmin();
 
-        // проверю, если было больше 2 неудачных попыток ввода пароля- время между попытками должно составлять не меньше 10 минут
-        if ($admin->failed_try > 2 && $admin->last_login_try > time() - 600) {
-            $this->addError('password', 'Слишком много неверных попыток ввода пароля. Должно пройти не менее 10 минут с последней попытки');
-            return false;
-        }
-        if ($admin->failed_try > 5) {
-            $this->addError('password', 'Учётная запись заблокирована. Обратитесь к системному администратору для восстановления доступа');
+        // проверю, правильно ли введено имя
+        if ($admin->username != $this->username) {
+            $this->registerWrongTry();
+            $this->addError('password', 'Неверный логин или пароль');
             return false;
         }
 
         if (!$admin->validatePassword($this->password)) {
-            $admin->last_login_try = time();
-            $admin->failed_try = ++$admin->failed_try;
-            $admin->save();
-            $this->addError('password', 'Неверный номер обследования или пароль');
+            $this->registerWrongTry();
+            $this->addError('password', 'Неверный логин или пароль');
+            return false;
         } else {
             // логиню пользователя
-            $admin->failed_try = 0;
             if (empty($admin->access_token)) {
-                $admin->access_token = Yii::$app->getSecurity()->generateRandomString(255);
+                try {
+                    $admin->access_token = Yii::$app->getSecurity()->generateRandomString(255);
+                } catch (Exception $e) {
+                    die('не удалось добавить токен');
+                }
             }
             $admin->save();
-            return Yii::$app->user->login($admin, 0);
+            return Yii::$app->user->login($admin, 60 * 60 * 30);
         }
-        return false;
     }
 
     /**
@@ -160,15 +166,39 @@ class LoginForm extends Model
      */
     public function loginUser()
     {
-        // получу данные о пользователе
-        $user = User::findByUsername(ExecutionHandler::toLatin($this->username));
-        if(!empty($user)){
-            // проверю, если было больше 2 неудачных попыток ввода пароля- время между попытками должно составлять не меньше 10 минут
-            if ($user->failed_try > 5 && $user->last_login_try > time() - 600) {
+        // проверю, не занесён ли IP в чёрный список
+        $blocked = $this->checkBlacklist();
+        if ($blocked) {
+            // если прошло больше суток с последнего ввода пароля- уберу IP из блеклиста
+            if(time() - $blocked->last_try > 60 * 60 * 24){
+                try {
+                    $blocked->delete();
+                } catch (StaleObjectException $e) {
+                } catch (\Throwable $e) {
+                    // ошибка при удалении блокировки
+                }
+            }
+            // если количество неудачных попыток больше 3 и не прошло 10 минут- отправим ожидать
+            elseif($blocked->try_count > 3 && (time() - $blocked->last_try < 600)){
                 $this->addError('username', 'Слишком много неверных попыток ввода пароля. Должно пройти не менее 10 минут с последней попытки');
                 return false;
             }
-            if ($user->failed_try > 15) {
+            elseif ($blocked->missed_execution_number > 20){
+                $this->addError('username', 'Слишком много попыток ввода номера обследования. Попробуйте снова через сутки');
+                return false;
+            }
+        }
+        // проверю, не производится ли попытка зайти под админской учёткой
+        $admin = User::getAdmin();
+        if($this->username == $admin->username){
+            $this->addError('password', 'Неверный номер обследования или пароль');
+            return false;
+        }
+
+        // получу данные о пользователе
+        $user = User::findByUsername(ExecutionHandler::toLatin($this->username));
+        if (!empty($user)) {
+            if ($user->failed_try > 20) {
                 $this->addError('username', 'Было выполнено слишком много неверных попыток ввода пароля. В целях безопасности данные были удалены. Вы можете обратиться к нам для восстановления доступа');
                 return false;
             }
@@ -177,6 +207,14 @@ class LoginForm extends Model
                 $user->failed_try = ++$user->failed_try;
                 $user->save();
                 $this->addError('username', 'Неверный номер обследования или пароль');
+                if($blocked){
+                    $blocked->updateCounters(['try_count' => 1]);
+                    $blocked->last_try = time();
+                    $blocked->save();
+                }
+                else{
+                    $this->registerWrongTry();
+                }
                 return false;
             }
             // логиню пользователя
@@ -188,14 +226,36 @@ class LoginForm extends Model
             return Yii::$app->user->login($user, 0);
         }
         $this->addError("username", "Неверный номер обследования или пароль");
+        // добавлю пользователя в список подозрительных
+        if($blocked){
+            $blocked->updateCounters(['missed_execution_number' => 1]);
+            $blocked->save();
+        }
+        else{
+            $this->registerWrongTry();
+        }
         return false;
     }
 
 
-    public static function autoLoginAdmin()
+    private function checkBlacklist()
     {
-        // получу админа
-        $admin = User::getAdmin();
-        Yii::$app->user->login($admin, 0);
+        $ip = $_SERVER['REMOTE_ADDR'];
+        return Table_blacklist::findOne(['ip' => $ip]);
+    }
+
+    private function registerWrongTry()
+    {
+        // проверю, не занесён ли уже IP в базу данных
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $is_blocked = Table_blacklist::findOne(['ip' => $ip]);
+        if (empty($is_blocked)) {
+            // внесу IP в чёрный список
+            $blacklist = new Table_blacklist();
+            $blacklist->ip = $ip;
+            $blacklist->try_count = 1;
+            $blacklist->last_try = time();
+            $blacklist->save();
+        }
     }
 }

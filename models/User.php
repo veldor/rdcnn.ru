@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use DateTime;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
@@ -10,20 +9,16 @@ use yii\web\IdentityInterface;
 /**
  *
  * @property int $id [int(10) unsigned]
- * @property int $user_name [int(10) unsigned]
- * @property string $user_pass [varchar(255)]
- * @property string $user_access_token [varchar(255)]
- * @property string $user_auth_key [varchar(255)]
- * @property int $last_login_try [int(11)]
- * @property bool $failed_try [tinyint(4)]
  * @property string $username [varchar(255)]  Номер обследования
  * @property string $auth_key [varchar(255)]
  * @property string $password_hash [varchar(255)]  Хеш пароля
  * @property int $status [smallint(6)]  Статус пользователя
  * @property int $created_at [int(11)]  Дата регистрации
  * @property int $updated_at [int(11)]
+ * @property bool $failed_try [tinyint(4)]  Неудачных попыток входа
  * @property string $access_token [varchar(255)]
- * @property bool $active [tinyint(1)]  Активность обследования
+ * @property string $authKey
+ * @property int $last_login_try [bigint(20)]  Дата последней попытки входа
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -122,7 +117,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getAuthKey()
     {
-        return $this->user_auth_key;
+        return $this->auth_key;
     }
 
     /**
@@ -135,7 +130,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function validateAuthKey($authKey)
     {
-        return $this->user_auth_key === $authKey;
+        return $this->auth_key === $authKey;
     }
 
     public static function generateNumericPassword(){

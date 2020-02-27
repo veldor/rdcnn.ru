@@ -36,9 +36,9 @@ class SiteController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['administrate'],
+                        'actions' => ['iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'],
                         'roles' => ['?', '@'],
-                        'ips' => Info::ACCEPTED_IPS,
+                        //'ips' => Info::ACCEPTED_IPS,
                     ],
 
                     [
@@ -114,26 +114,26 @@ class SiteController extends Controller
     /**
      * @return string|Response
      */
-    public function actionAdministrate()
+    public function actionIolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8()
     {
         // если пользователь не залогинен- показываю ему страницу с предложением ввести номер обследования и пароль
         if (Yii::$app->user->isGuest) {
-//            if(Yii::$app->request->isGet){
-//                $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
-//                return $this->render('administrationLogin', ['model' => $model]);
-//            }
-//            if(Yii::$app->request->isPost){
-//                // попробую залогинить
-//                $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
-//                $model->load(Yii::$app->request->post());
-//                if($model->loginAdmin()){
-//                    // загружаю страницу управления
-//                    return $this->redirect('site/administrate', 301);
-//                }
-//                return $this->render('administrationLogin', ['model' => $model]);
-//            }
+            if(Yii::$app->request->isGet){
+                $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
+                return $this->render('administrationLogin', ['model' => $model]);
+            }
+            if(Yii::$app->request->isPost){
+                // попробую залогинить
+                $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
+                $model->load(Yii::$app->request->post());
+                if($model->loginAdmin()){
+                    // загружаю страницу управления
+                    return $this->redirect('iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
+                }
+                return $this->render('administrationLogin', ['model' => $model]);
+            }
             // зарегистрирую пользователя как администратора
-            LoginForm::autoLoginAdmin();
+            //LoginForm::autoLoginAdmin();
         }
         // если пользователь админ
         if (Yii::$app->user->can('manage')) {
