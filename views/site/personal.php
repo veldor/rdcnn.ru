@@ -42,10 +42,10 @@ die();*/
 
 <h1 class="text-center">Обследование № <?= $execution->username ?></h1>
 
-<div class="col-sm-12">
+<div class="col-sm-12 col-md-6 col-md-offset-3">
 
     <?php
-        echo "<div id='availabilityTimeContainer' class='alert alert-info text-center " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "'><span class='glyphicon glyphicon-info-sign'></span> Данные исследования будут доступны в течение <span id='availabilityTime'></span></div>";
+        echo "<div id='availabilityTimeContainer' class='alert alert-info text-center " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "'><span class='glyphicon glyphicon-info-sign'></span> Данные исследования будут доступны в течение<br/> <span id='availabilityTime'></span></div>";
     ?>
 </div>
 
@@ -86,7 +86,7 @@ die();*/
     ?>
 </div>
 
-<div class="col-sm-12 text-center">
+<div class="col-sm-12 col-md-6 col-md-offset-3 text-center">
     <div class="alert alert-success"><span class='glyphicon glyphicon-info-sign'></span> Если Вам необходима печать на заключение, обратитесь в центр, где Вы проходили
         исследование
     </div>
