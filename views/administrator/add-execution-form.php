@@ -10,16 +10,23 @@ use yii\widgets\ActiveForm;
 /* @var $this View */
 /* @var $model ExecutionHandler */
 
-$form = ActiveForm::begin(['id' => 'complexPayment', 'options' => ['class' => 'form-horizontal bg-default', 'enctype' => 'multipart/form-data'], 'enableAjaxValidation' => false, 'validateOnSubmit'  => false, 'action' => ['/execution/add']]);
+$form = ActiveForm::begin(['id' => 'addPatientForm', 'options' => ['class' => 'form-horizontal bg-default', 'enctype' => 'multipart/form-data'], 'enableAjaxValidation' => false, 'validateOnSubmit'  => false, 'action' => ['/execution/add']]);
 
 try {
+//    echo $form->field($model, 'executionNumber', ['template' =>
+//        '<div class="col-sm-5">{label}</div><div class="col-sm-7"><div class="input-group">{input}<a id="pasteFromClipboard" class="btn btn-default input-group-addon"><span class="text-success">Вставить</span></a></div>{error}{hint}</div>','inputOptions' =>
+//    ['autofocus' => 'autofocus', 'class' => 'form-control', 'tabindex' => '1']])
+//        ->textInput(['autocomplete' => 'off', 'focus' => true])
+//        ->hint('Номер обследования пациента')
+//        ->label('Номер обследования');
     echo $form->field($model, 'executionNumber', ['template' =>
-        '<div class="col-sm-5">{label}</div><div class="col-sm-7">{input}{error}{hint}</div>'])
-        ->textInput(['autocomplete' => 'off'])
+        '<div class="col-sm-5">{label}</div><div class="col-sm-7">{input}{error}{hint}</div>','inputOptions' =>
+    ['autofocus' => 'autofocus', 'class' => 'form-control', 'tabindex' => '1']])
+        ->textInput(['autocomplete' => 'off', 'focus' => true])
         ->hint('Номер обследования пациента')
         ->label('Номер обследования');
 
-    echo $form->field($model, 'executionResponse', ['template' =>
+/*    echo $form->field($model, 'executionResponse', ['template' =>
         '<div class="col-sm-5">{label}</div><div class="col-sm-7">{input}{error}{hint}</div>'])->widget(FileInput::class, [
         'options' => ['accept' => 'application/pdf'],
         'pluginOptions' => [
@@ -38,7 +45,7 @@ try {
             'browseLabel' =>  'Выберите файл с данными обследования',
             'showUpload' => false
         ]
-    ]);
+    ]);*/
 } catch (Exception $e) {
 }
 

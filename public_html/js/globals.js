@@ -8,49 +8,74 @@ function serialize(obj) {
 }
 
 // Функция вызова пустого модального окна
-function makeModal(header, text, delayed) {
-    if (delayed) {
-        // открытие модали поверх другой модали
-        let modal = $("#myModal");
-        if (modal.length === 1) {
-            modal.modal('hide');
-            let newModal = $('<div id="myModal" class="modal fade mode-choose"><div class="modal-dialog  modal-lg"><div class="modal-content"><div class="modal-header">' + header + '</div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-danger"  data-dismiss="modal" type="button" id="cancelActionButton">Отмена</button></div></div></div>');
-            modal.on('hidden.bs.modal', function () {
-                modal.remove();
-                if (!text)
-                    text = '';
-                $('body').append(newModal);
+function makeModal(header, text, delayed, normalReset, delay) {
+    if(delay){
+        setTimeout(function () {
+            if (!text)
+                text = '';
+            let modal = $('<div id="myModal" class="modal fade mode-choose"><div class="modal-dialog  modal-lg"><div class="modal-content"><div class="modal-header">' + header + '</div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-danger"  data-dismiss="modal" type="button" id="cancelActionButton">Отмена</button></div></div></div>');
+            $('body').append(modal);
+            if(!normalReset)
                 dangerReload();
-                newModal.modal({
-                    keyboard: true,
-                    show: true
-                });
-                newModal.on('hidden.bs.modal', function () {
-                    normalReload();
-                    newModal.remove();
-                    $('div.wrap div.container, div.wrap nav').removeClass('blured');
-                });
-                $('div.wrap div.container, div.wrap nav').addClass('blured');
+            modal.modal({
+                keyboard: true,
+                show: true
             });
-            return newModal;
-        }
+            modal.on('hidden.bs.modal', function () {
+                normalReload();
+                modal.remove();
+                $('div.wrap div.container, div.wrap nav').removeClass('blured');
+            });
+            $('div.wrap div.container, div.wrap nav').addClass('blured');
+            return modal;
+        }, delay);
     }
-    if (!text)
-        text = '';
-    let modal = $('<div id="myModal" class="modal fade mode-choose"><div class="modal-dialog  modal-lg"><div class="modal-content"><div class="modal-header">' + header + '</div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-danger"  data-dismiss="modal" type="button" id="cancelActionButton">Отмена</button></div></div></div>');
-    $('body').append(modal);
-    dangerReload();
-    modal.modal({
-        keyboard: true,
-        show: true
-    });
-    modal.on('hidden.bs.modal', function () {
-        normalReload();
-        modal.remove();
-        $('div.wrap div.container, div.wrap nav').removeClass('blured');
-    });
-    $('div.wrap div.container, div.wrap nav').addClass('blured');
-    return modal;
+    else{
+        if (delayed) {
+            // открытие модали поверх другой модали
+            let modal = $("#myModal");
+            if (modal.length === 1) {
+                modal.modal('hide');
+                let newModal = $('<div id="myModal" class="modal fade mode-choose"><div class="modal-dialog  modal-lg"><div class="modal-content"><div class="modal-header">' + header + '</div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-danger"  data-dismiss="modal" type="button" id="cancelActionButton">Отмена</button></div></div></div>');
+                modal.on('hidden.bs.modal', function () {
+                    modal.remove();
+                    if (!text)
+                        text = '';
+                    $('body').append(newModal);
+                    if (!normalReset)
+                        dangerReload();
+                    newModal.modal({
+                        keyboard: true,
+                        show: true
+                    });
+                    newModal.on('hidden.bs.modal', function () {
+                        normalReload();
+                        newModal.remove();
+                        $('div.wrap div.container, div.wrap nav').removeClass('blured');
+                    });
+                    $('div.wrap div.container, div.wrap nav').addClass('blured');
+                });
+                return newModal;
+            }
+        }
+        if (!text)
+            text = '';
+        let modal = $('<div id="myModal" class="modal fade mode-choose"><div class="modal-dialog  modal-lg"><div class="modal-content"><div class="modal-header">' + header + '</div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-danger"  data-dismiss="modal" type="button" id="cancelActionButton">Отмена</button></div></div></div>');
+        $('body').append(modal);
+        if(!normalReset)
+            dangerReload();
+        modal.modal({
+            keyboard: true,
+            show: true
+        });
+        modal.on('hidden.bs.modal', function () {
+            normalReload();
+            modal.remove();
+            $('div.wrap div.container, div.wrap nav').removeClass('blured');
+        });
+        $('div.wrap div.container, div.wrap nav').addClass('blured');
+        return modal;
+    }
 }
 
 function sendAjax(method, url, callback, attributes, isForm) {
@@ -219,8 +244,9 @@ function stringify(data) {
 function simpleAnswerHandler(data) {
     if (data['status']) {
         if (data['status'] === 1) {
+            let header = data['header'] ? data['header'] : "Успешно";
             let message = data['message'] ? data['message'] : 'Операция успешно завершена';
-            makeInformerModal("Успешно", message);
+            makeInformerModal(header, message);
         }
     }
 }

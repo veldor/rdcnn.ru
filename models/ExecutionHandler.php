@@ -5,10 +5,13 @@ namespace app\models;
 
 
 use app\priv\Info;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
 use yii\web\UploadedFile;
+use ZipArchive;
 
 class ExecutionHandler extends Model
 {
@@ -17,26 +20,144 @@ class ExecutionHandler extends Model
     public static function checkAvailability()
     {
         // получу информацию о пациенте
-        $id = Yii::$app->user->identity->username;
+        if (Yii::$app->user->can('manage')) {
+            $referer = $_SERVER['HTTP_REFERER'];
+            $id = explode("/", $referer)[4];
+        } else
+            $id = Yii::$app->user->identity->username;
         $isExecution = !!ExecutionHandler::isExecution($id);
         $isConclusion = !!ExecutionHandler::isConclusion($id);
         $timeLeft = 0;
         // посмотрю, сколько времении ещё будет доступно обследование
-        $startTime = Table_availability::findOne(['userId' => $id]);
-        if(!empty($startTime)){
+        $startTime = User::findByUsername($id)->created_at;
+        if (!empty($startTime)) {
             // найдено время старта
             $now = time();
-            $lifetime = $startTime->startTime + Info::DATA_SAVING_TIME;
-            if($now < $lifetime){
+            $lifetime = $startTime + Info::DATA_SAVING_TIME;
+            if ($now < $lifetime) {
                 $timeLeft = Utils::secondsToTime($lifetime - $now);
-            }
-            else{
+            } else {
                 AdministratorActions::simpleDeleteItem($id);
                 return ['status' => 2];
             }
         }
 
-        return ['status' => 1, 'execution' => $isExecution, 'conclusion' => $isConclusion, 'timeLeft' => $timeLeft];
+        $addConc = ExecutionHandler::isAdditionalConclusions($id);
+
+        return ['status' => 1, 'execution' => $isExecution, 'conclusion' => $isConclusion, 'timeLeft' => $timeLeft, 'addConc' => $addConc];
+    }
+
+    public static function checkFiles($executionNumber)
+    {
+        $executionDir = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber;
+        if (is_dir($executionDir)) {
+            // скопирую в папку содержимое dicom-просмотровщика
+            $viewer_dir = Yii::getAlias('@dicomViewerDirectory');
+            self::recurse_copy($viewer_dir, $executionDir);
+            $fileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '_tmp.zip';
+            $trueFileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '.zip';
+            // создам архив и удалю исходное
+            shell_exec('cd /d ' . $executionDir . ' && "' . Info::WINRAR_FOLDER . '"  a -afzip -r -df  ' . $fileWay . ' .');
+            // удалю пустую директорию
+            // переименую файл
+            rename($fileWay, $trueFileWay);
+            rmdir($executionDir);
+            /*            $fileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '_tmp.zip';
+                        $trueFileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '.zip';
+                        // Initialize archive object
+                        $zip = new ZipArchive();
+                        $zip->open($fileWay, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+                        // теперь добавлю в архив просмотрщики для разных систем
+                        $viewer_dir = Yii::getAlias('@dicomViewerDirectory');
+                        $files = new RecursiveIteratorIterator(
+                            new RecursiveDirectoryIterator($viewer_dir),
+                            RecursiveIteratorIterator::LEAVES_ONLY
+                        );
+                        foreach ($files as $name => $file)
+                        {
+                            // Skip directories (they would be added automatically)
+                            if (!$file->isDir())
+                            {
+                                // Get real and relative path for current file
+                                $filePath = $file->getRealPath();
+                                $relativePath = substr($filePath, strlen($executionDir) + 1);
+                                // Add current file to archive
+                                $zip->addFile($filePath, $relativePath);
+                            }
+                        }
+
+
+                        // Create recursive directory iterator
+                        $files = new RecursiveIteratorIterator(
+                            new RecursiveDirectoryIterator($executionDir),
+                            RecursiveIteratorIterator::LEAVES_ONLY
+                        );
+                        foreach ($files as $name => $file)
+                        {
+                            // Skip directories (they would be added automatically)
+                            if (!$file->isDir())
+                            {
+                                // Get real and relative path for current file
+                                $filePath = $file->getRealPath();
+                                $relativePath = substr($filePath, strlen($executionDir) + 1);
+                                // Add current file to archive
+                                $zip->addFile($filePath, $relativePath);
+                            }
+                        }
+                        // Zip archive will be created only after closing object
+                        $zip->close();
+                        ExecutionHandler::rmRec($executionDir);
+                        // изменить название файла на оригинальное
+                        rename($fileWay, $trueFileWay);*/
+            return ['status' => 1, 'header' => '<h2 class="text-center text-success">Успех</h2>', 'message' => '<p class="text-success text-center">Папка найдена и успешно обработана</p>'];
+        }
+        return ['status' => 1, 'header' => '<h2 class="text-center text-danger">Неудача</h2>', 'message' => '<p class="text-center text-danger">Папка не найдена</p>'];
+
+    }
+
+    public static function rmRec($path)
+    {
+        if (is_file($path)) {
+            return unlink($path);
+        }
+        if (is_dir($path)) {
+            foreach (scandir($path, SCANDIR_SORT_NONE) as $p) {
+                if (($p !== '.') && ($p !== '..')) {
+                    ExecutionHandler::rmRec($path . DIRECTORY_SEPARATOR . $p);
+                }
+            }
+            return rmdir($path);
+        }
+        return false;
+    }
+
+    public static function isAdditionalConclusions(string $username)
+    {
+        $searchPattern = '/' . $username . '-[0-9]+\.pdf/';
+        $existentFiles = scandir(Info::CONC_FOLDER);
+        $addsQuantity = 0;
+        foreach ($existentFiles as $existentFile) {
+            if (preg_match($searchPattern, $existentFile)) {
+                $addsQuantity++;
+            }
+        }
+        return $addsQuantity;
+    }
+
+    public static function deleteAddConcs($id)
+    {
+        if (self::isAdditionalConclusions($id)) {
+            $searchPattern = '/' . $id . '-[0-9]+\.pdf/';
+            $existentFiles = scandir(Info::CONC_FOLDER);
+            foreach ($existentFiles as $existentFile) {
+                if (preg_match($searchPattern, $existentFile)) {
+                    if (is_file($existentFile)) {
+                        unlink($existentFile);
+                    }
+                }
+            }
+        }
     }
 
     public static function toLatin($executionNumber)
@@ -79,7 +200,7 @@ class ExecutionHandler extends Model
             [['executionResponse'], 'file', 'skipOnEmpty' => true, 'extensions' => 'pdf', 'maxSize' => 104857600],
             [['executionNumber'], 'required', 'on' => self::SCENARIO_ADD],
             ['executionNumber', 'string', 'length' => [1, 255]],
-            ['executionNumber', 'match', 'pattern' => '/^[a-z0-9]+$/iu']
+            ['executionNumber', 'match', 'pattern' => '/^[а-яa-z0-9]+$/iu']
         ];
     }
 
@@ -95,7 +216,6 @@ class ExecutionHandler extends Model
             if (empty($this->executionNumber)) {
                 return ['status' => 2, 'message' => 'Не указан номер обследования'];
             }
-            // todo Сделать замену букв в номере на латиницу
             $this->executionNumber = self::toLatin($this->executionNumber);
             // проверю, не зарегистрировано ли уже обследование
             if (!empty(User::findByUsername($this->executionNumber))) {
@@ -172,5 +292,21 @@ class ExecutionHandler extends Model
             $timer->startTime = time();
             $timer->save();
         }
+    }
+
+    public static function recurse_copy($src, $dst)
+    {
+        $dir = opendir($src);
+        @mkdir($dst);
+        while (false !== ($file = readdir($dir))) {
+            if (($file != '.') && ($file != '..')) {
+                if (is_dir($src . '/' . $file)) {
+                    self::recurse_copy($src . '/' . $file, $dst . '/' . $file);
+                } else {
+                    copy($src . '/' . $file, $dst . '/' . $file);
+                }
+            }
+        }
+        closedir($dir);
     }
 }

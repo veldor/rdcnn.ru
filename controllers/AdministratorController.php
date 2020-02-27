@@ -6,12 +6,14 @@ namespace app\controllers;
 
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
+use app\models\Utils;
 use app\priv\Info;
 use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
@@ -23,12 +25,12 @@ class AdministratorController extends Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function () {
-                    return $this->redirect('/error', 404);
+                    return $this->redirect('/error', 301);
                 },
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data'],
+                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage'],
                         'roles' => ['manager'],
                         'ips' => Info::ACCEPTED_IPS,
                     ],
@@ -55,6 +57,7 @@ class AdministratorController extends Controller
             $model->executionResponse = UploadedFile::getInstance($model, 'executionResponse');
             return $model->register();
         }
+        throw new NotFoundHttpException();
     }
 
     /**
@@ -68,11 +71,13 @@ class AdministratorController extends Controller
             $model->load(Yii::$app->request->post());
             return $model->changePassword();
         }
+        throw new NotFoundHttpException();
     }
 
     /**
      * @return array
      * @throws Exception
+     * @throws NotFoundHttpException
      * @throws Throwable
      */
     public function actionDeleteItem(){
@@ -82,8 +87,13 @@ class AdministratorController extends Controller
             $model->load(Yii::$app->request->post());
             return $model->deleteItem();
         }
+        throw new NotFoundHttpException();
     }
 
+    /**
+     * @return array
+     * @throws NotFoundHttpException
+     */
     public function actionAddConclusion(){
         if(Yii::$app->request->isPost){
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -92,7 +102,13 @@ class AdministratorController extends Controller
             $model->conclusion = UploadedFile::getInstance($model, 'conclusion');
             return $model->addConclusion();
         }
+        throw new NotFoundHttpException();
     }
+
+    /**
+     * @return array
+     * @throws NotFoundHttpException
+     */
     public function actionAddExecutionData(){
         if(Yii::$app->request->isPost){
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -101,5 +117,22 @@ class AdministratorController extends Controller
             $model->execution = UploadedFile::getInstance($model, 'execution');
             return $model->addExecution();
         }
+        throw new NotFoundHttpException();
+    }
+
+    public function actionPatientsCheck(){
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return AdministratorActions::checkPatients();
+    }
+
+    public function actionFilesCheck($executionNumber){
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return ExecutionHandler::checkFiles($executionNumber);
+    }
+
+    public function actionClearGarbage(){
+        Utils::clearGarbage();
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return ['status' => 1, 'message' => 'Весь мусор удалён.'];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use DateTime;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
@@ -22,6 +23,7 @@ use yii\web\IdentityInterface;
  * @property int $created_at [int(11)]  Дата регистрации
  * @property int $updated_at [int(11)]
  * @property string $access_token [varchar(255)]
+ * @property bool $active [tinyint(1)]  Активность обследования
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -77,7 +79,15 @@ class User extends ActiveRecord implements IdentityInterface
     public static function findAllRegistered()
     {
         // верну все записи кроме админской
-        return static::find()->where(['<>', 'username', self::ADMIN_NAME])->all();
+
+        // если есть ограничение по времени- использую его
+
+        if(Utils::isTimeFiltered()){
+            $startOfInterval = Utils::getStartInterval();
+            $endOfInterval = Utils::getEndInterval();
+            return static::find()->where(['<>', 'username', self::ADMIN_NAME])->andWhere(['>' , 'created_at', $startOfInterval])->andWhere(['<' , 'created_at', $endOfInterval])->orderBy('created_at DESC')->all();
+        }
+        return static::find()->where(['<>', 'username', self::ADMIN_NAME])->orderBy('created_at DESC')->all();
     }
 
     public function validatePassword($password){

@@ -2,10 +2,12 @@
 
 namespace app\controllers;
 
+use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\LoginForm;
 use app\models\Test;
 use app\models\User;
+use app\models\Utils;
 use app\priv\Info;
 use Yii;
 use yii\base\Exception;
@@ -24,7 +26,7 @@ class SiteController extends Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function () {
-                    return $this->redirect('/error', 404);
+                    return $this->redirect('error', 404);
                 },
                 'rules' => [
                     [
@@ -96,17 +98,17 @@ class SiteController extends Controller
                 return $this->render('personal', ['execution' => $execution]);
             } else {
                 // страница не найдена
-                return $this->render('personal-not-found');
+                return $this->render('error', ['message' => 'Страница не найдена']);
             }
         } elseif (Yii::$app->user->can('read')) {
             $execution = User::findByUsername(Yii::$app->user->identity->username);
             if (!empty($execution)) {
                 return $this->render('personal', ['execution' => $execution]);
             } else {
-                return $this->render('personal-not-found');
+                return $this->render('error', ['message' => 'Страница не найдена']);
             }
         }
-        return $this->render('personal-not-found');
+        return $this->render('error', ['message' => 'Страница не найдена']);
     }
 
     /**
@@ -135,9 +137,25 @@ class SiteController extends Controller
         }
         // если пользователь админ
         if (Yii::$app->user->can('manage')) {
+
+            // очищу неиспользуемые данные
+
+            AdministratorActions::clearGarbage();
+
+            $this->layout = 'administrate';
+            if(Yii::$app->request->isPost){
+                // выбор центра, обследования которого нужно отображать
+                AdministratorActions::selectCenter();
+                AdministratorActions::selectTime();
+                AdministratorActions::selectSort();
+                return $this->redirect('site/administrate', 301);
+            }
             // получу все зарегистрированные обследования
             $executionsList = User::findAllRegistered();
-            return $this->render('administration', ['executions' => $executionsList]);
+            // отсортирую список
+            $executionsList = Utils::sortExecutions($executionsList);
+            $model = new ExecutionHandler(['scenario' => ExecutionHandler::SCENARIO_ADD]);
+            return $this->render('administration', ['executions' => $executionsList, 'model' => $model]);
         } else {
             // редирект на главную
             return $this->redirect('site/index', 301);

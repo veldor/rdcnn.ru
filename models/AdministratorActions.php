@@ -4,10 +4,12 @@
 namespace app\models;
 
 
+use app\priv\Info;
 use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
+use yii\db\StaleObjectException;
 use yii\web\UploadedFile;
 
 class AdministratorActions extends Model
@@ -27,19 +29,82 @@ class AdministratorActions extends Model
      */
     public $conclusion;
 
+    public static function checkPatients()
+    {
+        $response = [];
+        // верну список пациентов со статусами данных
+        $patientsList = User::find()->where(['<>', 'username', User::ADMIN_NAME])->all();
+        if(!empty($patientsList)){
+            foreach ($patientsList as $item) {
+                // проверю, загружены ли данные по пациенту
+                $patientInfo = [];
+                $patientInfo['id'] = $item->username;
+                $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
+                $patientInfo['conclusion'] = ExecutionHandler::isConclusion($item->username);
+                $response[] = $patientInfo;
+            }
+        }
+        return $response;
+    }
+
+    public static function selectCenter()
+    {
+        $center =  Yii::$app->request->post('center');
+        $session = Yii::$app->session;
+        $session['center'] = $center;
+    }
+
+    public static function selectTime()
+    {
+        $time =  Yii::$app->request->post('timeInterval');
+        $session = Yii::$app->session;
+        $session['timeInterval'] = $time;
+    }
+
+
+    public static function selectSort()
+    {
+        $sortBy =  Yii::$app->request->post('sortBy');
+        $session = Yii::$app->session;
+        $session['sortBy'] = $sortBy;
+    }
+
+    public static function clearGarbage()
+    {
+        // получу список всех пациентов
+        $patients = User::findAllRegistered();
+        // определю время жизни учётной записи
+        $lifetime = time() - Info::DATA_SAVING_TIME;
+        if(!empty($patients)){
+            foreach ($patients as $patient) {
+                if($patient->created_at < $lifetime){
+                    self::simpleDeleteItem($patient->username);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param $id
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
     public static function simpleDeleteItem($id)
     {
         $execution = User::findByUsername($id);
         if(!empty($execution)){
-            $execution->delete();
             $conclusionFile = Yii::getAlias('@conclusionsDirectory') . '\\' . $id . '.pdf';
             if(is_file($conclusionFile)){
                 unlink($conclusionFile);
+                ExecutionHandler::deleteAddConcs($execution->username);
             }
             $executionFile = Yii::getAlias('@executionsDirectory') . '\\' . $id . '.zip';
             if(is_file($executionFile)){
                 unlink($executionFile);
             }
+            // удалю запись в таблице выдачи разрешений
+            Table_auth_assigment::findOne(["user_id" => $execution->id])->delete();
+            $execution->delete();
             // если пользователь залогинен и это не админ- выхожу из учётной записи
             if(!Yii::$app->user->can('manage')){
                 Yii::$app->user->logout(true);
