@@ -25,9 +25,9 @@ $this->title = "РДЦ, личный кабинет";
         ],
     ]); ?>
 
-        <?= $form->field($model, 'username', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'><button tabindex='-1' type='button' class='btn btn-info' id='loginHint'><span class='glyphicon glyphicon-question-sign'></span></button></div><div class='col-sm-12'>{error}</div>",])->textInput(['autofocus' => true,]) ?>
+        <?= $form->field($model, 'username', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-sm-1'><button tabindex='-1' type='button' class='btn btn-info' id='loginHint'><span class='glyphicon glyphicon-question-sign'></span></button></div><div class='col-sm-12'>{error}</div>",])->textInput(['autofocus' => true,]) ?>
 
-        <?= $form->field($model, 'password', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'><button tabindex='-1' type='button' class='btn btn-info'><span class='glyphicon glyphicon-question-sign'></span></button></div><div class='col-sm-12'>{error}</div>",])->passwordInput() ?>
+        <?= $form->field($model, 'password', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-sm-1'><button tabindex='-1' type='button' class='btn btn-info'><span class='glyphicon glyphicon-question-sign'></span></button></div><div class='col-sm-12'>{error}</div>",])->passwordInput() ?>
 
         <div class="form-group">
             <div class="col-sm-12 text-center">
