@@ -12,6 +12,7 @@ use app\priv\Info;
 use Yii;
 use yii\base\Exception;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\Response;
 
@@ -97,8 +98,8 @@ class SiteController extends Controller
             if (!empty($execution)) {
                 return $this->render('personal', ['execution' => $execution]);
             } else {
-                // страница не найдена
-                return $this->render('error', ['message' => 'Страница не найдена']);
+                // страница не найдена, перенаправлю на страницу менеджмента
+                return $this->redirect(Url::toRoute('site/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'));
             }
         } elseif (Yii::$app->user->can('read')) {
             $execution = User::findByUsername(Yii::$app->user->identity->username);
