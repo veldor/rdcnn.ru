@@ -72,7 +72,7 @@ ActiveForm::end();
 
 echo "</div><div class='col-sm-12'>";
 
-echo Html::beginForm(['/administrate'], 'post');
+echo Html::beginForm(['/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'], 'post');
 
 echo "<div class='col-sm-4'><label class='control-label' for='#centerSelect'>Центр</label><select id='centerSelect' name='center' onchange='this.form.submit();' class='form-control'><option value='all'>Все</option><option value='nv' {$centers['nv']}>Нижневолжская набережная</option><option value='aurora' {$centers['aurora']}>Аврора</option></select></div>";
 
@@ -87,7 +87,7 @@ echo "</div>";
 $executionsCounter = 0;
 
 if (!empty($executions)) {
-    echo "<table class='table-hover table table-striped'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody>";
+    echo "<table class='table-hover table table-striped'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'>";
     foreach ($executions as $execution) {
 
         // проверю, если включена фильтрация по центру- выведу только те обследования, которые проведены в этом центре
@@ -98,14 +98,14 @@ if (!empty($executions)) {
         }
             ++ $executionsCounter;
         ?>
-        <tr>
+        <tr data-id="<?= $execution->username?>">
             <td>
                 <a class='btn-link' href='/person/<?= $execution->username ?>'><?= $execution->username ?></a>
             </td>
             <td>
 
-                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить заключение'><span class='text-info glyphicon glyphicon-file'></span><input id="addConclusion" data-id='<?= $execution->username ?>' class='hidden loader' type='file' accept='application/pdf' name='AdministratorActions[conclusion]'></label></form>
-                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить обследование'><span class='text-info glyphicon glyphicon-folder-close'></span><input id="addExecution" data-id='<?= $execution->username ?>' class='hidden loader' type='file' accept='application/zip' name='AdministratorActions[execution]'></label></form>
+                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить заключение'><span class='text-info glyphicon glyphicon-file'></span><input data-id='<?= $execution->username ?>' class='hidden loader addConclusion' type='file' accept='application/pdf' name='AdministratorActions[conclusion]'></label></form>
+                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить обследование'><span class='text-info glyphicon glyphicon-folder-close'></span><input data-id='<?= $execution->username ?>' class='hidden loader addExecution' type='file' accept='application/zip' name='AdministratorActions[execution]'></label></form>
                 <a class='btn btn-default activator' data-action='check-data'
                    data-id='<?= $execution->username ?>' data-toggle='tooltip' data-placement='auto'
                    title='Подтвердить загруженные данные'><span class='glyphicon glyphicon-refresh'></span></a>

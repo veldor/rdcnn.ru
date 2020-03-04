@@ -8,7 +8,6 @@ use app\models\LoginForm;
 use app\models\Test;
 use app\models\User;
 use app\models\Utils;
-use app\priv\Info;
 use Yii;
 use yii\base\Exception;
 use yii\filters\AccessControl;
@@ -32,7 +31,7 @@ class SiteController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['index', 'error', 'test'],
+                        'actions' => ['index', 'error', 'check'],
                         'roles' => ['?', '@'],
                     ],
                     [
@@ -149,7 +148,7 @@ class SiteController extends Controller
                 AdministratorActions::selectCenter();
                 AdministratorActions::selectTime();
                 AdministratorActions::selectSort();
-                return $this->redirect('site/administrate', 301);
+                return $this->redirect('site/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
             }
             // получу все зарегистрированные обследования
             $executionsList = User::findAllRegistered();
@@ -189,5 +188,9 @@ class SiteController extends Controller
     public function actionAvailabilityCheck(){
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ExecutionHandler::checkAvailability();
+    }
+
+    public function actionCheck(){
+        ExecutionHandler::check();
     }
 }

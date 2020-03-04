@@ -241,12 +241,22 @@ function stringify(data) {
 }
 
 // ТИПИЧНАЯ ОБРАБОТКА ОТВЕТА AJAX
-function simpleAnswerHandler(data) {
+function simpleAnswerHandlerReload(data) {
     if (data['status']) {
         if (data['status'] === 1) {
             let header = data['header'] ? data['header'] : "Успешно";
             let message = data['message'] ? data['message'] : 'Операция успешно завершена';
             makeInformerModal(header, message);
+        }
+    }
+}
+// ТИПИЧНАЯ ОБРАБОТКА ОТВЕТА AJAX
+function simpleAnswerHandler(data) {
+    if (data['status']) {
+        if (data['status'] === 1) {
+            let header = data['header'] ? data['header'] : "Успешно";
+            let message = data['message'] ? data['message'] : 'Операция успешно завершена';
+            makeInformerModal(header, message, function () {});
         }
     }
 }
