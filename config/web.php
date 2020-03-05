@@ -16,6 +16,7 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
         '@executionsDirectory' => \app\priv\Info::EXEC_FOLDER,
         '@conclusionsDirectory' => \app\priv\Info::CONC_FOLDER,
+        '@cloudDirectory' => \app\priv\Info::CLOUD_FOLDER,
         '@dicomViewerDirectory' => \app\priv\Info::DICOM_VIEWER_FOLDER,
     ],
     'components' => [
