@@ -5,13 +5,10 @@ namespace app\models;
 
 
 use app\priv\Info;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
 use yii\web\UploadedFile;
-use ZipArchive;
 
 class ExecutionHandler extends Model
 {
@@ -108,12 +105,15 @@ class ExecutionHandler extends Model
      */
     public static function check()
     {
+        $handledCounter = 0;
+        $addCounter = 0;
         // автоматическая обработка папок
         $dirs = array_slice(scandir( Yii::getAlias('@executionsDirectory')), 2);
         $pattern =  '/^[aа]?[0-9]+$/ui';
         // проверю папки
         if(!empty($dirs)){
             foreach ($dirs as $dir) {
+                $handledCounter++;
                 $path = Yii::getAlias('@executionsDirectory') . '/' . $dir;
                 if(is_dir($path)){
                     // для начала проверю папку, если она изменена менее 10 минут назад- пропускаю её
@@ -138,6 +138,7 @@ class ExecutionHandler extends Model
                                 }
                                 // сохраню содержимое папки в архив
                                 self::PackFiles($dirLatin, $path);
+                                $addCounter++;
                             }
                             else{
                                 // удалю папку
@@ -153,6 +154,14 @@ class ExecutionHandler extends Model
                 }
             }
         }
+        $answer = "handled $handledCounter, added $addCounter at " . time();
+        echo $answer;
+        $dir = ($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
+        if(!is_dir($dir)){
+            mkdir($dir);
+        }
+        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update.log';
+        file_put_contents($file, $answer);
     }
 
     /**
