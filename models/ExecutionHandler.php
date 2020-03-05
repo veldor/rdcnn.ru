@@ -107,6 +107,8 @@ class ExecutionHandler extends Model
     {
         $handledCounter = 0;
         $addCounter = 0;
+        $deleteCounter = 0;
+        $waitCounter = 0;
         // автоматическая обработка папок
         $dirs = array_slice(scandir( Yii::getAlias('@executionsDirectory')), 2);
         $pattern =  '/^[aа]?[0-9]+$/ui';
@@ -143,25 +145,30 @@ class ExecutionHandler extends Model
                             else{
                                 // удалю папку
                                 self::rmRec($path);
+                                $deleteCounter++;
                             }
 
                         }
                         else{
                             // удалю папку
                             self::rmRec($path);
+                            $deleteCounter++;
                         }
+                    }
+                    else{
+                        $waitCounter++;
                     }
                 }
             }
         }
-        $answer = "handled $handledCounter, added $addCounter at " . time();
+        $answer = "handled $handledCounter, added $addCounter deleted $deleteCounter wait $waitCounter at " . time();
         echo $answer;
-        $dir = ($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
+        $dir = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
         if(!is_dir($dir)){
             mkdir($dir);
         }
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update.log';
-        file_put_contents($file, $answer);
+        file_put_contents($file, $answer . "\n", FILE_APPEND);
     }
 
     /**
