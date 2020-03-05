@@ -167,7 +167,7 @@ class ExecutionHandler extends Model
         echo $answer;
         $dir = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
         if(!is_dir($dir)){
-            if (!mkdir($dir) && !is_dir($dir)) {
+            if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)){
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
             }
         }
@@ -425,7 +425,7 @@ class ExecutionHandler extends Model
     public static function recurse_copy($src, $dst)
     {
         $dir = opendir($src);
-        if (!mkdir($dst) && !is_dir($dst)) {
+        if (!is_dir($dst) && !mkdir($dst) && !is_dir($dst)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $dst));
         }
         while (false !== ($file = readdir($dir))) {
