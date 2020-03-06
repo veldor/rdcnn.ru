@@ -33,15 +33,18 @@ class AdministratorActions extends Model
     {
         $response = [];
         // верну список пациентов со статусами данных
-        $patientsList = User::find()->where(['<>', 'username', User::ADMIN_NAME])->all();
+        $patientsList = User::findAllRegistered();
         if(!empty($patientsList)){
             foreach ($patientsList as $item) {
-                // проверю, загружены ли данные по пациенту
-                $patientInfo = [];
-                $patientInfo['id'] = $item->username;
-                $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
-                $patientInfo['conclusion'] = ExecutionHandler::isConclusion($item->username);
-                $response[] = $patientInfo;
+                if(Yii::$app->session['center'] != 'all' && Utils::isFiltered($item)){
+                    continue;
+                }
+                    // проверю, загружены ли данные по пациенту
+                    $patientInfo = [];
+                    $patientInfo['id'] = $item->username;
+                    $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
+                    $patientInfo['conclusion'] = ExecutionHandler::isConclusion($item->username);
+                    $response[] = $patientInfo;
             }
         }
         return $response;

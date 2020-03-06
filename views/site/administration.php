@@ -51,7 +51,13 @@ $sortBy = Yii::$app->session['sortBy'];
             $sort[$key] = '';
         }
     }
+/*echo "<div class=\"nav-link\">
 
+          <div class=\"custom-control custom-switch\">
+            <input type=\"checkbox\" class=\"custom-control-input\" id=\"darkSwitch\">
+            <label class=\"custom-control-label\" for=\"darkSwitch\">Dark Mode</label>
+          </div>
+        </div>";*/
 
 // добавлю кнопку для создания нового обследования
 echo "<div class='col-sm-12 text-center'>";
@@ -100,18 +106,15 @@ if (!empty($executions)) {
         ?>
         <tr data-id="<?= $execution->username?>">
             <td>
-                <a class='btn-link' href='/person/<?= $execution->username ?>'><?= $execution->username ?></a>
+                <a class='btn-link execution-id' href='/person/<?= $execution->username ?>'><?= $execution->username ?></a>
             </td>
             <td>
 
                     <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить заключение'><span class='text-info glyphicon glyphicon-file'></span><input data-id='<?= $execution->username ?>' class='hidden loader addConclusion' type='file' accept='application/pdf' name='AdministratorActions[conclusion]'></label></form>
                     <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить обследование'><span class='text-info glyphicon glyphicon-folder-close'></span><input data-id='<?= $execution->username ?>' class='hidden loader addExecution' type='file' accept='application/zip' name='AdministratorActions[execution]'></label></form>
-                <a class='btn btn-default activator' data-action='check-data'
-                   data-id='<?= $execution->username ?>' data-toggle='tooltip' data-placement='auto'
-                   title='Подтвердить загруженные данные'><span class='glyphicon glyphicon-refresh'></span></a>
             </td>
-            <td data-conclusion="<?= $execution->username ?>"><?= ExecutionHandler::isConclusion($execution->username) ? "<span class='glyphicon glyphicon-ok text-success'></span>" : "<span class='glyphicon glyphicon-remove text-danger'></span>"?></td>
-            <td data-execution="<?= $execution->username ?>"><?= ExecutionHandler::isExecution($execution->username) ? "<span class='glyphicon glyphicon-ok text-success'></span>" : "<span class='glyphicon glyphicon-remove text-danger'></span>"?></td>
+            <?= ExecutionHandler::isConclusion($execution->username) ? "<td data-conclusion='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-conclusion='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"?>
+            <?= ExecutionHandler::isExecution($execution->username) ?  "<td data-execution='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-execution='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"?>
             <td>
                 <a class='btn btn-default activator' data-action='change-password'
                    data-id='<?= $execution->username ?>' data-toggle='tooltip' data-placement='auto'

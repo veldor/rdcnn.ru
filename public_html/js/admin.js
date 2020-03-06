@@ -63,6 +63,7 @@ function handleActivator(element) {
 
 
 $(function () {
+
     copyPassTextarea = $('textarea#forPasswordCopy');
 
     // обработаю добавление обследования
@@ -108,7 +109,7 @@ function checkPatientDataFilling() {
                     // добавлю новый элемент наверх списка
                     let td = $('<tr class="new-element" data-id="' + item['id'] +'">\n' +
                         '            <td>\n' +
-                        '                <a class="btn-link" href="/person/' + item['id'] +'">' + item['id'] +'</a>\n' +
+                        '                <a class="btn-link execution-id" href="/person/' + item['id'] +'">' + item['id'] +'</a>\n' +
                         '            </td>\n' +
                         '            <td>\n' +
                         '\n' +
@@ -141,19 +142,19 @@ function checkPatientDataFilling() {
                     let conclusionContainer = $('td[data-conclusion="' + item['id'] +'"]');
                     if(conclusionContainer.length){
                         if(item['conclusion']){
-                            conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success'></span>");
+                            conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span>").removeClass('field-danger').addClass('field-success');
                         }
                         else{
-                            conclusionContainer.html("<span class='glyphicon glyphicon-remove text-danger'></span>");
+                            conclusionContainer.html("<span class='glyphicon glyphicon-remove text-danger status-icon'></span>").addClass('field-danger').removeClass('field-success');
                         }
                     }
                     let executionContainer = $('td[data-execution="' + item['id'] +'"]');
                     if(executionContainer.length){
                         if(item['execution']){
-                            executionContainer.html("<span class='glyphicon glyphicon-ok text-success'></span>");
+                            executionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span>").removeClass('field-danger').addClass('field-success');
                         }
                         else{
-                            executionContainer.html("<span class='glyphicon glyphicon-remove text-danger'></span>");
+                            executionContainer.html("<span class='glyphicon glyphicon-remove text-danger status-icon'></span>").addClass('field-danger').removeClass('field-success');
                         }
                     }
             }

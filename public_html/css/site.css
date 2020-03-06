@@ -204,11 +204,30 @@ body.background {
 }
 
 .new-element {
-    background-color: #67b168 !important;
+    background-color: #b8e4e8 !important;
 }
 
 .with-wrap{
     margin-bottom: 4px;
     white-space: normal;
     padding: 5px;
+}
+
+.field-success{
+    background-color: #c9decc;
+    text-align: center;
+}
+.field-danger{
+    background-color: antiquewhite;
+    text-align: center;
+}
+
+.status-icon{
+    font-size: 20px;
+}
+
+.execution-id{
+    color: darkblue;
+    font-weight: 600;
+    font-size: 18px;
 }
