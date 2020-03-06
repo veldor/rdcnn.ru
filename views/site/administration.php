@@ -51,13 +51,12 @@ $sortBy = Yii::$app->session['sortBy'];
             $sort[$key] = '';
         }
     }
-/*echo "<div class=\"nav-link\">
-
-          <div class=\"custom-control custom-switch\">
-            <input type=\"checkbox\" class=\"custom-control-input\" id=\"darkSwitch\">
-            <label class=\"custom-control-label\" for=\"darkSwitch\">Dark Mode</label>
+echo '<div class="col-xs-12 text-center margin">
+          <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" id="darkSwitch">
+            <label class="custom-control-label" for="darkSwitch">Ночной режим</label>
           </div>
-        </div>";*/
+        </div>';
 
 // добавлю кнопку для создания нового обследования
 echo "<div class='col-sm-12 text-center'>";
@@ -93,7 +92,7 @@ echo "</div>";
 $executionsCounter = 0;
 
 if (!empty($executions)) {
-    echo "<table class='table-hover table table-striped'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'>";
+    echo "<table class='table-hover table'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'>";
     foreach ($executions as $execution) {
 
         // проверю, если включена фильтрация по центру- выведу только те обследования, которые проведены в этом центре
@@ -107,6 +106,7 @@ if (!empty($executions)) {
         <tr data-id="<?= $execution->username?>">
             <td>
                 <a class='btn-link execution-id' href='/person/<?= $execution->username ?>'><?= $execution->username ?></a>
+                <span class="pull-right"><?=Utils::showDate($execution->created_at)?></span>
             </td>
             <td>
 
