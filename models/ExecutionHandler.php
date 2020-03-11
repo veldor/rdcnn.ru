@@ -27,7 +27,7 @@ class ExecutionHandler extends Model
         if (Yii::$app->user->can('manage')) {
             $referer = $_SERVER['HTTP_REFERER'];
             $id = explode('/', $referer)[4];
-        } else{
+        } else {
             /** @noinspection PhpUndefinedFieldInspection */
             $id = Yii::$app->user->identity->username;
         }
@@ -117,17 +117,12 @@ class ExecutionHandler extends Model
         // проверю устаревшие данные
         // получу всех пользователей
         $users = User::findAllRegistered();
-        if(!empty($users)){
+        if (!empty($users)) {
             foreach ($users as $user) {
                 // ищу данные по доступности обследований.
-                $dataAvailability = Table_availability::findOne(['userId' => $user->username]);
-                if(!empty($dataAvailability)){
-                    if(!empty($dataAvailability->startTime)){
-                        if(($dataAvailability->startTime + Info::DATA_SAVING_TIME) < time()){
-                            AdministratorActions::simpleDeleteItem($user->username);
-                            echo "deleted $user->username by timeout <br/>";
-                        }
-                    }
+                if (($user->created_at + Info::DATA_SAVING_TIME) < time()) {
+                    AdministratorActions::simpleDeleteItem($user->username);
+                    echo "deleted $user->username by timeout <br/>";
                 }
             }
         }
@@ -136,45 +131,42 @@ class ExecutionHandler extends Model
         $deleteCounter = 0;
         $waitCounter = 0;
         // автоматическая обработка папок
-        $dirs = array_slice(scandir( Yii::getAlias('@executionsDirectory')), 2);
-        $pattern =  '/^[aа]?[0-9]+$/ui';
+        $dirs = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
+        $pattern = '/^[aа]?[0-9]+$/ui';
         // проверю папки
-        if(!empty($dirs)){
+        if (!empty($dirs)) {
             foreach ($dirs as $dir) {
                 $handledCounter++;
                 $path = Yii::getAlias('@executionsDirectory') . '/' . $dir;
-                if(is_dir($path)){
+                if (is_dir($path)) {
                     // для начала проверю папку, если она изменена менее 10 минут назад- пропускаю её
                     $stat = stat($path);
                     $changeTime = $stat['mtime'];
                     $difference = time() - $changeTime;
-                    if($difference > 300){
+                    if ($difference > 300) {
                         // проверю, соответствует ли название папки шаблону
                         if (preg_match($pattern, $dir)) {
                             $dirLatin = self::toLatin(mb_strtoupper($dir));
                             // вероятно, папка содержит файлы обследования
                             // проверю, что папка не пуста
-                            if(count(scandir($path)) > 2){
+                            if (count(scandir($path)) > 2) {
                                 // папка не пуста
                                 self::checkUser($dirLatin);
                                 // сохраню содержимое папки в архив
                                 self::PackFiles($dirLatin, $path);
                                 $addCounter++;
-                            }
-                            else{
+                            } else {
                                 // удалю папку
                                 self::rmRec($path);
                                 $deleteCounter++;
                             }
 
-                        }
-                        else{
+                        } else {
                             // удалю папку
                             self::rmRec($path);
                             $deleteCounter++;
                         }
-                    }
-                    else{
+                    } else {
                         $waitCounter++;
                     }
                 }
@@ -183,41 +175,41 @@ class ExecutionHandler extends Model
         $answer = "handled $handledCounter, added $addCounter deleted $deleteCounter wait $waitCounter at " . time();
         echo $answer;
         $dir = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
-        if(!is_dir($dir)){
-            if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)){
+        if (!is_dir($dir)) {
+            if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
             }
         }
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update.log';
         file_put_contents($file, $answer . "\n", FILE_APPEND);
         // теперь обработаю заключения
-        $pattern =  '/^[aа]?\W?[0-9]+-?[0-9]*\.pdf$/ui';
+        $pattern = '/^[aа]?\W?[0-9]+-?[0-9]*\.pdf$/ui';
         // проверю папку с заключениями
-        $conclusionsDir =  Yii::getAlias('@conclusionsDirectory');
-        if(!empty($conclusionsDir) && is_dir($conclusionsDir)){
+        $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
+        if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
 
             $files = array_slice(scandir($conclusionsDir), 2);
             foreach ($files as $file) {
                 $path = Yii::getAlias('@conclusionsDirectory') . '\\' . $file;
-                if(is_file($path)){
+                if (is_file($path)) {
                     // проверю, подходит ли файл под регулярку
-                    if (preg_match($pattern, $file)){
+                    if (preg_match($pattern, $file)) {
                         // получу данные о файле
                         $stat = stat($path);
                         $changeTime = $stat['mtime'];
                         $difference = time() - $changeTime;
-                        if($difference > 30){
+                        if ($difference > 30) {
                             // переименую файл в нормальный вид
                             $fileLatin = self::toLatin(ucfirst(trim($file)));
                             // уберу пробелы
                             $filePureName = preg_replace('/\s/', '', $fileLatin);
                             // проверю наличие учётной записи
                             // если это не дублирующее заключение
-                            if(stripos('-', $filePureName) < 0){
+                            if (stripos('-', $filePureName) < 0) {
                                 self::checkUser($filePureName);
                             }
                             // если файл не соответствует строгому шаблону
-                            if($file !== $filePureName){
+                            if ($file !== $filePureName) {
                                 rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
                             }
                         }
@@ -226,26 +218,26 @@ class ExecutionHandler extends Model
             }
         }
         // из облачной папки
-        $cloudDir =  Yii::getAlias('@cloudDirectory');
-        if(!empty($cloudDir) && is_dir($cloudDir)){
+        $cloudDir = Yii::getAlias('@cloudDirectory');
+        if (!empty($cloudDir) && is_dir($cloudDir)) {
             $files = array_slice(scandir($cloudDir), 2);
             foreach ($files as $file) {
                 $path = Yii::getAlias('@cloudDirectory') . '\\' . $file;
-                if(is_file($path)){
+                if (is_file($path)) {
                     // проверю, подходит ли файл под регулярку
-                    if (preg_match($pattern, $file)){
+                    if (preg_match($pattern, $file)) {
                         // получу данные о файле
                         $stat = stat($path);
                         $changeTime = $stat['mtime'];
                         $difference = time() - $changeTime;
-                        if($difference > 30){
+                        if ($difference > 30) {
                             // переименую файл в нормальный вид
                             $fileLatin = self::toLatin(ucfirst(trim($file)));
                             // уберу пробелы
                             $filePureName = preg_replace('/\s/', '', $fileLatin);
                             // проверю наличие учётной записи
                             // если это не дублирующее заключение
-                            if(stripos('-', $filePureName) < 0){
+                            if (stripos('-', $filePureName) < 0) {
                                 self::checkUser($filePureName);
                             }
                             // перемещу файл в папку с заключениями
