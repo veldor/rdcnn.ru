@@ -8,6 +8,7 @@ use app\models\LoginForm;
 use app\models\Test;
 use app\models\User;
 use app\models\Utils;
+use app\priv\Info;
 use Yii;
 use yii\base\Exception;
 use yii\filters\AccessControl;
@@ -31,8 +32,14 @@ class SiteController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['index', 'error', 'check'],
+                        'actions' => ['index', 'error'],
                         'roles' => ['?', '@'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['check'],
+                        'roles' => ['?', '@'],
+                        'ips' => Info::ACCEPTED_IPS,
                     ],
                     [
                         'allow' => true,
@@ -187,7 +194,12 @@ class SiteController extends Controller
         return ExecutionHandler::checkAvailability();
     }
 
-    public function actionCheck(){
+    /**
+     * @throws Exception
+     * @throws \yii\db\Exception
+     */
+    public function actionCheck(): void
+    {
         ExecutionHandler::check();
     }
 }

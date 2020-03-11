@@ -112,8 +112,25 @@ class ExecutionHandler extends Model
      * @throws Exception
      * @throws \yii\db\Exception
      */
-    public static function check()
+    public static function check(): void
     {
+        // проверю устаревшие данные
+        // получу всех пользователей
+        $users = User::findAllRegistered();
+        if(!empty($users)){
+            foreach ($users as $user) {
+                // ищу данные по доступности обследований.
+                $dataAvailability = Table_availability::findOne(['userId' => $user->username]);
+                if(!empty($dataAvailability)){
+                    if(!empty($dataAvailability->startTime)){
+                        if(($dataAvailability->startTime + Info::DATA_SAVING_TIME) < time()){
+                            AdministratorActions::simpleDeleteItem($user->username);
+                            echo "deleted $user->username by timeout <br/>";
+                        }
+                    }
+                }
+            }
+        }
         $handledCounter = 0;
         $addCounter = 0;
         $deleteCounter = 0;

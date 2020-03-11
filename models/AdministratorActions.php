@@ -89,10 +89,8 @@ class AdministratorActions extends Model
 
     /**
      * @param $id
-     * @throws Throwable
-     * @throws StaleObjectException
      */
-    public static function simpleDeleteItem($id)
+    public static function simpleDeleteItem($id): void
     {
         $execution = User::findByUsername($id);
         if(!empty($execution)){
@@ -106,8 +104,19 @@ class AdministratorActions extends Model
                 unlink($executionFile);
             }
             // удалю запись в таблице выдачи разрешений
-            Table_auth_assigment::findOne(["user_id" => $execution->id])->delete();
-            $execution->delete();
+            $auth = Table_auth_assigment::findOne(["user_id" => $execution->id]);
+            if(!empty($auth)){
+                try {
+                    $auth->delete();
+                } catch (StaleObjectException $e) {
+                } catch (Throwable $e) {
+                }
+            }
+            try {
+                $execution->delete();
+            } catch (StaleObjectException $e) {
+            } catch (Throwable $e) {
+            }
             // если пользователь залогинен и это не админ- выхожу из учётной записи
             if(!Yii::$app->user->can('manage')){
                 Yii::$app->user->logout(true);

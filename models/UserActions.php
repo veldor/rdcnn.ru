@@ -16,7 +16,8 @@ class UserActions extends Model
      * @throws Throwable
      * @throws StaleObjectException
      */
-    public static function deleteUser($executionNumber){
+    public static function deleteUser($executionNumber): void
+    {
         if(!empty($executionNumber)){
             // получу данные о пользователе
             $execution = User::findByUsername($executionNumber);
