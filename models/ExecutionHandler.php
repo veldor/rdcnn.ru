@@ -183,11 +183,11 @@ class ExecutionHandler extends Model
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update.log';
         file_put_contents($file, $answer . "\n", FILE_APPEND);
         // теперь обработаю заключения
-        $pattern = '/^[aа]?\W?[0-9]+-?\.?[0-9]*\.pdf$/ui';
+        $pattern = '/^[aа]?\W?\d+-?\.?\d+\.pdf$/ui';
+        $dotPattern = '/^([aа]?\W?\d+)\.(\d+\.pdf)$/ui';
         // проверю папку с заключениями
         $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
-
             $files = array_slice(scandir($conclusionsDir), 2);
             foreach ($files as $file) {
                 $path = Yii::getAlias('@conclusionsDirectory') . '\\' . $file;
@@ -203,6 +203,12 @@ class ExecutionHandler extends Model
                             $fileLatin = self::toLatin(ucfirst(trim($file)));
                             // уберу пробелы
                             $filePureName = preg_replace('/\s/', '', $fileLatin);
+                            // заменю разделитель-точку на тире
+                            if (preg_match($dotPattern, $file, $arr)) {
+                                // переименую файл
+                                $filePureName = $arr[1] . '-' . $arr[2];
+                                copy($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                            }
                             // проверю наличие учётной записи
                             // если это не дублирующее заключение
                             if (stripos('-', $filePureName) < 0) {
