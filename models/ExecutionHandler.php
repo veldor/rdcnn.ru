@@ -183,7 +183,7 @@ class ExecutionHandler extends Model
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update.log';
         file_put_contents($file, $answer . "\n", FILE_APPEND);
         // теперь обработаю заключения
-        $pattern = '/^[aа]?\W?[0-9]+-?[0-9]*\.pdf$/ui';
+        $pattern = '/^[aа]?\W?[0-9]+-?\.?[0-9]*\.pdf$/ui';
         // проверю папку с заключениями
         $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
