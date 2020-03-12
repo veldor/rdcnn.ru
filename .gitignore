@@ -35,3 +35,6 @@ tests/_support/_generated
 logs/
 public_html/logs/
 !/logs/update.log
+/tests/
+/vagrant/
+/runtime/
