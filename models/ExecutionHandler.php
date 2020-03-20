@@ -139,7 +139,7 @@ class ExecutionHandler extends Model
                 $handledCounter++;
                 $path = Yii::getAlias('@executionsDirectory') . '/' . $dir;
                 if (is_dir($path)) {
-                    // для начала проверю папку, если она изменена менее 10 минут назад- пропускаю её
+                    // для начала проверю папку, если она изменена менее 5 минут назад- пропускаю её
                     $stat = stat($path);
                     $changeTime = $stat['mtime'];
                     $difference = time() - $changeTime;
@@ -162,9 +162,11 @@ class ExecutionHandler extends Model
                             }
 
                         } else {
-                            // удалю папку
+                            // пока ничего не делаю
+                            //todo убедиться, что система работает
+                            /*// удалю папку
                             self::rmRec($path);
-                            $deleteCounter++;
+                            $deleteCounter++;*/
                         }
                     } else {
                         $waitCounter++;

@@ -32,11 +32,15 @@ class AdministratorActions extends Model
     public static function checkPatients()
     {
         $response = [];
+        // тут придётся проверять наличие неопознанных папок
+        $unhandledFolders = FileUtils::checkUnhandledFolders();
+        $response['unhandledFolders'] = $unhandledFolders;
+        $response['patientList'] = [];
         // верну список пациентов со статусами данных
         $patientsList = User::findAllRegistered();
         if(!empty($patientsList)){
             foreach ($patientsList as $item) {
-                if(Yii::$app->session['center'] != 'all' && Utils::isFiltered($item)){
+                if(!empty(Yii::$app->session['center']) && Yii::$app->session['center'] != 'all' && Utils::isFiltered($item)){
                     continue;
                 }
                     // проверю, загружены ли данные по пациенту
@@ -44,7 +48,7 @@ class AdministratorActions extends Model
                     $patientInfo['id'] = $item->username;
                     $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
                     $patientInfo['conclusion'] = ExecutionHandler::isConclusion($item->username);
-                    $response[] = $patientInfo;
+                    $response['patientList'][] = $patientInfo;
             }
         }
         return $response;

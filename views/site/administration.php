@@ -89,12 +89,25 @@ echo Html::endForm();
 
 echo "</div>";
 
+// тут список нераспознанных папок
+
+echo "
+    <div id='unhandledFoldersContainer' class='col-sm-12 hidden margin'>
+        <h2 class='text-center text-danger'><span class='glyphicon glyphicon-warning-sign'></span> Найдены неопознанные папки <span class='glyphicon glyphicon-warning-sign'></span></h2>
+        <h3 class='text-danger text-center'>Удалите или назовите папки правильно!</h3>
+        <table class='table-hover table'><thead><tr><th>Имя папки</th><th>Действия</th></tr></thead><tbody id='unhandledFoldersList'></tbody></table>
+    </div>
+";
+
+echo "
+    <div class='col-sm-12 margin'><div class='col-sm-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-sm-4'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b></div><div class='col-sm-4 text-danger'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
+";
+
 $executionsCounter = 0;
 
 if (!empty($executions)) {
     echo "<table class='table-hover table'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'>";
     foreach ($executions as $execution) {
-
         // проверю, если включена фильтрация по центру- выведу только те обследования, которые проведены в этом центре
         if(Utils::isCenterFiltered()){
             if(Utils::isFiltered($execution)){
@@ -103,7 +116,7 @@ if (!empty($executions)) {
         }
             ++ $executionsCounter;
         ?>
-        <tr data-id="<?= $execution->username?>">
+        <tr class="patient" data-id="<?= $execution->username?>">
             <td>
                 <a class='btn-link execution-id' href='/person/<?= $execution->username ?>'><?= $execution->username ?></a>
                 <span class="pull-right"><?=Utils::showDate($execution->created_at)?></span>
@@ -128,22 +141,12 @@ if (!empty($executions)) {
     }
     echo "</tbody></table>";
 }
-
-if($executionsCounter > 0){
-    echo "<div class='col-sm-12'><h2 class='text-center'>Всего обследований: $executionsCounter</h2></div>";
-}
-else{
+if($executionsCounter === 0){
     echo "<div class='col-sm-12'><h2 class='text-center'>Обследований не зарегистрировано</div>";
 }
 
 echo "<div class='col-sm-12 text-center'>";
 
-/*echo Html::beginForm(['/site/logout'], 'post')
-    . Html::submitButton(
-        'Выйти из учётной записи',
-        ['class' => 'btn btn-default logout']
-    )
-    . Html::endForm();*/
 
 echo "<button class='btn btn-default' id='clearGarbageButton'><span class='text-danger'>Очистить мусор</span></button>";
 
