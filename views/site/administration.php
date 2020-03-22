@@ -51,7 +51,12 @@ $sortBy = Yii::$app->session['sortBy'];
             $sort[$key] = '';
         }
     }
-
+echo '<div class="col-xs-12 text-center margin">
+          <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" id="darkSwitch">
+            <label class="custom-control-label" for="darkSwitch">Ночной режим</label>
+          </div>
+        </div>';
 
 // добавлю кнопку для создания нового обследования
 echo "<div class='col-sm-12 text-center'>";
@@ -72,7 +77,7 @@ ActiveForm::end();
 
 echo "</div><div class='col-sm-12'>";
 
-echo Html::beginForm(['/administrate'], 'post');
+echo Html::beginForm(['/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'], 'post');
 
 echo "<div class='col-sm-4'><label class='control-label' for='#centerSelect'>Центр</label><select id='centerSelect' name='center' onchange='this.form.submit();' class='form-control'><option value='all'>Все</option><option value='nv' {$centers['nv']}>Нижневолжская набережная</option><option value='aurora' {$centers['aurora']}>Аврора</option></select></div>";
 
@@ -84,12 +89,25 @@ echo Html::endForm();
 
 echo "</div>";
 
+// тут список нераспознанных папок
+
+echo "
+    <div id='unhandledFoldersContainer' class='col-sm-12 hidden margin'>
+        <h2 class='text-center text-danger'><span class='glyphicon glyphicon-warning-sign'></span> Найдены неопознанные папки <span class='glyphicon glyphicon-warning-sign'></span></h2>
+        <h3 class='text-danger text-center'>Удалите или назовите папки правильно!</h3>
+        <table class='table-hover table'><thead><tr><th>Имя папки</th><th>Действия</th></tr></thead><tbody id='unhandledFoldersList'></tbody></table>
+    </div>
+";
+
+echo "
+    <div class='col-sm-12 margin'><div class='col-sm-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-sm-4'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b></div><div class='col-sm-4 text-danger'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
+";
+
 $executionsCounter = 0;
 
 if (!empty($executions)) {
-    echo "<table class='table-hover table table-striped'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody>";
+    echo "<table class='table-hover table'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'>";
     foreach ($executions as $execution) {
-
         // проверю, если включена фильтрация по центру- выведу только те обследования, которые проведены в этом центре
         if(Utils::isCenterFiltered()){
             if(Utils::isFiltered($execution)){
@@ -98,20 +116,18 @@ if (!empty($executions)) {
         }
             ++ $executionsCounter;
         ?>
-        <tr>
+        <tr class="patient" data-id="<?= $execution->username?>">
             <td>
-                <a class='btn-link' href='/person/<?= $execution->username ?>'><?= $execution->username ?></a>
+                <a class='btn-link execution-id' href='/person/<?= $execution->username ?>'><?= $execution->username ?></a>
+                <span class="pull-right"><?=Utils::showDate($execution->created_at)?></span>
             </td>
             <td>
 
-                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить заключение'><span class='text-info glyphicon glyphicon-file'></span><input id="addConclusion" data-id='<?= $execution->username ?>' class='hidden loader' type='file' accept='application/pdf' name='AdministratorActions[conclusion]'></label></form>
-                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить обследование'><span class='text-info glyphicon glyphicon-folder-close'></span><input id="addExecution" data-id='<?= $execution->username ?>' class='hidden loader' type='file' accept='application/zip' name='AdministratorActions[execution]'></label></form>
-                <a class='btn btn-default activator' data-action='check-data'
-                   data-id='<?= $execution->username ?>' data-toggle='tooltip' data-placement='auto'
-                   title='Подтвердить загруженные данные'><span class='glyphicon glyphicon-refresh'></span></a>
+                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить заключение'><span class='text-info glyphicon glyphicon-file'></span><input data-id='<?= $execution->username ?>' class='hidden loader addConclusion' type='file' accept='application/pdf' name='AdministratorActions[conclusion]'></label></form>
+                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить обследование'><span class='text-info glyphicon glyphicon-folder-close'></span><input data-id='<?= $execution->username ?>' class='hidden loader addExecution' type='file' accept='application/zip' name='AdministratorActions[execution]'></label></form>
             </td>
-            <td data-conclusion="<?= $execution->username ?>"><?= ExecutionHandler::isConclusion($execution->username) ? "<span class='glyphicon glyphicon-ok text-success'></span>" : "<span class='glyphicon glyphicon-remove text-danger'></span>"?></td>
-            <td data-execution="<?= $execution->username ?>"><?= ExecutionHandler::isExecution($execution->username) ? "<span class='glyphicon glyphicon-ok text-success'></span>" : "<span class='glyphicon glyphicon-remove text-danger'></span>"?></td>
+            <?= ExecutionHandler::isConclusion($execution->username) ? "<td data-conclusion='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-conclusion='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"?>
+            <?= ExecutionHandler::isExecution($execution->username) ?  "<td data-execution='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-execution='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"?>
             <td>
                 <a class='btn btn-default activator' data-action='change-password'
                    data-id='<?= $execution->username ?>' data-toggle='tooltip' data-placement='auto'
@@ -125,22 +141,12 @@ if (!empty($executions)) {
     }
     echo "</tbody></table>";
 }
-
-if($executionsCounter > 0){
-    echo "<div class='col-sm-12'><h2 class='text-center'>Всего обследований: $executionsCounter</h2></div>";
-}
-else{
+if($executionsCounter === 0){
     echo "<div class='col-sm-12'><h2 class='text-center'>Обследований не зарегистрировано</div>";
 }
 
 echo "<div class='col-sm-12 text-center'>";
 
-/*echo Html::beginForm(['/site/logout'], 'post')
-    . Html::submitButton(
-        'Выйти из учётной записи',
-        ['class' => 'btn btn-default logout']
-    )
-    . Html::endForm();*/
 
 echo "<button class='btn btn-default' id='clearGarbageButton'><span class='text-danger'>Очистить мусор</span></button>";
 

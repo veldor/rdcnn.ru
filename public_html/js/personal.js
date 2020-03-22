@@ -14,19 +14,19 @@ function makeInstruction() {
 
 $(function () {
         // назначу переменные для кнопок
-    let downloadConclusionBtn = $('#downloadConclusionBtn');
-    let printConclusionBtn = $('#printConclusionBtn');
-    let conclusionNotReadyBtn = $('#conclusionNotReadyBtn');
+    let downloadConclusionBtn = $('.downloadConclusionBtn');
+    let printConclusionBtn = $('.printConclusionBtn');
+    let conclusionNotReadyBtn = $('.conclusionNotReadyBtn');
 
-    let downloadExecutionBtn = $('#downloadExecutionBtn');
-    let executionNotReadyBtn = $('#executionNotReadyBtn');
+    let downloadExecutionBtn = $('.downloadExecutionBtn');
+    let executionNotReadyBtn = $('.executionNotReadyBtn');
 
 
     let availabilityTimeDivContainer = $('#availabilityTimeContainer');
     let availabilityTimeContainer = $('#availabilityTime');
     let removeReasonContainer = $('#removeReasonContainer');
 
-    let clearDataBtn = $('#clearDataBtn');
+    let clearDataBtn = $('.clearDataBtn');
     clearDataBtn.on('click.clear', function () {
         makeInformerModal('Удалить данные?', 'Убрать все данные с сервера, чтобы никто не мог получить к ним доступ. Если вы удалите данные, то получить повторный доступ к ним вы сможете, обратившись в наш центр.', function () {
                 clearInterval(checkInterval);
@@ -47,17 +47,17 @@ $(function () {
         if(data['status'] === 1){
             // проверю, если есть заключение- активирую пункты о скачивании
             if(data['execution']){
-                downloadExecutionBtn.removeClass('hidden');
-                executionNotReadyBtn.addClass('hidden');
+                downloadExecutionBtn.removeClass('invisible');
+                executionNotReadyBtn.addClass('invisible');
             }
             if(data['conclusion']){
-                downloadConclusionBtn.removeClass('hidden');
-                printConclusionBtn.removeClass('hidden');
-                conclusionNotReadyBtn.addClass('hidden');
-                removeReasonContainer.removeClass('hidden');
+                downloadConclusionBtn.removeClass('invisible');
+                printConclusionBtn.removeClass('invisible');
+                conclusionNotReadyBtn.addClass('invisible');
+                removeReasonContainer.removeClass('invisible');
             }
             if(data['timeLeft']){
-                availabilityTimeDivContainer.removeClass('hidden');
+                availabilityTimeDivContainer.removeClass('invisible');
                 availabilityTimeContainer.html(data['timeLeft'])
             }
             if(data['addConc']){

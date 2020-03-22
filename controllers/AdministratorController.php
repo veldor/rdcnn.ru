@@ -6,6 +6,7 @@ namespace app\controllers;
 
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
+use app\models\FileUtils;
 use app\models\Utils;
 use app\priv\Info;
 use Throwable;
@@ -30,9 +31,9 @@ class AdministratorController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage'],
+                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage', 'delete-unhandled-folder', 'rename-unhandled-folder'],
                         'roles' => ['manager'],
-                        'ips' => Info::ACCEPTED_IPS,
+                        //'ips' => Info::ACCEPTED_IPS,
                     ],
                 ],
             ],
@@ -134,5 +135,15 @@ class AdministratorController extends Controller
         Utils::clearGarbage();
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ['status' => 1, 'message' => 'Весь мусор удалён.'];
+    }
+    public function actionDeleteUnhandledFolder(){
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        FileUtils::deleteUnhandledFolder();
+        return ['status' => 1];
+    }
+    public function actionRenameUnhandledFolder(){
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        FileUtils::renameUnhandledFolder();
+        return ['status' => 1];
     }
 }

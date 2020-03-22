@@ -113,12 +113,18 @@ class Utils extends Model
                 case "byNumber":
                     return $execution1->username < $execution2->username;
                 case "byExecutions":
-                    return ExecutionHandler::isExecution($execution1->username) < ExecutionHandler::isExecution($execution2->username);
+                    return ExecutionHandler::isExecution($execution1->username) > ExecutionHandler::isExecution($execution2->username);
                 case "byConclusion":
-                    return ExecutionHandler::isConclusion($execution1->username) < ExecutionHandler::isConclusion($execution2->username);
+                    return ExecutionHandler::isConclusion($execution1->username) > ExecutionHandler::isConclusion($execution2->username);
             }
         });
         return $executionsList;
+    }
+
+    public static function showDate(int $timestamp)
+    {
+        setlocale(LC_ALL, 'ru_RU.utf8');
+        return strftime('%d %h %H:%M', $timestamp);
     }
 
 }

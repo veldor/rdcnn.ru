@@ -31,7 +31,10 @@ tests/_support/_generated
 
 #vagrant folder
 /.vagrant
-/dicom_viewer/
-/executions/
-/conclusions/
-/priv/
+!/logs/
+logs/
+public_html/logs/
+!/logs/update.log
+/tests/
+/vagrant/
+/runtime/

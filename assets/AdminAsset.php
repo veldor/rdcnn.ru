@@ -21,10 +21,14 @@ class AdminAsset extends AssetBundle
     public $baseUrl = '@web';
     public $css = [
         'css/site.css',
+        'css/admin.css',
+        //'css/bootstrap.min.css',
+        'css/dark-mode.css',
     ];
     public $js = [
         'js/globals.js',
-        'js/admin.js'
+        'js/admin.js',
+        'js/dark-mode-switch.min.js'
     ];
     public $depends = [
         'yii\web\YiiAsset',

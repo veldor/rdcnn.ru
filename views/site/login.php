@@ -15,7 +15,8 @@ $this->title = "РДЦ, личный кабинет";
 ?>
 <div class="site-login text-center">
 
-    <div id="ourLogo"></div>
+    <div id="ourLogo" class="visible-sm visible-md visible-lg"></div>
+    <div id="ourSmallLogo" class="visible-xs"></div>
 
     <?php $form = ActiveForm::begin([
         'id' => 'login-form',
@@ -25,9 +26,9 @@ $this->title = "РДЦ, личный кабинет";
         ],
     ]); ?>
 
-        <?= $form->field($model, 'username', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'><button tabindex='-1' type='button' class='btn btn-info' id='loginHint'><span class='glyphicon glyphicon-question-sign'></span></button></div><div class='col-sm-12'>{error}</div>",])->textInput(['autofocus' => true,]) ?>
+        <?= $form->field($model, 'username', ['template' => "<div class='col-xs-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-xs-offset-3 col-xs-6 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-xs-1'><button tabindex='-1' type='button' class='btn btn-info' id='loginHint'><span class='glyphicon glyphicon-question-sign'></span></button></div><div class='col-xs-12'>{error}</div>",])->textInput(['autofocus' => true,]) ?>
 
-        <?= $form->field($model, 'password', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'><button tabindex='-1' type='button' class='btn btn-info'><span class='glyphicon glyphicon-question-sign'></span></button></div><div class='col-sm-12'>{error}</div>",])->passwordInput() ?>
+        <?= $form->field($model, 'password', ['template' => "<div class='col-xs-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-xs-offset-3 col-xs-6 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-xs-1'><button tabindex='-1' type='button' class='btn btn-info'><span class='glyphicon glyphicon-question-sign'></span></button></div><div class='col-xs-12'>{error}</div>",])->passwordInput() ?>
 
         <div class="form-group">
             <div class="col-sm-12 text-center">

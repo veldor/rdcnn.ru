@@ -38,55 +38,56 @@ die();*/
 
 ?>
 
-<div id="ourLogo"></div>
+<div id="ourLogo" class="visible-sm visible-md visible-lg "></div>
+<div id="ourSmallLogo" class="visible-xs"></div>
 
 <h1 class="text-center">Обследование № <?= $execution->username ?></h1>
 
-<div class="col-sm-12">
+<div class="col-sm-12 col-md-6 col-md-offset-3">
 
     <?php
-        echo "<div id='availabilityTimeContainer' class='alert alert-info text-center " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "'><span class='glyphicon glyphicon-info-sign'></span> Данные исследования будут доступны в течение <span id='availabilityTime'></span></div>";
+        echo "<div id='availabilityTimeContainer' class='alert alert-info text-center " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "'><span class='glyphicon glyphicon-info-sign'></span> Данные исследования будут доступны в течение<br/> <span id='availabilityTime'></span></div>";
     ?>
 </div>
 
 
 <div class="col-sm-12 col-md-6 col-md-offset-3">
     <?php
-    echo "<a id='downloadConclusionBtn' class='btn btn-primary btn-lg btn-block margin " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' href='" . Url::toRoute('download/conclusion') . "' role='button'><span class='glyphicon glyphicon-cloud-download'></span> Загрузить заключение врача</a>";
+    echo "<a id='downloadConclusionBtn' class='btn btn-primary btn btn-block margin with-wrap " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' href='" . Url::toRoute('download/conclusion') . "' role='button'><span class='glyphicon glyphicon-cloud-download'></span> Загрузить заключение врача</a>";
 
-    echo "<a id='printConclusionBtn' class='btn btn-primary  btn-lg btn-block margin " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' target='_blank' href='" . Url::toRoute('download/print-conclusion') . "' role='button'><span class='glyphicon glyphicon-print'></span> Распечатать заключение врача</a>";
+    echo "<a id='printConclusionBtn' class='btn btn-primary  btn btn-block margin with-wrap " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' target='_blank' href='" . Url::toRoute('download/print-conclusion') . "' role='button'><span class='glyphicon glyphicon-print'></span> Распечатать заключение врача</a>";
 
     // проверю наличие дополнительных заключений
     if($addsQuantity = ExecutionHandler::isAdditionalConclusions($execution->username)){
         $addsCounter = 2;
         while ($addsQuantity > 0){
-            echo "<a id='downloadConclusionBtn' class='btn btn-primary btn-lg btn-block margin " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' href='" . Url::toRoute('download/conclusion/' . ($addsCounter -1)) . "' role='button'><span class='glyphicon glyphicon-cloud-download'></span> Загрузить заключение №{$addsCounter}</a>";
+            echo "<a id='downloadConclusionBtn' class='btn btn-primary btn btn-block margin with-wrap " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' href='" . Url::toRoute('download/conclusion/' . ($addsCounter -1)) . "' role='button'><span class='glyphicon glyphicon-cloud-download'></span> Загрузить заключение №{$addsCounter}</a>";
 
-            echo "<a id='printConclusionBtn' class='btn btn-primary  btn-lg btn-block margin " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' target='_blank' href='" . Url::toRoute('download/print-conclusion/' . ($addsCounter -1)) . "' role='button'><span class='glyphicon glyphicon-print'></span> Распечатать заключение №{$addsCounter}</a>";
+            echo "<a id='printConclusionBtn' class='btn btn-primary  btn btn-block margin with-wrap " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "' target='_blank' href='" . Url::toRoute('download/print-conclusion/' . ($addsCounter -1)) . "' role='button'><span class='glyphicon glyphicon-print'></span> Распечатать заключение №{$addsCounter}</a>";
             $addsCounter++;
             --$addsQuantity;
         }
     }
 
-    echo "<a id='conclusionNotReadyBtn' class='btn btn-primary  btn-lg btn-block margin disabled " . (ExecutionHandler::isConclusion($execution->username) ? 'hidden' : '') . "' role='button'>Заключение врача ещё не готово</a>";
+    echo "<a id='conclusionNotReadyBtn' class='btn btn-primary btn btn-block margin with-wrap disabled " . (ExecutionHandler::isConclusion($execution->username) ? 'hidden' : '') . "' role='button'>Заключение врача ещё не готово</a>";
 
-    echo "<a id='downloadExecutionBtn' class='btn btn-primary  btn-lg btn-block margin " . (ExecutionHandler::isExecution($execution->username) ? '' : 'hidden') . "' href='" . Url::toRoute('download/execution') . "' role='button'><span class='glyphicon glyphicon-cloud-download'></span> Загрузить данные сканирования</a>";
+    echo "<a id='downloadExecutionBtn' class='btn btn-primary  btn btn-block margin with-wrap " . (ExecutionHandler::isExecution($execution->username) ? '' : 'hidden') . "' href='" . Url::toRoute('download/execution') . "' role='button'><span class='glyphicon glyphicon-cloud-download'></span> Загрузить данные сканирования</a>";
 
-    echo "<a id='executionNotReadyBtn' class='btn btn-primary btn-lg btn-block margin disabled " . (ExecutionHandler::isExecution($execution->username) ? 'hidden' : '') . "' role='button'>Данные сканирования пока недоступны</a>";
+    echo "<a id='executionNotReadyBtn' class='btn btn-primary btn btn-block margin with-wrap disabled " . (ExecutionHandler::isExecution($execution->username) ? 'hidden' : '') . "' role='button'>Данные сканирования пока недоступны</a>";
 
-    echo "<a id='clearDataBtn' class='btn btn-danger btn-lg btn-block margin' role='button'><span class='glyphicon glyphicon-trash'></span> Удалить данные</a>";
+    echo "<a id='clearDataBtn' class='btn btn-danger btn btn-block margin with-wrap' role='button'><span class='glyphicon glyphicon-trash'></span> Удалить данные</a>";
     ?>
     <?php
     echo Html::beginForm(['/site/logout'], 'post')
         . Html::submitButton(
             '<span class="glyphicon glyphicon-log-out"></span> Выйти из учётной записи',
-            ['class' => 'btn btn-primary btn-lg btn-block margin logout']
+            ['class' => 'btn btn-primary btn btn-block margin with-wrap logout']
         )
         . Html::endForm();
     ?>
 </div>
 
-<div class="col-sm-12 text-center">
+<div class="col-sm-12 col-md-6 col-md-offset-3 text-center">
     <div class="alert alert-success"><span class='glyphicon glyphicon-info-sign'></span> Если Вам необходима печать на заключение, обратитесь в центр, где Вы проходили
         исследование
     </div>

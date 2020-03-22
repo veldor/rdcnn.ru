@@ -32,16 +32,23 @@ class AdministratorActions extends Model
     public static function checkPatients()
     {
         $response = [];
+        // тут придётся проверять наличие неопознанных папок
+        $unhandledFolders = FileUtils::checkUnhandledFolders();
+        $response['unhandledFolders'] = $unhandledFolders;
+        $response['patientList'] = [];
         // верну список пациентов со статусами данных
-        $patientsList = User::find()->where(['<>', 'username', User::ADMIN_NAME])->all();
+        $patientsList = User::findAllRegistered();
         if(!empty($patientsList)){
             foreach ($patientsList as $item) {
-                // проверю, загружены ли данные по пациенту
-                $patientInfo = [];
-                $patientInfo['id'] = $item->username;
-                $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
-                $patientInfo['conclusion'] = ExecutionHandler::isConclusion($item->username);
-                $response[] = $patientInfo;
+                if(!empty(Yii::$app->session['center']) && Yii::$app->session['center'] != 'all' && Utils::isFiltered($item)){
+                    continue;
+                }
+                    // проверю, загружены ли данные по пациенту
+                    $patientInfo = [];
+                    $patientInfo['id'] = $item->username;
+                    $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
+                    $patientInfo['conclusion'] = ExecutionHandler::isConclusion($item->username);
+                    $response['patientList'][] = $patientInfo;
             }
         }
         return $response;
@@ -86,10 +93,8 @@ class AdministratorActions extends Model
 
     /**
      * @param $id
-     * @throws Throwable
-     * @throws StaleObjectException
      */
-    public static function simpleDeleteItem($id)
+    public static function simpleDeleteItem($id): void
     {
         $execution = User::findByUsername($id);
         if(!empty($execution)){
@@ -103,8 +108,19 @@ class AdministratorActions extends Model
                 unlink($executionFile);
             }
             // удалю запись в таблице выдачи разрешений
-            Table_auth_assigment::findOne(["user_id" => $execution->id])->delete();
-            $execution->delete();
+            $auth = Table_auth_assigment::findOne(["user_id" => $execution->id]);
+            if(!empty($auth)){
+                try {
+                    $auth->delete();
+                } catch (StaleObjectException $e) {
+                } catch (Throwable $e) {
+                }
+            }
+            try {
+                $execution->delete();
+            } catch (StaleObjectException $e) {
+            } catch (Throwable $e) {
+            }
             // если пользователь залогинен и это не админ- выхожу из учётной записи
             if(!Yii::$app->user->can('manage')){
                 Yii::$app->user->logout(true);

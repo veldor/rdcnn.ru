@@ -12,6 +12,7 @@ use app\priv\Info;
 use Yii;
 use yii\base\Exception;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\Response;
 
@@ -31,14 +32,20 @@ class SiteController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['index', 'error', 'test'],
+                        'actions' => ['index', 'error'],
                         'roles' => ['?', '@'],
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['administrate'],
+                        'actions' => ['check'],
                         'roles' => ['?', '@'],
                         'ips' => Info::ACCEPTED_IPS,
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'],
+                        'roles' => ['?', '@'],
+                        //'ips' => Info::ACCEPTED_IPS,
                     ],
 
                     [
@@ -97,8 +104,8 @@ class SiteController extends Controller
             if (!empty($execution)) {
                 return $this->render('personal', ['execution' => $execution]);
             } else {
-                // страница не найдена
-                return $this->render('error', ['message' => 'Страница не найдена']);
+                // страница не найдена, перенаправлю на страницу менеджмента
+                return $this->redirect(Url::toRoute('site/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'));
             }
         } elseif (Yii::$app->user->can('read')) {
             $execution = User::findByUsername(Yii::$app->user->identity->username);
@@ -114,41 +121,38 @@ class SiteController extends Controller
     /**
      * @return string|Response
      */
-    public function actionAdministrate()
+    public function actionIolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8()
     {
         // если пользователь не залогинен- показываю ему страницу с предложением ввести номер обследования и пароль
         if (Yii::$app->user->isGuest) {
-//            if(Yii::$app->request->isGet){
-//                $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
-//                return $this->render('administrationLogin', ['model' => $model]);
-//            }
-//            if(Yii::$app->request->isPost){
-//                // попробую залогинить
-//                $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
-//                $model->load(Yii::$app->request->post());
-//                if($model->loginAdmin()){
-//                    // загружаю страницу управления
-//                    return $this->redirect('site/administrate', 301);
-//                }
-//                return $this->render('administrationLogin', ['model' => $model]);
-//            }
+            if(Yii::$app->request->isGet){
+                $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
+                return $this->render('administrationLogin', ['model' => $model]);
+            }
+            if(Yii::$app->request->isPost){
+                // попробую залогинить
+                $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
+                $model->load(Yii::$app->request->post());
+                if($model->loginAdmin()){
+                    // загружаю страницу управления
+                    return $this->redirect('iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
+                }
+                return $this->render('administrationLogin', ['model' => $model]);
+            }
             // зарегистрирую пользователя как администратора
-            LoginForm::autoLoginAdmin();
+            //LoginForm::autoLoginAdmin();
         }
         // если пользователь админ
         if (Yii::$app->user->can('manage')) {
-
             // очищу неиспользуемые данные
-
-            AdministratorActions::clearGarbage();
-
+            //AdministratorActions::clearGarbage();
             $this->layout = 'administrate';
             if(Yii::$app->request->isPost){
                 // выбор центра, обследования которого нужно отображать
                 AdministratorActions::selectCenter();
                 AdministratorActions::selectTime();
                 AdministratorActions::selectSort();
-                return $this->redirect('site/administrate', 301);
+                return $this->redirect('site/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
             }
             // получу все зарегистрированные обследования
             $executionsList = User::findAllRegistered();
@@ -188,5 +192,14 @@ class SiteController extends Controller
     public function actionAvailabilityCheck(){
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ExecutionHandler::checkAvailability();
+    }
+
+    /**
+     * @throws Exception
+     * @throws \yii\db\Exception
+     */
+    public function actionCheck(): void
+    {
+        ExecutionHandler::check();
     }
 }
