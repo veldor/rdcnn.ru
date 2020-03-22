@@ -114,7 +114,7 @@ class ExecutionHandler extends Model
      */
     public static function check(): void
     {
-        $report = 'start report \n';
+        $report = "start report \n";
         // проверю устаревшие данные
         // получу всех пользователей
         $users = User::findAllRegistered();
@@ -229,33 +229,37 @@ class ExecutionHandler extends Model
         // из облачной папки
         $cloudDir = Yii::getAlias('@cloudDirectory');
         if (!empty($cloudDir) && is_dir($cloudDir)) {
+            $report .= "handle cloud dir \n";
             $files = array_slice(scandir($cloudDir), 2);
-            foreach ($files as $file) {
-                $path = Yii::getAlias('@cloudDirectory') . '\\' . $file;
-                if (is_file($path)) {
-                    // проверю, подходит ли файл под регулярку
-                    if (preg_match($pattern, $file)) {
-                        // получу данные о файле
-                        $stat = stat($path);
-                        $changeTime = $stat['mtime'];
-                        $difference = time() - $changeTime;
-                        if ($difference > 30) {
-                            // переименую файл в нормальный вид
-                            $fileLatin = self::toLatin(ucfirst(trim($file)));
-                            // уберу пробелы
-                            $filePureName = preg_replace('/\s/', '', $fileLatin);
-                            // проверю наличие учётной записи
-                            // если это не дублирующее заключение
-                            if (stripos('-', $filePureName) < 0) {
-                                self::checkUser($filePureName);
+            if(!empty($files)){
+                $report .= 'found ' . count($files) . " files in cloud dir \n";
+                foreach ($files as $file) {
+                    $path = Yii::getAlias('@cloudDirectory') . '\\' . $file;
+                    if (is_file($path)) {
+                        // проверю, подходит ли файл под регулярку
+                        if (preg_match($pattern, $file)) {
+                            // получу данные о файле
+                            $stat = stat($path);
+                            $changeTime = $stat['mtime'];
+                            $difference = time() - $changeTime;
+                            if ($difference > 30) {
+                                // переименую файл в нормальный вид
+                                $fileLatin = self::toLatin(ucfirst(trim($file)));
+                                // уберу пробелы
+                                $filePureName = preg_replace('/\s/', '', $fileLatin);
+                                // проверю наличие учётной записи
+                                // если это не дублирующее заключение
+                                if (stripos('-', $filePureName) < 0) {
+                                    self::checkUser($filePureName);
+                                }
+                                // перемещу файл в папку с заключениями
+                                rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                                $report .= "file $file handled and moved by $filePureName \n";
                             }
-                            // перемещу файл в папку с заключениями
-                            rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
-                            $report .= "file $file handled and moved by $filePureName \n";
                         }
-                    }
-                    else{
-                        $report .= "file $file not handled \n";
+                        else{
+                            $report .= "file $file not handled \n";
+                        }
                     }
                 }
             }
