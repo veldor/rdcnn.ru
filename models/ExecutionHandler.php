@@ -114,6 +114,7 @@ class ExecutionHandler extends Model
      */
     public static function check(): void
     {
+        $report = '';
         // проверю устаревшие данные
         // получу всех пользователей
         $users = User::findAllRegistered();
@@ -122,21 +123,16 @@ class ExecutionHandler extends Model
                 // ищу данные по доступности обследований.
                 if (($user->created_at + Info::DATA_SAVING_TIME) < time()) {
                     AdministratorActions::simpleDeleteItem($user->username);
-                    echo "deleted $user->username by timeout <br/>";
+                    $report .= "user $user->username deleted by timeout \n";
                 }
             }
         }
-        $handledCounter = 0;
-        $addCounter = 0;
-        $deleteCounter = 0;
-        $waitCounter = 0;
         // автоматическая обработка папок
         $dirs = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
         $pattern = '/^[aа]?[0-9]+$/ui';
         // проверю папки
         if (!empty($dirs)) {
             foreach ($dirs as $dir) {
-                $handledCounter++;
                 $path = Yii::getAlias('@executionsDirectory') . '/' . $dir;
                 if (is_dir($path)) {
                     // для начала проверю папку, если она изменена менее 5 минут назад- пропускаю её
@@ -154,14 +150,15 @@ class ExecutionHandler extends Model
                                 self::checkUser($dirLatin);
                                 // сохраню содержимое папки в архив
                                 self::PackFiles($dirLatin, $path);
-                                $addCounter++;
+                                $report .= "dir $dir handled and load to $path \n";
                             } else {
                                 // удалю папку
                                 self::rmRec($path);
-                                $deleteCounter++;
+                                $report .= "dir $dir is empty and deleted \n";
                             }
 
                         } else {
+                            $report .= "dir $dir not handled \n";
                             // пока ничего не делаю
                             //todo убедиться, что система работает
                             /*// удалю папку
@@ -169,23 +166,19 @@ class ExecutionHandler extends Model
                             $deleteCounter++;*/
                         }
                     } else {
-                        $waitCounter++;
+                        $report .= "dir $dir waiting for timeout \n";
                     }
                 }
             }
         }
-        $answer = "handled $handledCounter, added $addCounter deleted $deleteCounter wait $waitCounter at " . time();
-        echo $answer;
         $dir = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
         if (!is_dir($dir)) {
             if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
             }
         }
-        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update.log';
-        file_put_contents($file, $answer . "\n", FILE_APPEND);
         // теперь обработаю заключения
-        $pattern = '/^[aа]?\W?\d+-?\.?\d+\.pdf$/ui';
+        $pattern = '/^[aа]?\W?\d+-?\.?\d*\.pdf$/ui';
         $dotPattern = '/^([aа]?\W?\d+)\.(\d+\.pdf)$/ui';
         // проверю папку с заключениями
         $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
@@ -209,7 +202,8 @@ class ExecutionHandler extends Model
                             if (preg_match($dotPattern, $file, $arr)) {
                                 // переименую файл
                                 $filePureName = $arr[1] . '-' . $arr[2];
-                                copy($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                                rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                                $report .= "file $file renamed from dot to $filePureName \n";
                             }
                             // проверю наличие учётной записи
                             // если это не дублирующее заключение
@@ -219,8 +213,15 @@ class ExecutionHandler extends Model
                             // если файл не соответствует строгому шаблону
                             if ($file !== $filePureName) {
                                 rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                                $report .= "file $file renamed to $filePureName";
                             }
                         }
+                        else{
+                            $report .= "file $file in conclusions waiting for timeout \n";
+                        }
+                    }
+                    else{
+                        $report .= "file $file not handled \n";
                     }
                 }
             }
@@ -250,11 +251,17 @@ class ExecutionHandler extends Model
                             }
                             // перемещу файл в папку с заключениями
                             rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                            $report .= "file $file handled and moved by $filePureName \n";
                         }
+                    }
+                    else{
+                        $report .= "file $file not handled \n";
                     }
                 }
             }
         }
+        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update_' . time() . '.log';
+        file_put_contents($file, $report);
     }
 
     /**
