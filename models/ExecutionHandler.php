@@ -114,7 +114,7 @@ class ExecutionHandler extends Model
      */
     public static function check(): void
     {
-        $report = '';
+        $report = 'start report \n';
         // проверю устаревшие данные
         // получу всех пользователей
         $users = User::findAllRegistered();
@@ -261,6 +261,7 @@ class ExecutionHandler extends Model
             }
         }
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update_' . time() . '.log';
+        $report .= 'end report';
         file_put_contents($file, $report);
     }
 
