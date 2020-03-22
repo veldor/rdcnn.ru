@@ -256,6 +256,9 @@ class ExecutionHandler extends Model
                                 rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
                                 $report .= "file $file handled and moved by $filePureName \n";
                             }
+                            else{
+                                $report .= "file $file wait for timeout \n";
+                            }
                         }
                         else{
                             $report .= "file $file not handled \n";
