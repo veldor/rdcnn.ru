@@ -5,11 +5,11 @@ namespace app\models;
 
 
 use app\priv\Info;
+use RuntimeException;
 use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
-use yii\db\StaleObjectException;
 use yii\web\UploadedFile;
 
 class ExecutionHandler extends Model
@@ -19,7 +19,6 @@ class ExecutionHandler extends Model
     /**
      * @return array
      * @throws Throwable
-     * @throws StaleObjectException
      */
     public static function checkAvailability(): array
     {
@@ -31,8 +30,8 @@ class ExecutionHandler extends Model
             /** @noinspection PhpUndefinedFieldInspection */
             $id = Yii::$app->user->identity->username;
         }
-        $isExecution = (bool)self::isExecution($id);
-        $isConclusion = (bool)self::isConclusion($id);
+        $isExecution = self::isExecution($id);
+        $isConclusion = self::isConclusion($id);
         $timeLeft = 0;
         // посмотрю, сколько времении ещё будет доступно обследование
         $startTime = User::findByUsername($id)->created_at;
@@ -72,7 +71,7 @@ class ExecutionHandler extends Model
         if (is_dir($path)) {
             foreach (scandir($path, SCANDIR_SORT_NONE) as $p) {
                 if (($p !== '.') && ($p !== '..')) {
-                    ExecutionHandler::rmRec($path . DIRECTORY_SEPARATOR . $p);
+                    self::rmRec($path . DIRECTORY_SEPARATOR . $p);
                 }
             }
             return rmdir($path);
@@ -80,7 +79,7 @@ class ExecutionHandler extends Model
         return false;
     }
 
-    public static function isAdditionalConclusions(string $username)
+    public static function isAdditionalConclusions(string $username): int
     {
         $searchPattern = '/' . $username . '-[0-9]+\.pdf/';
         $existentFiles = scandir(Info::CONC_FOLDER);
@@ -93,16 +92,14 @@ class ExecutionHandler extends Model
         return $addsQuantity;
     }
 
-    public static function deleteAddConcs($id)
+    public static function deleteAddConcs($id): void
     {
         if (self::isAdditionalConclusions($id)) {
             $searchPattern = '/' . $id . '-[0-9]+\.pdf/';
             $existentFiles = scandir(Info::CONC_FOLDER);
             foreach ($existentFiles as $existentFile) {
-                if (preg_match($searchPattern, $existentFile)) {
-                    if (is_file($existentFile)) {
-                        unlink($existentFile);
-                    }
+                if (preg_match($searchPattern, $existentFile) && is_file($existentFile)) {
+                    unlink($existentFile);
                 }
             }
         }
@@ -172,10 +169,8 @@ class ExecutionHandler extends Model
             }
         }
         $dir = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
-        if (!is_dir($dir)) {
-            if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
-            }
+        if (!is_dir($dir) && !is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
         // теперь обработаю заключения
         $pattern = '/^[aа]?\W?\d+-?\.?\d*\.pdf$/ui';
@@ -299,8 +294,8 @@ class ExecutionHandler extends Model
 
     public static function toLatin($executionNumber)
     {
-        $input = ["А"];
-        $replace = ["A"];
+        $input = ['А'];
+        $replace = ['A'];
         return str_replace($input, $replace, $executionNumber);
     }
 
@@ -340,7 +335,7 @@ class ExecutionHandler extends Model
         }
     }
 
-    public function scenarios()
+    public function scenarios() :array
     {
         return [
             self::SCENARIO_ADD => ['executionNumber', 'executionData', 'executionResponse'],
@@ -382,7 +377,7 @@ class ExecutionHandler extends Model
      * @throws Exception
      * @throws \Exception
      */
-    public function register()
+    public function register(): ?array
     {
         if ($this->validate()) {
             $transaction = new DbTransaction();
@@ -398,14 +393,14 @@ class ExecutionHandler extends Model
                 // сохраняю данные в папку с обследованиями
                 $filename = Yii::getAlias('@executionsDirectory') . '\\' . $this->executionNumber . '.zip';
                 $this->executionData->saveAs($filename);
-                $this->startTimer($this->executionNumber);
+                self::startTimer($this->executionNumber);
             }
             if (!empty($this->executionResponse)) {
                 // сохраняю данные в папку с обследованиями
                 $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $this->executionNumber . '.pdf';
                 $this->executionResponse->saveAs($filename);
 
-                $this->startTimer($this->executionNumber);
+                self::startTimer($this->executionNumber);
             }
             $password = self::createUser($this->executionNumber);
             $transaction->commitTransaction();
@@ -419,13 +414,10 @@ class ExecutionHandler extends Model
      * @param $name
      * @return bool
      */
-    public static function isExecution($name)
+    public static function isExecution($name): bool
     {
         $filename = Yii::getAlias('@executionsDirectory') . '\\' . $name . '.zip';
-        if (!empty($name) && is_file($filename)) {
-            return true;
-        }
-        return false;
+        return !empty($name) && is_file($filename);
     }
 
     /**
@@ -433,16 +425,13 @@ class ExecutionHandler extends Model
      * @param $name
      * @return bool
      */
-    public static function isConclusion($name)
+    public static function isConclusion($name): bool
     {
         $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $name . '.pdf';
-        if (!empty($name) && is_file($filename)) {
-            return true;
-        }
-        return false;
+        return !empty($name) && is_file($filename);
     }
 
-    public static function startTimer($id)
+    public static function startTimer($id): void
     {
         // проверю, нет ли ещё в базе данного пациента
         $contains = Table_availability::findOne(['userId' => $id]);
@@ -454,11 +443,11 @@ class ExecutionHandler extends Model
         }
     }
 
-    public static function recurse_copy($src, $dst)
+    public static function recurse_copy($src, $dst): void
     {
         $dir = opendir($src);
         if (!is_dir($dst) && !mkdir($dst) && !is_dir($dst)) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $dst));
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $dst));
         }
         while (false !== ($file = readdir($dir))) {
             if (($file !== '.') && ($file !== '..')) {

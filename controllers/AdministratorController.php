@@ -31,7 +31,7 @@ class AdministratorController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage', 'delete-unhandled-folder', 'rename-unhandled-folder'],
+                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage', 'delete-unhandled-folder', 'rename-unhandled-folder', 'print-missed-conclusions-list'],
                         'roles' => ['manager'],
                         //'ips' => Info::ACCEPTED_IPS,
                     ],
@@ -110,7 +110,8 @@ class AdministratorController extends Controller
      * @return array
      * @throws NotFoundHttpException
      */
-    public function actionAddExecutionData(){
+    public function actionAddExecutionData(): array
+    {
         if(Yii::$app->request->isPost){
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new AdministratorActions(['scenario' => AdministratorActions::SCENARIO_ADD_CONCLUSION]);
@@ -126,24 +127,33 @@ class AdministratorController extends Controller
         return AdministratorActions::checkPatients();
     }
 
-    public function actionFilesCheck($executionNumber){
+    public function actionFilesCheck($executionNumber): array
+    {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ExecutionHandler::checkFiles($executionNumber);
     }
 
-    public function actionClearGarbage(){
+    public function actionClearGarbage(): array
+    {
         Utils::clearGarbage();
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ['status' => 1, 'message' => 'Весь мусор удалён.'];
     }
-    public function actionDeleteUnhandledFolder(){
+    public function actionDeleteUnhandledFolder(): array
+    {
         Yii::$app->response->format = Response::FORMAT_JSON;
         FileUtils::deleteUnhandledFolder();
         return ['status' => 1];
     }
-    public function actionRenameUnhandledFolder(){
+    public function actionRenameUnhandledFolder(): array
+    {
         Yii::$app->response->format = Response::FORMAT_JSON;
         FileUtils::renameUnhandledFolder();
         return ['status' => 1];
+    }
+
+    public function actionPrintMissedConclusionsList(): string
+    {
+        return $this->render('missed-conclusions-list');
     }
 }
