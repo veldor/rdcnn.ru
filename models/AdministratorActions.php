@@ -25,7 +25,7 @@ class AdministratorActions extends Model
      */
     public $execution;
     /**
-     * @var UploadedFile
+     * @var UploadedFile[]
      */
     public $conclusion;
 
@@ -144,7 +144,7 @@ class AdministratorActions extends Model
             [['executionNumber'], 'required', 'on' => [self::SCENARIO_CHANGE_PASSWORD, self::SCENARIO_DELETE_ITEM, self::SCENARIO_ADD_EXECUTION, self::SCENARIO_ADD_CONCLUSION]],
             ['executionId', 'match', 'pattern' => '/^[a-z0-9]+$/iu'],
             [['execution'], 'file', 'skipOnEmpty' => true, 'extensions' => 'zip', 'maxSize' => 1048576000],
-            [['conclusion'], 'file', 'skipOnEmpty' => true, 'extensions' => 'pdf', 'maxSize' => 104857600],
+            [['conclusion'], 'file', 'skipOnEmpty' => true, 'extensions' => 'pdf', 'maxSize' => 104857600, 'maxFiles' => 10],
         ];
     }
 
@@ -196,8 +196,18 @@ class AdministratorActions extends Model
             if(empty($this->conclusion)){
                 return ['status' => 4, 'message' => 'Файл не загрузился, попробуйте ещё раз'];
             }
-            $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $execution->username . '.pdf';
-            $this->conclusion->saveAs($filename);
+            $counter = 0;
+            foreach ($this->conclusion as $file) {
+                if($counter > 0){
+                    $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $execution->username . "-{$counter}.pdf";
+                }
+                else{
+                    $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $execution->username . '.pdf';
+                }
+                $file->saveAs($filename);
+                ++$counter;
+            }
+
             ExecutionHandler::startTimer($this->executionId);
             return ['status' => 1, 'message' => 'Заключение добавлено'];
         }

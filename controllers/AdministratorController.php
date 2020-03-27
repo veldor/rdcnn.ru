@@ -100,7 +100,7 @@ class AdministratorController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new AdministratorActions(['scenario' => AdministratorActions::SCENARIO_ADD_CONCLUSION]);
             $model->load(Yii::$app->request->post());
-            $model->conclusion = UploadedFile::getInstance($model, 'conclusion');
+            $model->conclusion = UploadedFile::getInstances($model, 'conclusion');
             return $model->addConclusion();
         }
         throw new NotFoundHttpException();
