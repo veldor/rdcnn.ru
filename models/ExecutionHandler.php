@@ -5,11 +5,11 @@ namespace app\models;
 
 
 use app\priv\Info;
+use RuntimeException;
 use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
-use yii\db\StaleObjectException;
 use yii\web\UploadedFile;
 
 class ExecutionHandler extends Model
@@ -19,7 +19,6 @@ class ExecutionHandler extends Model
     /**
      * @return array
      * @throws Throwable
-     * @throws StaleObjectException
      */
     public static function checkAvailability(): array
     {
@@ -31,8 +30,8 @@ class ExecutionHandler extends Model
             /** @noinspection PhpUndefinedFieldInspection */
             $id = Yii::$app->user->identity->username;
         }
-        $isExecution = (bool)self::isExecution($id);
-        $isConclusion = (bool)self::isConclusion($id);
+        $isExecution = self::isExecution($id);
+        $isConclusion = self::isConclusion($id);
         $timeLeft = 0;
         // посмотрю, сколько времении ещё будет доступно обследование
         $startTime = User::findByUsername($id)->created_at;
@@ -72,7 +71,7 @@ class ExecutionHandler extends Model
         if (is_dir($path)) {
             foreach (scandir($path, SCANDIR_SORT_NONE) as $p) {
                 if (($p !== '.') && ($p !== '..')) {
-                    ExecutionHandler::rmRec($path . DIRECTORY_SEPARATOR . $p);
+                    self::rmRec($path . DIRECTORY_SEPARATOR . $p);
                 }
             }
             return rmdir($path);
@@ -80,7 +79,7 @@ class ExecutionHandler extends Model
         return false;
     }
 
-    public static function isAdditionalConclusions(string $username)
+    public static function isAdditionalConclusions(string $username): int
     {
         $searchPattern = '/' . $username . '-[0-9]+\.pdf/';
         $existentFiles = scandir(Info::CONC_FOLDER);
@@ -93,16 +92,14 @@ class ExecutionHandler extends Model
         return $addsQuantity;
     }
 
-    public static function deleteAddConcs($id)
+    public static function deleteAddConcs($id): void
     {
         if (self::isAdditionalConclusions($id)) {
             $searchPattern = '/' . $id . '-[0-9]+\.pdf/';
             $existentFiles = scandir(Info::CONC_FOLDER);
             foreach ($existentFiles as $existentFile) {
-                if (preg_match($searchPattern, $existentFile)) {
-                    if (is_file($existentFile)) {
-                        unlink($existentFile);
-                    }
+                if (preg_match($searchPattern, $existentFile) && is_file($existentFile)) {
+                    unlink($existentFile);
                 }
             }
         }
@@ -114,6 +111,7 @@ class ExecutionHandler extends Model
      */
     public static function check(): void
     {
+        $report = "start report \n";
         // проверю устаревшие данные
         // получу всех пользователей
         $users = User::findAllRegistered();
@@ -122,21 +120,16 @@ class ExecutionHandler extends Model
                 // ищу данные по доступности обследований.
                 if (($user->created_at + Info::DATA_SAVING_TIME) < time()) {
                     AdministratorActions::simpleDeleteItem($user->username);
-                    echo "deleted $user->username by timeout <br/>";
+                    $report .= "user $user->username deleted by timeout \n";
                 }
             }
         }
-        $handledCounter = 0;
-        $addCounter = 0;
-        $deleteCounter = 0;
-        $waitCounter = 0;
         // автоматическая обработка папок
         $dirs = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
         $pattern = '/^[aа]?[0-9]+$/ui';
         // проверю папки
         if (!empty($dirs)) {
             foreach ($dirs as $dir) {
-                $handledCounter++;
                 $path = Yii::getAlias('@executionsDirectory') . '/' . $dir;
                 if (is_dir($path)) {
                     // для начала проверю папку, если она изменена менее 5 минут назад- пропускаю её
@@ -154,14 +147,15 @@ class ExecutionHandler extends Model
                                 self::checkUser($dirLatin);
                                 // сохраню содержимое папки в архив
                                 self::PackFiles($dirLatin, $path);
-                                $addCounter++;
+                                $report .= "dir $dir handled and load to $path \n";
                             } else {
                                 // удалю папку
                                 self::rmRec($path);
-                                $deleteCounter++;
+                                $report .= "dir $dir is empty and deleted \n";
                             }
 
                         } else {
+                            $report .= "dir $dir not handled \n";
                             // пока ничего не делаю
                             //todo убедиться, что система работает
                             /*// удалю папку
@@ -169,23 +163,17 @@ class ExecutionHandler extends Model
                             $deleteCounter++;*/
                         }
                     } else {
-                        $waitCounter++;
+                        $report .= "dir $dir waiting for timeout \n";
                     }
                 }
             }
         }
-        $answer = "handled $handledCounter, added $addCounter deleted $deleteCounter wait $waitCounter at " . time();
-        echo $answer;
         $dir = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
-        if (!is_dir($dir)) {
-            if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
-            }
+        if (!is_dir($dir) && !is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
-        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update.log';
-        file_put_contents($file, $answer . "\n", FILE_APPEND);
         // теперь обработаю заключения
-        $pattern = '/^[aа]?\W?\d+-?\.?\d+\.pdf$/ui';
+        $pattern = '/^[aа]?\W?\d+-?\.?\d*\.pdf$/ui';
         $dotPattern = '/^([aа]?\W?\d+)\.(\d+\.pdf)$/ui';
         // проверю папку с заключениями
         $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
@@ -209,7 +197,8 @@ class ExecutionHandler extends Model
                             if (preg_match($dotPattern, $file, $arr)) {
                                 // переименую файл
                                 $filePureName = $arr[1] . '-' . $arr[2];
-                                copy($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                                rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                                $report .= "file $file renamed from dot to $filePureName \n";
                             }
                             // проверю наличие учётной записи
                             // если это не дублирующее заключение
@@ -219,8 +208,15 @@ class ExecutionHandler extends Model
                             // если файл не соответствует строгому шаблону
                             if ($file !== $filePureName) {
                                 rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                                $report .= "file $file renamed to $filePureName";
                             }
                         }
+                        else{
+                            $report .= "file $file in conclusions waiting for timeout \n";
+                        }
+                    }
+                    else{
+                        $report .= "file $file not handled \n";
                     }
                 }
             }
@@ -228,33 +224,47 @@ class ExecutionHandler extends Model
         // из облачной папки
         $cloudDir = Yii::getAlias('@cloudDirectory');
         if (!empty($cloudDir) && is_dir($cloudDir)) {
+            $report .= "handle cloud dir \n";
             $files = array_slice(scandir($cloudDir), 2);
-            foreach ($files as $file) {
-                $path = Yii::getAlias('@cloudDirectory') . '\\' . $file;
-                if (is_file($path)) {
-                    // проверю, подходит ли файл под регулярку
-                    if (preg_match($pattern, $file)) {
-                        // получу данные о файле
-                        $stat = stat($path);
-                        $changeTime = $stat['mtime'];
-                        $difference = time() - $changeTime;
-                        if ($difference > 30) {
-                            // переименую файл в нормальный вид
-                            $fileLatin = self::toLatin(ucfirst(trim($file)));
-                            // уберу пробелы
-                            $filePureName = preg_replace('/\s/', '', $fileLatin);
-                            // проверю наличие учётной записи
-                            // если это не дублирующее заключение
-                            if (stripos('-', $filePureName) < 0) {
-                                self::checkUser($filePureName);
+            if(!empty($files)){
+                $report .= 'found ' . count($files) . " files in cloud dir \n";
+                foreach ($files as $file) {
+                    $path = Yii::getAlias('@cloudDirectory') . '\\' . $file;
+                    if (is_file($path)) {
+                        // проверю, подходит ли файл под регулярку
+                        if (preg_match($pattern, $file)) {
+                            // получу данные о файле
+                            $stat = stat($path);
+                            $changeTime = $stat['mtime'];
+                            $difference = time() - $changeTime;
+                            if ($difference > 30) {
+                                // переименую файл в нормальный вид
+                                $fileLatin = self::toLatin(ucfirst(trim($file)));
+                                // уберу пробелы
+                                $filePureName = preg_replace('/\s/', '', $fileLatin);
+                                // проверю наличие учётной записи
+                                // если это не дублирующее заключение
+                                if (stripos('-', $filePureName) < 0) {
+                                    self::checkUser($filePureName);
+                                }
+                                // перемещу файл в папку с заключениями
+                                rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                                $report .= "file $file handled and moved by $filePureName \n";
                             }
-                            // перемещу файл в папку с заключениями
-                            rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                            else{
+                                $report .= "file $file wait for timeout \n";
+                            }
+                        }
+                        else{
+                            $report .= "file $file not handled \n";
                         }
                     }
                 }
             }
         }
+        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update_' . time() . '.log';
+        $report .= 'end report';
+        file_put_contents($file, $report);
     }
 
     /**
@@ -284,8 +294,8 @@ class ExecutionHandler extends Model
 
     public static function toLatin($executionNumber)
     {
-        $input = ["А"];
-        $replace = ["A"];
+        $input = ['А'];
+        $replace = ['A'];
         return str_replace($input, $replace, $executionNumber);
     }
 
@@ -325,7 +335,7 @@ class ExecutionHandler extends Model
         }
     }
 
-    public function scenarios()
+    public function scenarios() :array
     {
         return [
             self::SCENARIO_ADD => ['executionNumber', 'executionData', 'executionResponse'],
@@ -367,7 +377,7 @@ class ExecutionHandler extends Model
      * @throws Exception
      * @throws \Exception
      */
-    public function register()
+    public function register(): ?array
     {
         if ($this->validate()) {
             $transaction = new DbTransaction();
@@ -383,14 +393,14 @@ class ExecutionHandler extends Model
                 // сохраняю данные в папку с обследованиями
                 $filename = Yii::getAlias('@executionsDirectory') . '\\' . $this->executionNumber . '.zip';
                 $this->executionData->saveAs($filename);
-                $this->startTimer($this->executionNumber);
+                self::startTimer($this->executionNumber);
             }
             if (!empty($this->executionResponse)) {
                 // сохраняю данные в папку с обследованиями
                 $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $this->executionNumber . '.pdf';
                 $this->executionResponse->saveAs($filename);
 
-                $this->startTimer($this->executionNumber);
+                self::startTimer($this->executionNumber);
             }
             $password = self::createUser($this->executionNumber);
             $transaction->commitTransaction();
@@ -404,13 +414,10 @@ class ExecutionHandler extends Model
      * @param $name
      * @return bool
      */
-    public static function isExecution($name)
+    public static function isExecution($name): bool
     {
         $filename = Yii::getAlias('@executionsDirectory') . '\\' . $name . '.zip';
-        if (!empty($name) && is_file($filename)) {
-            return true;
-        }
-        return false;
+        return !empty($name) && is_file($filename);
     }
 
     /**
@@ -418,16 +425,13 @@ class ExecutionHandler extends Model
      * @param $name
      * @return bool
      */
-    public static function isConclusion($name)
+    public static function isConclusion($name): bool
     {
         $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $name . '.pdf';
-        if (!empty($name) && is_file($filename)) {
-            return true;
-        }
-        return false;
+        return !empty($name) && is_file($filename);
     }
 
-    public static function startTimer($id)
+    public static function startTimer($id): void
     {
         // проверю, нет ли ещё в базе данного пациента
         $contains = Table_availability::findOne(['userId' => $id]);
@@ -439,11 +443,11 @@ class ExecutionHandler extends Model
         }
     }
 
-    public static function recurse_copy($src, $dst)
+    public static function recurse_copy($src, $dst): void
     {
         $dir = opendir($src);
         if (!is_dir($dst) && !mkdir($dst) && !is_dir($dst)) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $dst));
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $dst));
         }
         while (false !== ($file = readdir($dir))) {
             if (($file !== '.') && ($file !== '..')) {

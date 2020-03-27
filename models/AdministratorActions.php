@@ -29,7 +29,7 @@ class AdministratorActions extends Model
      */
     public $conclusion;
 
-    public static function checkPatients()
+    public static function checkPatients(): array
     {
         $response = [];
         // тут придётся проверять наличие неопознанных папок
@@ -40,7 +40,7 @@ class AdministratorActions extends Model
         $patientsList = User::findAllRegistered();
         if(!empty($patientsList)){
             foreach ($patientsList as $item) {
-                if(!empty(Yii::$app->session['center']) && Yii::$app->session['center'] != 'all' && Utils::isFiltered($item)){
+                if(!empty(Yii::$app->session['center']) && Yii::$app->session['center'] !== 'all' && Utils::isFiltered($item)){
                     continue;
                 }
                     // проверю, загружены ли данные по пациенту

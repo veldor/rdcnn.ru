@@ -189,7 +189,12 @@ class SiteController extends Controller
         return $this->redirect('/', 301);
     }
 
-    public function actionAvailabilityCheck(){
+    /**
+     * @return array
+     * @throws \Throwable
+     */
+    public function actionAvailabilityCheck(): array
+    {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ExecutionHandler::checkAvailability();
     }
