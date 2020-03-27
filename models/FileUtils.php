@@ -8,7 +8,6 @@ use Yii;
 
 class FileUtils
 {
-    // TODO сменить время отстаивания папок
     const FOLDER_WAITING_TIME = 300;
 
     /**
