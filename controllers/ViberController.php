@@ -11,6 +11,7 @@ use TelegramBot\Api\InvalidJsonException;
 use Viber\Api\Event;
 use Viber\Api\Keyboard;
 use Viber\Api\Keyboard\Button;
+use Viber\Api\Message\File;
 use Viber\Api\Message\Text;
 use Viber\Api\Sender;
 use Viber\Bot;
@@ -102,10 +103,9 @@ class ViberController extends Controller
                 ->onText('|^[aа]?\d+ \d{4}$|isu', function ($event) use ($bot, $botSender) {
                     $receiverId = $event->getSender()->getId();
                     $bot->getClient()->sendMessage(
-                        (new Text())
-                            ->setSender($botSender)
-                            ->setReceiver($receiverId)
-                            ->setText('Ищу ваше обследование')
+                        (new File())
+                        ->setMedia('C:\serv\rdcnn\public_html\robots.txt')
+                        ->setFileName('test.txt')
                     );
                 })
                 ->run();
