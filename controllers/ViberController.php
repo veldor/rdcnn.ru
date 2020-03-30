@@ -88,7 +88,7 @@ class ViberController extends Controller
 
     public function actionTestCurl()
     {
-        $ch = curl_init('http://www.example.com/');
+        $ch = curl_init('https://www.example.com/');
         $fp = fopen('example_homepage.txt', 'wb');
 
         curl_setopt($ch, CURLOPT_FILE, $fp);
