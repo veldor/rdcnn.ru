@@ -53,7 +53,7 @@ class ViberController extends Controller
                         ->setSender($botSender)
                         ->setText('Чё как, сучара?');
                 })
-                ->onText('.+', function ($event) use ($bot, $botSender) {
+                ->onText('|whois .*|si', function ($event) use ($bot, $botSender) {
                     // это событие будет вызвано если пользователь пошлет сообщение
                     // которое совпадет с регулярным выражением
                     $bot->getClient()->sendMessage(
