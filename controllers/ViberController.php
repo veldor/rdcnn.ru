@@ -28,7 +28,9 @@ class ViberController extends Controller
     }
     public function actionConnect(): void
     {
-        echo 'here';
+        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_msg_' . time() . '.log';
+        $report = 'test';
+        file_put_contents($file, $report);
     }
     public function actionSetup(){
         $apiKey = Info::VIBER_API_KEY; // <- PLACE-YOU-API-KEY-HERE
