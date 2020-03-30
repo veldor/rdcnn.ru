@@ -8,6 +8,7 @@ use app\priv\Info;
 use Exception;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\InvalidJsonException;
+use Viber\Api\Event;
 use Viber\Api\Message\Text;
 use Viber\Api\Sender;
 use Viber\Bot;
@@ -46,39 +47,190 @@ class ViberController extends Controller
         try {
             $bot = new Bot(['token' => $apiKey]);
             $bot
-                ->onConversation(function ($event) use ($bot, $botSender) {
-                    // это событие будет вызвано, как только пользователь перейдет в чат
-                    // вы можете отправить "привествие", но не можете посылать более сообщений
-                    return (new Text())
+    // first interaction with bot - return "welcome message"
+    ->onConversation(function ($event) use ($bot, $botSender) {
+        $buttons = [];
+        for ($i = 0; $i <= 8; $i++) {
+            $buttons[] =
+                (new \Viber\Api\Keyboard\Button())
+                    ->setColumns(1)
+                    ->setActionType('reply')
+                    ->setActionBody('k' . $i)
+                    ->setText('k' . $i);
+        }
+        return (new \Viber\Api\Message\Text())
+            ->setSender($botSender)
+            ->setText("Hi, you can see some demo: send 'k1' or 'k2' etc.")
+            ->setKeyboard(
+                (new \Viber\Api\Keyboard())
+                    ->setButtons($buttons)
+            );
+    })
+    // when user subscribe to PA
+    ->onSubscribe(function ($event) use ($bot, $botSender) {
+        $this->getClient()->sendMessage(
+            (new \Viber\Api\Message\Text())
+                ->setSender($botSender)
+                ->setText('Thanks for subscription!')
+        );
+    })
+    ->onText('|btn-click|s', function ($event) use ($bot, $botSender) {
+        $receiverId = $event->getSender()->getId();
+        $bot->getClient()->sendMessage(
+            (new \Viber\Api\Message\Text())
+                ->setSender($botSender)
+                ->setReceiver($receiverId)
+                ->setText('you press the button')
+        );
+    })
+    ->onText('|k\d+|is', function ($event) use ($bot, $botSender) {
+        $caseNumber = (int)preg_replace('|[^0-9]|s', '', $event->getMessage()->getText());
+        $client = $bot->getClient();
+        $receiverId = $event->getSender()->getId();
+        switch ($caseNumber) {
+            case 0:
+                $client->sendMessage(
+                    (new \Viber\Api\Message\Text())
                         ->setSender($botSender)
-                        ->setText('Здравствуй. Я- бот РДЦ. Я пока маленький и тупенький, но буду учиться делать разные штуки. Скажи мне "привет"');
-                })
-                ->onText('|привет|siu', function ($event) use ($bot, $botSender) {
-                    // это событие будет вызвано если пользователь пошлет сообщение
-                    // которое совпадет с регулярным выражением
-                    $bot->getClient()->sendMessage(
-                        (new Text())
-                            ->setSender($botSender)
-                            ->setReceiver($event->getSender()->getId())
-                            ->setText('О, привет! :)')
-                    );
-                })
-                ->onText('|.+|siu', function ($event) use ($bot, $botSender) {
-                    // сохраню ID пользователя
-                    $id = $event->getSender()->getId();
-                    $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_client_id_' . time() . '.log';
-                    file_put_contents($file, $id);
+                        ->setReceiver($receiverId)
+                        ->setText('Basic keyboard layout')
+                        ->setKeyboard(
+                            (new \Viber\Api\Keyboard())
+                                ->setButtons([
+                                    (new \Viber\Api\Keyboard\Button())
+                                        ->setActionType('reply')
+                                        ->setActionBody('btn-click')
+                                        ->setText('Tap this button')
+                                ])
+                        )
+                );
+                break;
+            //
+            case 1:
+                $client->sendMessage(
+                    (new \Viber\Api\Message\Text())
+                        ->setSender($botSender)
+                        ->setReceiver($receiverId)
+                        ->setText('More buttons and styles')
+                        ->setKeyboard(
+                            (new \Viber\Api\Keyboard())
+                                ->setButtons([
+                                    (new \Viber\Api\Keyboard\Button())
+                                        ->setBgColor('#8074d6')
+                                        ->setTextSize('small')
+                                        ->setTextHAlign('right')
+                                        ->setActionType('reply')
+                                        ->setActionBody('btn-click')
+                                        ->setText('Button 1'),
 
-                    $message = $event->getMessage()->getText();
-                    // это событие будет вызвано если пользователь пошлет сообщение
-                    // которое совпадет с регулярным выражением
-                    $bot->getClient()->sendMessage(
-                        (new Text())
-                            ->setSender($botSender)
-                            ->setReceiver($event->getSender()->getId())
-                            ->setText($message)
-                    );
-                })
+                                    (new \Viber\Api\Keyboard\Button())
+                                        ->setBgColor('#2fa4e7')
+                                        ->setTextHAlign('center')
+                                        ->setActionType('reply')
+                                        ->setActionBody('btn-click')
+                                        ->setText('Button 2'),
+
+                                    (new \Viber\Api\Keyboard\Button())
+                                        ->setBgColor('#555555')
+                                        ->setTextSize('large')
+                                        ->setTextHAlign('left')
+                                        ->setActionType('reply')
+                                        ->setActionBody('btn-click')
+                                        ->setText('Button 3'),
+                                ])
+                        )
+                );
+                break;
+            //
+            case 2:
+                $client->sendMessage(
+                    (new \Viber\Api\Message\Contact())
+                        ->setSender($botSender)
+                        ->setReceiver($receiverId)
+                        ->setName('Novikov Bogdan')
+                        ->setPhoneNumber('+380000000000')
+                );
+                break;
+            //
+            case 3:
+                $client->sendMessage(
+                    (new \Viber\Api\Message\Location())
+                        ->setSender($botSender)
+                        ->setReceiver($receiverId)
+                        ->setLat(48.486504)
+                        ->setLng(35.038910)
+                );
+                break;
+            //
+            case 4:
+                $client->sendMessage(
+                    (new \Viber\Api\Message\Sticker())
+                        ->setSender($botSender)
+                        ->setReceiver($receiverId)
+                        ->setStickerId(114408)
+                );
+                break;
+            //
+            case 5:
+                $client->sendMessage(
+                    (new \Viber\Api\Message\Url())
+                        ->setSender($botSender)
+                        ->setReceiver($receiverId)
+                        ->setMedia('https://hcbogdan.com')
+                );
+                break;
+            //
+            case 6:
+                $client->sendMessage(
+                    (new \Viber\Api\Message\Picture())
+                        ->setSender($botSender)
+                        ->setReceiver($receiverId)
+                        ->setText('some media data')
+                        ->setMedia('https://developers.viber.com/img/devlogo.png')
+                );
+                break;
+            //
+            case 7:
+                $client->sendMessage(
+                    (new \Viber\Api\Message\Video())
+                        ->setSender($botSender)
+                        ->setReceiver($receiverId)
+                        ->setSize(2 * 1024 * 1024)
+                        ->setMedia('http://techslides.com/demos/sample-videos/small.mp4')
+                );
+                break;
+            //
+            case 8:
+                $client->sendMessage(
+                    (new \Viber\Api\Message\CarouselContent())
+                        ->setSender($botSender)
+                        ->setReceiver($receiverId)
+                        ->setButtonsGroupColumns(6)
+                        ->setButtonsGroupRows(6)
+                        ->setBgColor('#FFFFFF')
+                        ->setButtons([
+                            (new \Viber\Api\Keyboard\Button())
+                                ->setColumns(6)
+                                ->setRows(3)
+                                ->setActionType('open-url')
+                                ->setActionBody('https://www.google.com')
+                                ->setImage('https://i.vimeocdn.com/portrait/58832_300x300'),
+
+                            (new \Viber\Api\Keyboard\Button())
+                                ->setColumns(6)
+                                ->setRows(3)
+                                ->setActionType('reply')
+                                ->setActionBody('https://www.google.com')
+                                ->setText('<span style="color: #ffffff; ">Buy</span>')
+                                ->setTextSize("large")
+                                ->setTextVAlign("middle")
+                                ->setTextHAlign("middle")
+                                ->setImage('https://s14.postimg.org/4mmt4rw1t/Button.png')
+                        ])
+                );
+                break;
+        }
+    })
                 ->run();
         } catch (Exception $e) {
             // todo - log exceptions
