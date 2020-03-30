@@ -8,6 +8,9 @@ use app\priv\Info;
 use Exception;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\InvalidJsonException;
+use Viber\Api\Message\Text;
+use Viber\Api\Sender;
+use Viber\Bot;
 use Yii;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
@@ -28,9 +31,38 @@ class ViberController extends Controller
     }
     public function actionConnect(): void
     {
-        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_msg_' . time() . '.log';
-        $report = 'test';
-        file_put_contents($file, $report);
+        $apiKey = Info::VIBER_API_KEY;
+
+// так будет выглядеть наш бот (имя и аватар - можно менять)
+        $botSender = new Sender([
+            'name' => 'Бот РДЦ',
+            'avatar' => 'https://developers.viber.com/img/favicon.ico',
+        ]);
+
+        try {
+            $bot = new Bot(['token' => $apiKey]);
+            $bot
+                ->onConversation(function ($event) use ($bot, $botSender) {
+                    // это событие будет вызвано, как только пользователь перейдет в чат
+                    // вы можете отправить "привествие", но не можете посылать более сообщений
+                    return (new Text())
+                        ->setSender($botSender)
+                        ->setText('Чё как, сучара?');
+                })
+                ->onText('|whois .*|si', function ($event) use ($bot, $botSender) {
+                    // это событие будет вызвано если пользователь пошлет сообщение
+                    // которое совпадет с регулярным выражением
+                    $bot->getClient()->sendMessage(
+                        (new Text())
+                            ->setSender($botSender)
+                            ->setReceiver($event->getSender()->getId())
+                            ->setText('Понятия не имею )')
+                    );
+                })
+                ->run();
+        } catch (Exception $e) {
+            // todo - log exceptions
+        }
     }
     public function actionSetup(){
         $apiKey = Info::VIBER_API_KEY; // <- PLACE-YOU-API-KEY-HERE
