@@ -67,7 +67,7 @@ class ViberController extends Controller
         } catch (Exception $e) {
             // todo - log exceptions
             $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_err_' . time() . '.log';
-            $report = $e->getMessage();
+            $report = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
             file_put_contents($file, $report);
         }
     }
