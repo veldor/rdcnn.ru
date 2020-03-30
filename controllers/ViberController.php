@@ -29,8 +29,12 @@ class ViberController extends Controller
 
         return parent::beforeAction($action);
     }
+
     public function actionConnect(): void
     {
+        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_request_' . time() . '.log';
+        $report = serialize($_POST);
+        file_put_contents($file, $report);
         $apiKey = Info::VIBER_API_KEY;
 
 // так будет выглядеть наш бот (имя и аватар - можно менять)
@@ -62,18 +66,23 @@ class ViberController extends Controller
                 ->run();
         } catch (Exception $e) {
             // todo - log exceptions
+            $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_err_' . time() . '.log';
+            $report = $e->getMessage();
+            file_put_contents($file, $report);
         }
     }
-    public function actionSetup(){
+
+    public function actionSetup()
+    {
         $apiKey = Info::VIBER_API_KEY; // <- PLACE-YOU-API-KEY-HERE
         $webhookUrl = 'https://rdcnn.ru/viber/connect'; // <- PLACE-YOU-HTTPS-URL
         try {
-            $client = new \Viber\Client([ 'token' => $apiKey ]);
+            $client = new \Viber\Client(['token' => $apiKey]);
             $result = $client->setWebhook($webhookUrl);
             var_dump($result);
             echo "Success!\n";
         } catch (Exception $e) {
-            echo 'Error: ' . $e->getMessage() ."\n";
+            echo 'Error: ' . $e->getMessage() . "\n";
         }
     }
 }
