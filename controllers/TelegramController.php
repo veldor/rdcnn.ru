@@ -14,6 +14,9 @@ class TelegramController extends Controller
 {
     public function actionConnect(): void
     {
+        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/telebot_msg_' . time() . '.log';
+        $report = 'test';
+        file_put_contents($file, $report);
         try{
             $token = Info::TG_BOT_TOKEN;
             $bot = new Client($token);
