@@ -104,6 +104,8 @@ class ViberController extends Controller
                     $receiverId = $event->getSender()->getId();
                     $bot->getClient()->sendMessage(
                         (new File())
+                         ->setSender($botSender)
+                         ->setReceiver($receiverId)
                         ->setMedia('C:\serv\rdcnn\public_html\robots.txt')
                         ->setFileName('test.txt')
                     );
