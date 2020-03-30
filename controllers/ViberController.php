@@ -87,7 +87,7 @@ class ViberController extends Controller
                         (new Text())
                             ->setSender($botSender)
                             ->setReceiver($receiverId)
-                            ->setText('Введите номер обследования')
+                            ->setText('Введите через пробел номер обследования и пароль, например: 1 432')
                     );
                 })
                 ->onText('|more-actions|s', function ($event) use ($bot, $botSender) {
@@ -97,6 +97,15 @@ class ViberController extends Controller
                             ->setSender($botSender)
                             ->setReceiver($receiverId)
                             ->setText('Напишите, что бы вы хотели сделать')
+                    );
+                })
+                ->onText('|^[aа]?\d+ \d{4}$|isu', function ($event) use ($bot, $botSender) {
+                    $receiverId = $event->getSender()->getId();
+                    $bot->getClient()->sendMessage(
+                        (new Text())
+                            ->setSender($botSender)
+                            ->setReceiver($receiverId)
+                            ->setText('Ищу ваше обследование')
                     );
                 })
                 ->run();
