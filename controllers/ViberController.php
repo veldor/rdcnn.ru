@@ -63,6 +63,17 @@ class ViberController extends Controller
                             ->setText('Понятия не имею )')
                     );
                 })
+
+                ->onText('*', function ($event) use ($bot, $botSender) {
+                    // это событие будет вызвано если пользователь пошлет сообщение
+                    // которое совпадет с регулярным выражением
+                    $bot->getClient()->sendMessage(
+                        (new Text())
+                            ->setSender($botSender)
+                            ->setReceiver($event->getSender()->getId())
+                            ->setText('Понятия не имею )')
+                    );
+                })
                 ->run();
         } catch (Exception $e) {
             // todo - log exceptions
