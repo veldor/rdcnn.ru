@@ -53,32 +53,32 @@ class ViberController extends Controller
     ->onConversation(function ($event) use ($bot, $botSender) {
         return (new Text())
             ->setSender($botSender)
-            ->setText("Hi, you can see some demo: send 'k1' or 'k2' etc.");
+            ->setText("Добрый день. Я бот РДЦ. Выберите, что вы хотите сделать")
+            ->setKeyboard(
+                (new Keyboard())
+                    ->setButtons([
+                        (new Button())
+                            ->setBgColor('#2fa4e7')
+                            ->setTextHAlign('center')
+                            ->setActionType('reply')
+                            ->setActionBody('btn-click')
+                            ->setText('Получить заключение'),
+                        (new Button())
+                            ->setBgColor('#2fa4e7')
+                            ->setTextHAlign('center')
+                            ->setActionType('reply')
+                            ->setActionBody('btn-click')
+                            ->setText('Что-то ещё'),
+
+                    ])
+            );
     })
     // when user subscribe to PA
     ->onSubscribe(function ($event) use ($bot, $botSender) {
         $this->getClient()->sendMessage(
             (new Text())
                 ->setSender($botSender)
-                ->setText('Добрый день. Я бот РДЦ. Выберите, что вы хотите сделать')
-                ->setKeyboard(
-                    (new Keyboard())
-                        ->setButtons([
-                            (new Button())
-                                ->setBgColor('#2fa4e7')
-                                ->setTextHAlign('center')
-                                ->setActionType('reply')
-                                ->setActionBody('btn-click')
-                                ->setText('Получить заключение'),
-                            (new Button())
-                                ->setBgColor('#2fa4e7')
-                                ->setTextHAlign('center')
-                                ->setActionType('reply')
-                                ->setActionBody('btn-click')
-                                ->setText('Что-то ещё'),
-
-                        ])
-                )
+                ->setText('Сейчас продолжим')
         );
     })
     ->onText('|btn-click|s', function ($event) use ($bot, $botSender) {
