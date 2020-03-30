@@ -9,6 +9,8 @@ use Exception;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\InvalidJsonException;
 use Viber\Api\Event;
+use Viber\Api\Keyboard;
+use Viber\Api\Keyboard\Button;
 use Viber\Api\Message\Text;
 use Viber\Api\Sender;
 use Viber\Bot;
@@ -49,35 +51,40 @@ class ViberController extends Controller
             $bot
     // first interaction with bot - return "welcome message"
     ->onConversation(function ($event) use ($bot, $botSender) {
-        $buttons = [];
-        for ($i = 0; $i <= 8; $i++) {
-            $buttons[] =
-                (new \Viber\Api\Keyboard\Button())
-                    ->setColumns(1)
-                    ->setActionType('reply')
-                    ->setActionBody('k' . $i)
-                    ->setText('k' . $i);
-        }
-        return (new \Viber\Api\Message\Text())
+        return (new Text())
             ->setSender($botSender)
-            ->setText("Hi, you can see some demo: send 'k1' or 'k2' etc.")
-            ->setKeyboard(
-                (new \Viber\Api\Keyboard())
-                    ->setButtons($buttons)
-            );
+            ->setText("Hi, you can see some demo: send 'k1' or 'k2' etc.");
     })
     // when user subscribe to PA
     ->onSubscribe(function ($event) use ($bot, $botSender) {
         $this->getClient()->sendMessage(
-            (new \Viber\Api\Message\Text())
+            (new Text())
                 ->setSender($botSender)
-                ->setText('Thanks for subscription!')
+                ->setText('Добрый день. Я бот РДЦ. Выберите, что вы хотите сделать')
+                ->setKeyboard(
+                    (new Keyboard())
+                        ->setButtons([
+                            (new Button())
+                                ->setBgColor('#2fa4e7')
+                                ->setTextHAlign('center')
+                                ->setActionType('reply')
+                                ->setActionBody('btn-click')
+                                ->setText('Получить заключение'),
+                            (new Button())
+                                ->setBgColor('#2fa4e7')
+                                ->setTextHAlign('center')
+                                ->setActionType('reply')
+                                ->setActionBody('btn-click')
+                                ->setText('Что-то ещё'),
+
+                        ])
+                )
         );
     })
     ->onText('|btn-click|s', function ($event) use ($bot, $botSender) {
         $receiverId = $event->getSender()->getId();
         $bot->getClient()->sendMessage(
-            (new \Viber\Api\Message\Text())
+            (new Text())
                 ->setSender($botSender)
                 ->setReceiver($receiverId)
                 ->setText('you press the button')
@@ -90,14 +97,14 @@ class ViberController extends Controller
         switch ($caseNumber) {
             case 0:
                 $client->sendMessage(
-                    (new \Viber\Api\Message\Text())
+                    (new Text())
                         ->setSender($botSender)
                         ->setReceiver($receiverId)
                         ->setText('Basic keyboard layout')
                         ->setKeyboard(
-                            (new \Viber\Api\Keyboard())
+                            (new Keyboard())
                                 ->setButtons([
-                                    (new \Viber\Api\Keyboard\Button())
+                                    (new Button())
                                         ->setActionType('reply')
                                         ->setActionBody('btn-click')
                                         ->setText('Tap this button')
@@ -108,14 +115,14 @@ class ViberController extends Controller
             //
             case 1:
                 $client->sendMessage(
-                    (new \Viber\Api\Message\Text())
+                    (new Text())
                         ->setSender($botSender)
                         ->setReceiver($receiverId)
                         ->setText('More buttons and styles')
                         ->setKeyboard(
-                            (new \Viber\Api\Keyboard())
+                            (new Keyboard())
                                 ->setButtons([
-                                    (new \Viber\Api\Keyboard\Button())
+                                    (new Button())
                                         ->setBgColor('#8074d6')
                                         ->setTextSize('small')
                                         ->setTextHAlign('right')
@@ -123,14 +130,14 @@ class ViberController extends Controller
                                         ->setActionBody('btn-click')
                                         ->setText('Button 1'),
 
-                                    (new \Viber\Api\Keyboard\Button())
+                                    (new Button())
                                         ->setBgColor('#2fa4e7')
                                         ->setTextHAlign('center')
                                         ->setActionType('reply')
                                         ->setActionBody('btn-click')
                                         ->setText('Button 2'),
 
-                                    (new \Viber\Api\Keyboard\Button())
+                                    (new Button())
                                         ->setBgColor('#555555')
                                         ->setTextSize('large')
                                         ->setTextHAlign('left')
@@ -209,14 +216,14 @@ class ViberController extends Controller
                         ->setButtonsGroupRows(6)
                         ->setBgColor('#FFFFFF')
                         ->setButtons([
-                            (new \Viber\Api\Keyboard\Button())
+                            (new Button())
                                 ->setColumns(6)
                                 ->setRows(3)
                                 ->setActionType('open-url')
                                 ->setActionBody('https://www.google.com')
                                 ->setImage('https://i.vimeocdn.com/portrait/58832_300x300'),
 
-                            (new \Viber\Api\Keyboard\Button())
+                            (new Button())
                                 ->setColumns(6)
                                 ->setRows(3)
                                 ->setActionType('reply')
