@@ -51,16 +51,26 @@ class ViberController extends Controller
                     // вы можете отправить "привествие", но не можете посылать более сообщений
                     return (new Text())
                         ->setSender($botSender)
-                        ->setText('Чё как, сучара?');
+                        ->setText('Здравствуй. Я- бот РДЦ. Я пока маленький и тупенький, но буду учиться делать разные штуки. Скажи мне "привет"');
                 })
-                ->onText('|.*|si', function ($event) use ($bot, $botSender) {
+                ->onText('|привет|si', function ($event) use ($bot, $botSender) {
                     // это событие будет вызвано если пользователь пошлет сообщение
                     // которое совпадет с регулярным выражением
                     $bot->getClient()->sendMessage(
                         (new Text())
                             ->setSender($botSender)
                             ->setReceiver($event->getSender()->getId())
-                            ->setText('Понятия не имею )')
+                            ->setText('О, привет! :)')
+                    );
+                })
+                ->onText('|.+|si', function ($event) use ($bot, $botSender) {
+                    // это событие будет вызвано если пользователь пошлет сообщение
+                    // которое совпадет с регулярным выражением
+                    $bot->getClient()->sendMessage(
+                        (new Text())
+                            ->setSender($botSender)
+                            ->setReceiver($event->getSender()->getId())
+                            ->setText('Не понимаю, о чём ты говоришь :(')
                     );
                 })
                 ->run();
@@ -84,21 +94,5 @@ class ViberController extends Controller
         } catch (Exception $e) {
             echo 'Error: ' . $e->getMessage() . "\n";
         }
-    }
-
-    public function actionTestCurl()
-    {
-        $ch = curl_init('https://www.example.com/');
-        $fp = fopen('example_homepage.txt', 'wb');
-
-        curl_setopt($ch, CURLOPT_FILE, $fp);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-
-        curl_exec($ch);
-        if (curl_error($ch)) {
-            fwrite($fp, curl_error($ch));
-        }
-        curl_close($ch);
-        fclose($fp);
     }
 }
