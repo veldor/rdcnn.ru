@@ -8,10 +8,24 @@ use app\priv\Info;
 use Exception;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\InvalidJsonException;
+use Yii;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 
 class TelegramController extends Controller
 {
+    /**
+     * @inheritdoc
+     * @throws BadRequestHttpException
+     */
+    public function beforeAction($action)
+    {
+        if ($action->id === 'connect') {
+            $this->enableCsrfValidation = false;
+        }
+
+        return parent::beforeAction($action);
+    }
     public function actionConnect(): void
     {
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/telebot_msg_' . time() . '.log';
