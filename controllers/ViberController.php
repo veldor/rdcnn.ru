@@ -53,7 +53,7 @@ class ViberController extends Controller
                         ->setSender($botSender)
                         ->setText('Здравствуй. Я- бот РДЦ. Я пока маленький и тупенький, но буду учиться делать разные штуки. Скажи мне "привет"');
                 })
-                ->onText('|привет|si', function ($event) use ($bot, $botSender) {
+                ->onText('|привет|siu', function ($event) use ($bot, $botSender) {
                     // это событие будет вызвано если пользователь пошлет сообщение
                     // которое совпадет с регулярным выражением
                     $bot->getClient()->sendMessage(
@@ -63,14 +63,15 @@ class ViberController extends Controller
                             ->setText('О, привет! :)')
                     );
                 })
-                ->onText('|.+|si', function ($event) use ($bot, $botSender) {
+                ->onText('|.+|siu', function ($event) use ($bot, $botSender) {
+                    $message = $event->getMessage()->getText();
                     // это событие будет вызвано если пользователь пошлет сообщение
                     // которое совпадет с регулярным выражением
                     $bot->getClient()->sendMessage(
                         (new Text())
                             ->setSender($botSender)
                             ->setReceiver($event->getSender()->getId())
-                            ->setText('Не понимаю, о чём ты говоришь :(')
+                            ->setText($message)
                     );
                 })
                 ->run();
