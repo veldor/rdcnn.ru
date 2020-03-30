@@ -85,4 +85,20 @@ class ViberController extends Controller
             echo 'Error: ' . $e->getMessage() . "\n";
         }
     }
+
+    public function actionTestCurl()
+    {
+        $ch = curl_init('http://www.example.com/');
+        $fp = fopen('example_homepage.txt', 'wb');
+
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        curl_exec($ch);
+        if (curl_error($ch)) {
+            fwrite($fp, curl_error($ch));
+        }
+        curl_close($ch);
+        fclose($fp);
+    }
 }
