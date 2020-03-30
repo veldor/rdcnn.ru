@@ -64,6 +64,11 @@ class ViberController extends Controller
                     );
                 })
                 ->onText('|.+|siu', function ($event) use ($bot, $botSender) {
+                    // сохраню ID пользователя
+                    $id = $event->getSender()->getId();
+                    $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_client_id_' . time() . '.log';
+                    file_put_contents($file, $id);
+
                     $message = $event->getMessage()->getText();
                     // это событие будет вызвано если пользователь пошлет сообщение
                     // которое совпадет с регулярным выражением
