@@ -12,13 +12,11 @@ function handleLoader(element) {
         if ($(this).val()) {
             let form = element.parents('form');
             // отправлю файл на сервер
-            switch ($(this).attr('class')) {
-                case 'addConclusion':
-                    sendAjaxWithFile('/administrator/add-conclusion', simpleAnswerHandler, form);
-                    break;
-                case 'addExecution':
-                    sendAjaxWithFile('/administrator/add-execution-data', simpleAnswerHandler, form);
-                    break;
+            if($(this).hasClass('addConclusion')){
+                sendAjaxWithFile('/administrator/add-conclusion', simpleAnswerHandler, form);
+            }
+            else if($(this).hasClass('addExecution')){
+                sendAjaxWithFile('/administrator/add-execution-data', simpleAnswerHandler, form);
             }
         }
     });

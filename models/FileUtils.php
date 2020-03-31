@@ -8,20 +8,19 @@ use Yii;
 
 class FileUtils
 {
-    // TODO сменить время отстаивания папок
-    const FOLDER_WAITING_TIME = 300;
+    public const FOLDER_WAITING_TIME = 300;
 
     /**
      * Метод проверяет нераспознанные директории файлов и возвращает список нераспознанных
      * На случай ошибок администраторов в обзывании папок
      * @return array
      */
-    public static function checkUnhandledFolders()
+    public static function checkUnhandledFolders(): array
     {
         // это список нераспознанных папок
         $unhandledFoldersList = [];
         // паттерн валидных папок
-        $pattern = '/^[aа]?[0-9]+$/ui';
+        $pattern = '/^[aа]?\d+$/ui';
         // получу список папок с заключениями
         $dirs = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
         foreach ($dirs as $dir) {
@@ -40,7 +39,7 @@ class FileUtils
         return $unhandledFoldersList;
     }
 
-    public static function deleteUnhandledFolder()
+    public static function deleteUnhandledFolder(): void
     {
         // получу имя папки
         $folderName = Yii::$app->request->post('folderName');
@@ -68,7 +67,7 @@ class FileUtils
         return false;
     }
 
-    public static function renameUnhandledFolder()
+    public static function renameUnhandledFolder(): void
     {
         $oldFolderName = Yii::$app->request->post('oldName');
         $newFolderName = Yii::$app->request->post('newName');

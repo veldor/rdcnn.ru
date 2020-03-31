@@ -100,7 +100,7 @@ echo "
 ";
 
 echo "
-    <div class='col-sm-12 margin'><div class='col-sm-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-sm-4'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b></div><div class='col-sm-4 text-danger'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
+    <div class='col-sm-12 margin'><div class='col-sm-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-sm-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b><br/><a target='_blank' href='/print-missed-conclusions-list' class='btn btn-default'><span class='text-info'>Распечатать список</span></a></div><div class='col-sm-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
 ";
 
 $executionsCounter = 0;
@@ -123,7 +123,7 @@ if (!empty($executions)) {
             </td>
             <td>
 
-                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить заключение'><span class='text-info glyphicon glyphicon-file'></span><input data-id='<?= $execution->username ?>' class='hidden loader addConclusion' type='file' accept='application/pdf' name='AdministratorActions[conclusion]'></label></form>
+                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить заключение'><span class='text-info glyphicon glyphicon-file'></span><input data-id='<?= $execution->username ?>' multiple="multiple" class='hidden loader addConclusion' type='file' accept='application/pdf' name='AdministratorActions[conclusion][]'></label></form>
                     <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="<?= $execution->username ?>"></label><label class='btn btn-default activator' data-toggle='tooltip' data-placement='auto' title='Добавить обследование'><span class='text-info glyphicon glyphicon-folder-close'></span><input data-id='<?= $execution->username ?>' class='hidden loader addExecution' type='file' accept='application/zip' name='AdministratorActions[execution]'></label></form>
             </td>
             <?= ExecutionHandler::isConclusion($execution->username) ? "<td data-conclusion='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-conclusion='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"?>

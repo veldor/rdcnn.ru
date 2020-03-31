@@ -24,9 +24,14 @@
 		"tecnickcom/tcpdf": "6.3.2",
 		"setasign/fpdi-protection": "^2.0",
 	
-      "ext-zip": "*"
+      "ext-zip": "*",
+        "telegram-bot/api": "^2.3",
+        "bogdaan/viber-bot-php": "^0.0.13",
+        "ext-curl": "*"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-master"
+        ,
         "yiisoft/yii2-debug": "~2.0.0",
         "yiisoft/yii2-gii": "~2.0.0",
         "yiisoft/yii2-faker": "~2.0.0",

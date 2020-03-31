@@ -57,8 +57,8 @@ $(function () {
                 removeReasonContainer.removeClass('invisible');
             }
             if(data['timeLeft']){
-                availabilityTimeDivContainer.removeClass('invisible');
-                availabilityTimeContainer.html(data['timeLeft'])
+                availabilityTimeDivContainer.removeClass('invisible hidden');
+                availabilityTimeContainer.html(data['timeLeft']);
             }
             if(data['addConc']){
                 // проверю, есть ли уже ссылки на скачивание дополнительных заключений
