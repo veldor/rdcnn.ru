@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
@@ -91,10 +92,13 @@ class LoginForm extends Model
      * @return bool whether the user is logged in successfully
      * @throws Exception
      */
-    public function login()
+    public function login(): bool
     {
         if ($this->validate()) {
             $user = $this->getUser();
+            if(null === $user){
+                throw new Exception('Не найден пользователь!');
+            }
             $user->failed_try = 0;
             if (!$user->user_access_token) {
                 $user->user_access_token = Yii::$app->getSecurity()->generateRandomString(255);
@@ -108,21 +112,20 @@ class LoginForm extends Model
     /**
      * Finds user by [[username]]
      *
-     * @return User|null
+     * @return User
      */
-    public function getUser()
+    public function getUser(): User
     {
         if ($this->_user === false) {
             $this->_user = User::findByUsername($this->username);
         }
-
         return $this->_user;
     }
 
     /**
      * @return bool
      */
-    public function loginAdmin()
+    public function loginAdmin(): bool
     {
         $blocked = $this->checkBlacklist();
         if ($blocked) {
@@ -136,7 +139,7 @@ class LoginForm extends Model
         $admin = User::getAdmin();
 
         // проверю, правильно ли введено имя
-        if ($admin->username != $this->username) {
+        if ($admin->username !== $this->username) {
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
             return false;
@@ -146,25 +149,25 @@ class LoginForm extends Model
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
             return false;
-        } else {
-            // логиню пользователя
-            if (empty($admin->access_token)) {
-                try {
-                    $admin->access_token = Yii::$app->getSecurity()->generateRandomString(255);
-                } catch (Exception $e) {
-                    die('не удалось добавить токен');
-                }
-            }
-            $admin->save();
-            return Yii::$app->user->login($admin, 60 * 60 * 30);
         }
+
+// логиню пользователя
+        if (empty($admin->access_token)) {
+            try {
+                $admin->access_token = Yii::$app->getSecurity()->generateRandomString(255);
+            } catch (Exception $e) {
+                die('не удалось добавить токен');
+            }
+        }
+        $admin->save();
+        return Yii::$app->user->login($admin, 60 * 60 * 30);
     }
 
     /**
      * @return bool
      * @throws Exception
      */
-    public function loginUser()
+    public function loginUser(): bool
     {
         // проверю, не занесён ли IP в чёрный список
         $blocked = $this->checkBlacklist();
@@ -174,7 +177,7 @@ class LoginForm extends Model
                 try {
                     $blocked->delete();
                 } catch (StaleObjectException $e) {
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                     // ошибка при удалении блокировки
                 }
             }
@@ -190,14 +193,14 @@ class LoginForm extends Model
         }
         // проверю, не производится ли попытка зайти под админской учёткой
         $admin = User::getAdmin();
-        if($this->username == $admin->username){
+        if($this->username === $admin->username){
             $this->addError('password', 'Неверный номер обследования или пароль');
             return false;
         }
 
         // получу данные о пользователе
         $user = User::findByUsername(ExecutionHandler::toLatin($this->username));
-        if (!empty($user)) {
+        if ($user !== null) {
             if ($user->failed_try > 20) {
                 $this->addError('username', 'Было выполнено слишком много неверных попыток ввода пароля. В целях безопасности данные были удалены. Вы можете обратиться к нам для восстановления доступа');
                 return false;
@@ -225,7 +228,7 @@ class LoginForm extends Model
             $user->save();
             return Yii::$app->user->login($user, 0);
         }
-        $this->addError("username", "Неверный номер обследования или пароль");
+        $this->addError('username', 'Неверный номер обследования или пароль');
         // добавлю пользователя в список подозрительных
         if($blocked){
             $blocked->updateCounters(['missed_execution_number' => 1]);
@@ -244,12 +247,12 @@ class LoginForm extends Model
         return Table_blacklist::findOne(['ip' => $ip]);
     }
 
-    private function registerWrongTry()
+    private function registerWrongTry(): void
     {
         // проверю, не занесён ли уже IP в базу данных
         $ip = $_SERVER['REMOTE_ADDR'];
         $is_blocked = Table_blacklist::findOne(['ip' => $ip]);
-        if (empty($is_blocked)) {
+        if ($is_blocked === null) {
             // внесу IP в чёрный список
             $blacklist = new Table_blacklist();
             $blacklist->ip = $ip;

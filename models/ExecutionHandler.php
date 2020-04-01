@@ -27,14 +27,14 @@ class ExecutionHandler extends Model
             $referer = $_SERVER['HTTP_REFERER'];
             $id = explode('/', $referer)[4];
         } else {
-            /** @noinspection PhpUndefinedFieldInspection */
             $id = Yii::$app->user->identity->username;
         }
+        $user = User::findByUsername($id);
         $isExecution = self::isExecution($id);
         $isConclusion = self::isConclusion($id);
         $timeLeft = 0;
         // посмотрю, сколько времении ещё будет доступно обследование
-        $startTime = User::findByUsername($id)->created_at;
+        $startTime = $user->created_at;
         if (!empty($startTime)) {
             // найдено время старта
             $now = time();
@@ -148,6 +148,8 @@ class ExecutionHandler extends Model
                                 // сохраню содержимое папки в архив
                                 self::PackFiles($dirLatin, $path);
                                 $report .= "dir $dir handled and load to $path \n";
+                                // отмечу, что данные обследования загружены
+                                Table_availability::setDataLoaded($dirLatin);
                             } else {
                                 // удалю папку
                                 self::rmRec($path);
@@ -389,20 +391,8 @@ class ExecutionHandler extends Model
             if (!empty(User::findByUsername($this->executionNumber))) {
                 return ['status' => 4, 'message' => 'Это обследование уже зарегистрировано, вы можете изменить информацию о нём в списке'];
             }
-            if (!empty($this->executionData)) {
-                // сохраняю данные в папку с обследованиями
-                $filename = Yii::getAlias('@executionsDirectory') . '\\' . $this->executionNumber . '.zip';
-                $this->executionData->saveAs($filename);
-                self::startTimer($this->executionNumber);
-            }
-            if (!empty($this->executionResponse)) {
-                // сохраняю данные в папку с обследованиями
-                $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $this->executionNumber . '.pdf';
-                $this->executionResponse->saveAs($filename);
-
-                self::startTimer($this->executionNumber);
-            }
             $password = self::createUser($this->executionNumber);
+            // отмечу, что добавлены файлы обследования
             $transaction->commitTransaction();
             return ['status' => 1, 'message' => ' <h2 class="text-center">Обследование №' . $this->executionNumber . '  зарегистрировано.</h2> Пароль для пациента: <b class="text-success">' . $password . '</b> <button class="btn btn-default" id="copyPassBtn" data-password="' . $password . '"><span class="text-success">Копировать пароль</span></button>'];
         }
@@ -417,7 +407,11 @@ class ExecutionHandler extends Model
     public static function isExecution($name): bool
     {
         $filename = Yii::getAlias('@executionsDirectory') . '\\' . $name . '.zip';
-        return !empty($name) && is_file($filename);
+        if(is_file($filename)){
+            Table_availability::setDataLoaded($name);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -428,14 +422,18 @@ class ExecutionHandler extends Model
     public static function isConclusion($name): bool
     {
         $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $name . '.pdf';
-        return !empty($name) && is_file($filename);
+        if(is_file($filename)){
+            Table_availability::setDataLoaded($name);
+            return true;
+        }
+        return false;
     }
 
     public static function startTimer($id): void
     {
         // проверю, нет ли ещё в базе данного пациента
         $contains = Table_availability::findOne(['userId' => $id]);
-        if (empty($contains)) {
+        if ($contains === null) {
             $timer = new Table_availability();
             $timer->userId = $id;
             $timer->startTime = time();

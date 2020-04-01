@@ -75,13 +75,13 @@ class SiteController extends Controller
      * @return string
      * @throws Exception
      */
-    public function actionIndex($executionNumber = null)
+    public function actionIndex($executionNumber = null): string
     {
         // если пользователь не залогинен- показываю ему страницу с предложением ввести номер обследования и пароль
         if (Yii::$app->user->isGuest) {
             if (Yii::$app->request->isGet) {
                 $model = new LoginForm(['scenario' => LoginForm::SCENARIO_USER_LOGIN]);
-                if ($executionNumber != null) {
+                if ($executionNumber !== null) {
                     $model->username = ExecutionHandler::toLatin($executionNumber);
                 }
                 return $this->render('login', ['model' => $model]);
@@ -101,25 +101,28 @@ class SiteController extends Controller
         if (Yii::$app->user->can('manage')) {
             // получу информацию о обследовании
             $execution = User::findByUsername($executionNumber);
-            if (!empty($execution)) {
+            if ($execution !== null) {
                 return $this->render('personal', ['execution' => $execution]);
-            } else {
-                // страница не найдена, перенаправлю на страницу менеджмента
-                return $this->redirect(Url::toRoute('site/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'));
             }
-        } elseif (Yii::$app->user->can('read')) {
+
+// страница не найдена, перенаправлю на страницу менеджмента
+            return $this->redirect(Url::toRoute('site/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'));
+        }
+
+        if (Yii::$app->user->can('read')) {
             $execution = User::findByUsername(Yii::$app->user->identity->username);
-            if (!empty($execution)) {
+            if ($execution !== null) {
                 return $this->render('personal', ['execution' => $execution]);
-            } else {
-                return $this->render('error', ['message' => 'Страница не найдена']);
             }
+
+            return $this->render('error', ['message' => 'Страница не найдена']);
         }
         return $this->render('error', ['message' => 'Страница не найдена']);
     }
 
     /**
      * @return string|Response
+     * @noinspection SpellCheckingInspection
      */
     public function actionIolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8()
     {
@@ -160,27 +163,19 @@ class SiteController extends Controller
             $executionsList = Utils::sortExecutions($executionsList);
             $model = new ExecutionHandler(['scenario' => ExecutionHandler::SCENARIO_ADD]);
             return $this->render('administration', ['executions' => $executionsList, 'model' => $model]);
-        } else {
-            // редирект на главную
-            return $this->redirect('site/index', 301);
         }
+
+// редирект на главную
+        return $this->redirect('site/index', 301);
     }
 
 
-    public function actionError()
+    public function actionError(): string
     {
         return $this->render('wooops');
     }
 
-    /**
-     * @throws Exception
-     */
-    public function actionTest()
-    {
-        Test::test();
-    }
-
-    public function actionLogout()
+    public function actionLogout(): Response
     {
         if (Yii::$app->request->isPost) {
             Yii::$app->user->logout();

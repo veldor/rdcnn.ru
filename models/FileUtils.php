@@ -79,4 +79,9 @@ class FileUtils
         }
 
     }
+
+    public static function getConclusions($name)
+    {
+
+    }
 }

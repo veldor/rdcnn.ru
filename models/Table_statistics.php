@@ -10,63 +10,30 @@ use yii\db\ActiveRecord;
  * @property int $id [bigint(20) unsigned]  Глобальный идентификатор
  * @property string $type [enum('download_conclusion', 'download_execution', 'print_conclusion')]
  * @property string $user_id [varchar(255)]
- * @property int $count [int(11)]
+ * @property int $timestamp [int(10) unsigned]
  */
-
 class Table_statistics extends ActiveRecord
 {
-    public static function tableName()
+    public static function tableName():string
     {
         return 'statistics';
     }
 
-    public static function plusConclusionDownload($userId)
+    public static function plusConclusionDownload($userId): void
     {
-        // проверю, не скачивал ли уже пациент заключение
-        $previousCounter = Table_statistics::findOne(['user_id' => $userId, 'type' => 'download_conclusion']);
-        if($previousCounter){
-            ++ $previousCounter->count;
-            $previousCounter->save();
-        }
-        else{
-            $newCounter = new Table_statistics();
-            $newCounter->user_id = $userId;
-            $newCounter->type = 'download_conclusion';
-            $newCounter->count = 1;
-            $newCounter->save();
-        }
+        $newCounter = new self(['user_id' => $userId, 'type' => 'download_conclusion', 'timestamp' => time()]);
+        $newCounter->save();
     }
 
-    public static function plusExecutionDownload($userId)
+    public static function plusExecutionDownload($userId): void
     {
-        // проверю, не скачивал ли уже пациент заключение
-        $previousCounter = Table_statistics::findOne(['user_id' => $userId, 'type' => 'download_execution']);
-        if($previousCounter){
-            ++ $previousCounter->count;
-            $previousCounter->save();
-        }
-        else{
-            $newCounter = new Table_statistics();
-            $newCounter->user_id = $userId;
-            $newCounter->type = 'download_execution';
-            $newCounter->count = 1;
-            $newCounter->save();
-        }
+        $newCounter = new self(['user_id' => $userId, 'type' => 'download_execution', 'timestamp' => time()]);
+        $newCounter->save();
     }
-    public static function plusConclusionPrint($userId)
+
+    public static function plusConclusionPrint($userId): void
     {
-        // проверю, не скачивал ли уже пациент заключение
-        $previousCounter = Table_statistics::findOne(['user_id' => $userId, 'type' => 'print_conclusion']);
-        if($previousCounter){
-            ++ $previousCounter->count;
-            $previousCounter->save();
-        }
-        else{
-            $newCounter = new Table_statistics();
-            $newCounter->user_id = $userId;
-            $newCounter->type = 'print_conclusion';
-            $newCounter->count = 1;
-            $newCounter->save();
-        }
+        $newCounter = new self(['user_id' => $userId, 'type' => 'print_conclusion', 'timestamp' => time()]);
+        $newCounter->save();
     }
 }

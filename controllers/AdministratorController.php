@@ -20,7 +20,7 @@ use yii\web\UploadedFile;
 
 class AdministratorController extends Controller
 {
-    public function behaviors()
+    public function behaviors():array
     {
         return [
             'access' => [
@@ -41,21 +41,22 @@ class AdministratorController extends Controller
     }
 
     /**
+     * Регистрация пациента
      * @return array
      * @throws Exception
      */
-    public function actionAddExecution(){
-        if(Yii::$app->request->isAjax && Yii::$app->request->isGet){
+    public function actionAddExecution(): array
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isGet) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new ExecutionHandler(['scenario' => ExecutionHandler::SCENARIO_ADD]);
             return ['status' => 1, 'header' => 'Добавление обследования',  'view' => $this->renderAjax('add-execution-form', ['model' => $model])];
         }
-        elseif(Yii::$app->request->isPost){
+
+        if(Yii::$app->request->isPost) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new ExecutionHandler(['scenario' => ExecutionHandler::SCENARIO_ADD]);
             $model->load(Yii::$app->request->post());
-            $model->executionData = UploadedFile::getInstance($model, 'executionData');
-            $model->executionResponse = UploadedFile::getInstance($model, 'executionResponse');
             return $model->register();
         }
         throw new NotFoundHttpException();
@@ -65,7 +66,8 @@ class AdministratorController extends Controller
      * @return array
      * @throws Exception
      */
-    public function actionChangePassword(){
+    public function actionChangePassword(): array
+    {
         if(Yii::$app->request->isPost){
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new AdministratorActions(['scenario' => AdministratorActions::SCENARIO_CHANGE_PASSWORD]);
@@ -81,7 +83,8 @@ class AdministratorController extends Controller
      * @throws NotFoundHttpException
      * @throws Throwable
      */
-    public function actionDeleteItem(){
+    public function actionDeleteItem(): array
+    {
         if(Yii::$app->request->isPost){
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new AdministratorActions(['scenario' => AdministratorActions::SCENARIO_DELETE_ITEM]);
@@ -95,7 +98,8 @@ class AdministratorController extends Controller
      * @return array
      * @throws NotFoundHttpException
      */
-    public function actionAddConclusion(){
+    public function actionAddConclusion(): array
+    {
         if(Yii::$app->request->isPost){
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new AdministratorActions(['scenario' => AdministratorActions::SCENARIO_ADD_CONCLUSION]);
