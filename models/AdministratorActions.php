@@ -54,14 +54,14 @@ class AdministratorActions extends Model
         return $response;
     }
 
-    public static function selectCenter()
+    public static function selectCenter(): void
     {
         $center =  Yii::$app->request->post('center');
         $session = Yii::$app->session;
         $session['center'] = $center;
     }
 
-    public static function selectTime()
+    public static function selectTime(): void
     {
         $time =  Yii::$app->request->post('timeInterval');
         $session = Yii::$app->session;
@@ -69,14 +69,14 @@ class AdministratorActions extends Model
     }
 
 
-    public static function selectSort()
+    public static function selectSort(): void
     {
         $sortBy =  Yii::$app->request->post('sortBy');
         $session = Yii::$app->session;
         $session['sortBy'] = $sortBy;
     }
 
-    public static function clearGarbage()
+/*    public static function clearGarbage()
     {
         // получу список всех пациентов
         $patients = User::findAllRegistered();
@@ -89,7 +89,7 @@ class AdministratorActions extends Model
                 }
             }
         }
-    }
+    }*/
 
     /**
      * @param $id
@@ -170,23 +170,22 @@ class AdministratorActions extends Model
 
     /**
      * @return array
-     * @throws Exception
      * @throws Throwable
      */
-    public function deleteItem()
+    public function deleteItem(): array
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
             if(empty($execution)){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];
             }
-            AdministratorActions::simpleDeleteItem($execution->username);
+            self::simpleDeleteItem($execution->username);
             return ['status' => 1, 'message' => 'Обследование удалено'];
         }
         return ['status' => 2, 'message' => $this->errors];
     }
 
-    public function addConclusion()
+    public function addConclusion(): array
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
@@ -207,13 +206,13 @@ class AdministratorActions extends Model
                 $file->saveAs($filename);
                 ++$counter;
             }
-
+            Table_availability::setConclusionLoaded($execution->username);
             ExecutionHandler::startTimer($this->executionId);
             return ['status' => 1, 'message' => 'Заключение добавлено'];
         }
         return ['status' => 2, 'message' => $this->errors];
     }
-    public function addExecution()
+    public function addExecution(): array
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);

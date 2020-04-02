@@ -21,7 +21,7 @@ class UserActions extends Model
         if(!empty($executionNumber)){
             // получу данные о пользователе
             $execution = User::findByUsername($executionNumber);
-            if(!empty($execution)){
+            if($execution !== null){
                 $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $execution->username . '.pdf';
                 // проверю, если есть файл результатов сканирования- выдам его на загрузку
                 if(is_file($file)){
@@ -35,14 +35,5 @@ class UserActions extends Model
                 $execution->delete();
             }
         }
-    }
-
-    /**
-     * @param $executionId
-     * @return bool
-     */
-    public static function isMyPage($executionId)
-    {
-        return Yii::$app->user->identity->username === $executionId;
     }
 }

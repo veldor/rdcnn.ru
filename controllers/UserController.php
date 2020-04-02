@@ -5,17 +5,18 @@ namespace app\controllers;
 
 
 use app\models\AdministratorActions;
-use app\models\User;
 use app\models\UserActions;
 use Throwable;
 use Yii;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class UserController extends Controller
 {
-    public function behaviors()
+    public function behaviors():array
     {
         return [
             'access' => [
@@ -38,7 +39,8 @@ class UserController extends Controller
      * @throws Throwable
      * @throws StaleObjectException
      */
-    public function actionDeleteExecution(){
+    public function actionDeleteExecution():Response
+    {
         if(Yii::$app->request->isPost){
             // если удаление выполняется от лица администратора- удалю запись и перенаправлю на страницу администрирования
             if(Yii::$app->user->can('manage')){
@@ -53,5 +55,6 @@ class UserController extends Controller
                 AdministratorActions::simpleDeleteItem($id);
             }
         }
+        throw new NotFoundHttpException();
     }
 }
