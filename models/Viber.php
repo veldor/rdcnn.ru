@@ -4,10 +4,12 @@
 namespace app\models;
 
 
+use app\models\database\TempDownloadLinks;
 use app\models\database\ViberMessaging;
 use app\models\database\ViberSubscriptions;
 use app\priv\Info;
 use Exception;
+use http\Url;
 use Viber\Api\Event;
 use Viber\Api\Keyboard;
 use Viber\Api\Keyboard\Button;
@@ -16,6 +18,7 @@ use Viber\Api\Message\Text;
 use Viber\Api\Sender;
 use Viber\Bot;
 use Viber\Client;
+use Yii;
 use yii\base\Model;
 
 class Viber extends Model
@@ -290,7 +293,7 @@ class Viber extends Model
 
     /**
      * Отправляю ссобщение пользователю
-     * @param $bot
+     * @param $bot Bot
      * @param $botSender
      * @param $receiverId
      * @param $text
@@ -316,6 +319,39 @@ class Viber extends Model
             'name' => 'Бот РДЦ',
             'avatar' => 'https://developers.viber.com/img/favicon.ico',
         ]);
-        self::sendMessage($bot, $botSender, $subscriberId, 'Выдаю ссылку на скачивание файла ' . $link);
+        self::sendMessage($bot, $botSender, $subscriberId, 'Заключение врача готово!');
+        self::sendFile($subscriberId, $link);
+    }
+
+    /**
+     * @param string $subscriberId
+     * @param string $link
+     */
+    private static function sendFile(string $subscriberId, string $link): void
+    {
+        $linkInfo = TempDownloadLinks::findOne(['link' => $link]);
+        if($linkInfo !== null){
+            if($linkInfo->file_type === 'execution'){
+                $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
+            }
+            else{
+                $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $linkInfo->file_name;
+            }
+            if(is_file($file)){
+                $bot = new Bot(['token' => Info::VIBER_API_KEY]);
+                $botSender = new Sender([
+                    'name' => 'Бот РДЦ',
+                    'avatar' => 'https://developers.viber.com/img/favicon.ico',
+                ]);
+                $bot->getClient()->sendMessage(
+                    (new File())
+                        ->setSender($botSender)
+                        ->setReceiver($subscriberId)
+                        ->setSize(filesize($file))
+                        ->setFileName($linkInfo->file_name)
+                        ->setMedia(\yii\helpers\Url::toRoute(['download/download-temp', 'link' => $link], 'https'))
+                );
+            }
+        }
     }
 }

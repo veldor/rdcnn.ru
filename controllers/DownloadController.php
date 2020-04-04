@@ -27,6 +27,11 @@ class DownloadController extends Controller
                         'actions' => ['execution', 'conclusion', 'print-conclusion'],
                         'roles' => ['@'],
                     ],
+                    [
+                        'allow' => true,
+                        'actions' => ['execution', 'download-temp'],
+                        'roles' => ['@', '?'],
+                    ],
                 ],
             ],
         ];
@@ -153,5 +158,9 @@ class DownloadController extends Controller
                 }
             }
         }
+    }
+
+    public function actionDownloadTemp($link){
+
     }
 }
