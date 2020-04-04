@@ -156,7 +156,7 @@ class AdministratorActions extends Model
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
-            if(empty($execution)){
+            if($execution === null){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];
             }
             $password = User::generateNumericPassword();
@@ -176,7 +176,7 @@ class AdministratorActions extends Model
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
-            if(empty($execution)){
+            if($execution === null){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];
             }
             self::simpleDeleteItem($execution->username);
@@ -189,7 +189,7 @@ class AdministratorActions extends Model
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
-            if(empty($execution)){
+            if($execution === null){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];
             }
             if(empty($this->conclusion)){

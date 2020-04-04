@@ -55,7 +55,7 @@ class Viber extends Model
         $apiKey = Info::VIBER_API_KEY;
 
 // так будет выглядеть наш бот (имя и аватар - можно менять)
-        $botSender  = new Sender([
+        $botSender = new Sender([
             'name' => 'Бот РДЦ',
             'avatar' => 'https://developers.viber.com/img/favicon.ico',
         ]);
@@ -211,6 +211,7 @@ class Viber extends Model
                     $receiverId = $event->getSender()->getId();
                     $text = $event->getMessage()->getText();
                     self::logAction('я тут');
+                    self::handleTextRequest($receiverId, $text, $bot, $botSender);
                 })
                 ->run();
         } catch (Exception $e) {
@@ -224,11 +225,10 @@ class Viber extends Model
     {
         // проверю, не подписан ли уже пользователь
         $existentSubscribe = ViberSubscriptions::findOne(['viber_id' => $receiverId]);
-        if($existentSubscribe !== null){
+        if ($existentSubscribe !== null) {
             $existentSubscribe->patient_id = $patientId;
             $existentSubscribe->save();
-        }
-        else{
+        } else {
             (new ViberSubscriptions(['patient_id' => $patientId, 'viber_id' => $receiverId]))->save();
         }
     }
@@ -238,16 +238,27 @@ class Viber extends Model
         (new ViberMessaging(['timestamp' => time(), 'text' => $text, 'receiver_id' => $receiverId]))->save();
     }
 
-    public function handleTextRequest($receiverId, $text): void
+    public static function handleTextRequest($receiverId, $text, $bot, $botSender): void
     {
         self::logMessaging($receiverId, $text);
         $executionPattern = '/^([aа]?\d+) (\d{4})$/ui';
-        if(preg_match($executionPattern, $text, $matches)){
+        if (preg_match($executionPattern, $text, $matches)) {
         }
     }
 
-    private static function logAction($text){
+    private static function logAction($text)
+    {
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_log_' . time() . '.log';
         file_put_contents($file, $text);
+    }
+
+    private static function sendMessage($bot, $botSender, $receiverId)
+    {
+        $bot->getClient()->sendMessage(
+            (new Text())
+                ->setSender($botSender)
+                ->setReceiver($receiverId)
+                ->setText('hehe')
+        );
     }
 }

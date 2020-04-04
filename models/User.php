@@ -59,9 +59,9 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * @param $username
-     * @return User
+     * @return User|null
      */
-    public static function findByUsername($username): User
+    public static function findByUsername($username): ?User
     {
         // найти по имени администратора невозможно
         if($username !== self::ADMIN_NAME){

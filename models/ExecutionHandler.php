@@ -388,7 +388,7 @@ class ExecutionHandler extends Model
             }
             $this->executionNumber = self::toLatin($this->executionNumber);
             // проверю, не зарегистрировано ли уже обследование
-            if (!empty(User::findByUsername($this->executionNumber))) {
+            if (User::findByUsername($this->executionNumber) !== null) {
                 return ['status' => 4, 'message' => 'Это обследование уже зарегистрировано, вы можете изменить информацию о нём в списке'];
             }
             $password = self::createUser($this->executionNumber);
