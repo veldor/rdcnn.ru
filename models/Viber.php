@@ -21,16 +21,6 @@ use yii\base\Model;
 class Viber extends Model
 {
 
-    /**
-     * @var Sender
-     */
-    private $botSender;
-    /**
-     * @var Bot
-     */
-    private $bot;
-    private $receiverId;
-
     public static function notifyExecutionLoaded()
     {
 
@@ -60,18 +50,18 @@ class Viber extends Model
     }
 
     /** @noinspection PhpUndefinedMethodInspection */
-    public function handleRequest(): void
+    public static function handleRequest(): void
     {
         $apiKey = Info::VIBER_API_KEY;
 
 // так будет выглядеть наш бот (имя и аватар - можно менять)
-        $botSender = $this->botSender = new Sender([
+        $botSender  = new Sender([
             'name' => 'Бот РДЦ',
             'avatar' => 'https://developers.viber.com/img/favicon.ico',
         ]);
 
         try {
-            $bot = $this->bot = new Bot(['token' => $apiKey]);
+            $bot = new Bot(['token' => $apiKey]);
             $bot
                 // При подключении бота
                 ->onConversation(static function () use ($bot, $botSender) {
@@ -218,9 +208,9 @@ class Viber extends Model
 //                    }
 //                })
                 ->onText('|.+|s', static function ($event) use ($bot, $botSender) {
-                    $this->receiverId = $event->getSender()->getId();
+                    $receiverId = $event->getSender()->getId();
                     $text = $event->getMessage()->getText();
-                    $this->handleTextRequest($this->receiverId , $text);
+                    self::logAction('я тут');
                 })
                 ->run();
         } catch (Exception $e) {
@@ -234,10 +224,11 @@ class Viber extends Model
     {
         // проверю, не подписан ли уже пользователь
         $existentSubscribe = ViberSubscriptions::findOne(['viber_id' => $receiverId]);
-        if ($existentSubscribe !== null) {
+        if($existentSubscribe !== null){
             $existentSubscribe->patient_id = $patientId;
             $existentSubscribe->save();
-        } else {
+        }
+        else{
             (new ViberSubscriptions(['patient_id' => $patientId, 'viber_id' => $receiverId]))->save();
         }
     }
@@ -251,21 +242,12 @@ class Viber extends Model
     {
         self::logMessaging($receiverId, $text);
         $executionPattern = '/^([aа]?\d+) (\d{4})$/ui';
-        if (preg_match($executionPattern, $text, $matches)) {
-            $this->sendMessage('Я нашёл обследование');
-        }
-        else{
-            $this->sendMessage('Я не понял, что вы имели в виду');
+        if(preg_match($executionPattern, $text, $matches)){
         }
     }
 
-    private function sendMessage(string $text): void
-    {
-        $this->bot->getClient()->sendMessage(
-            (new Text())
-                ->setSender($this->botSender)
-                ->setReceiver($this->receiverId)
-                ->setText($text)
-        );
+    private static function logAction($text){
+        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_log_' . time() . '.log';
+        file_put_contents($file, $text);
     }
 }

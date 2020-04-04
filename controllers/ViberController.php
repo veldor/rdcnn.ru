@@ -26,8 +26,7 @@ class ViberController extends Controller
 
     public function actionConnect(): void
     {
-        $viber = new Viber();
-        $viber->handleRequest();
+        Viber::handleRequest();
     }
 
     /**
