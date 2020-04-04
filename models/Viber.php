@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\ViberMessaging;
 use app\models\database\ViberSubscriptions;
 use app\priv\Info;
 use Exception;
@@ -120,6 +121,7 @@ class Viber extends Model
                     $receiverId = $event->getSender()->getId();
                     // попробую найти обследование по переданным данным
                     $text = $event->getMessage()->getText();
+                    self::logMessaging($receiverId, $text);
                     [$id, $password] = explode(' ', $text);
                     $user = User::findByUsername($id);
                     if(empty($id)){
@@ -174,6 +176,17 @@ class Viber extends Model
                         }
                     }
                 })
+                ->onText('|.+|s', static function ($event) use ($bot, $botSender) {
+                    $receiverId = $event->getSender()->getId();
+                    $text = $event->getMessage()->getText();
+                    self::logMessaging($receiverId, $text);
+                    $bot->getClient()->sendMessage(
+                        (new Text())
+                            ->setSender($botSender)
+                            ->setReceiver($receiverId)
+                            ->setText('Я вас не понял')
+                    );
+                })
                 ->run();
         } catch (Exception $e) {
             $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_err_' . time() . '.log';
@@ -193,5 +206,9 @@ class Viber extends Model
         else{
             (new ViberSubscriptions(['patient_id' => $patientId, 'viber_id' => $receiverId]))->save();
         }
+    }
+
+    public static function logMessaging($receiverId, $text){
+        (new ViberMessaging(['timestamp' => time(), 'text' => $text, 'receiver_id' => $receiverId]))->save();
     }
 }
