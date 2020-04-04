@@ -21,6 +21,16 @@ use yii\base\Model;
 class Viber extends Model
 {
 
+    /**
+     * @var Sender
+     */
+    private $botSender;
+    /**
+     * @var Bot
+     */
+    private $bot;
+    private $receiverId;
+
     public static function notifyExecutionLoaded()
     {
 
@@ -50,18 +60,18 @@ class Viber extends Model
     }
 
     /** @noinspection PhpUndefinedMethodInspection */
-    public static function handleRequest(): void
+    public function handleRequest(): void
     {
         $apiKey = Info::VIBER_API_KEY;
 
 // так будет выглядеть наш бот (имя и аватар - можно менять)
-        $botSender = new Sender([
+        $botSender = $this->botSender = new Sender([
             'name' => 'Бот РДЦ',
             'avatar' => 'https://developers.viber.com/img/favicon.ico',
         ]);
 
         try {
-            $bot = new Bot(['token' => $apiKey]);
+            $bot = $this->bot = new Bot(['token' => $apiKey]);
             $bot
                 // При подключении бота
                 ->onConversation(static function () use ($bot, $botSender) {
@@ -115,77 +125,102 @@ class Viber extends Model
                             ->setText('Напишите, что бы вы хотели сделать')
                     );
                 })
-                ->onText(/**
-                 * @param $event Event
-                 */ '|^[aа]?\d+ \d{4}$|isu', static function ($event) use ($bot, $botSender) {
-                    $receiverId = $event->getSender()->getId();
-                    // попробую найти обследование по переданным данным
-                    $text = $event->getMessage()->getText();
-                    self::logMessaging($receiverId, $text);
-                    [$id, $password] = explode(' ', $text);
-                    $user = User::findByUsername($id);
-                    if(empty($id)){
-                        $bot->getClient()->sendMessage(
-                            (new Text())
-                                ->setSender($botSender)
-                                ->setReceiver($receiverId)
-                                ->setText('Вы ввели неверный номер обследования или неправильный пароль. Можете попробовать ещё раз или обратиться к нам за помощью по номеру 2020200')
-                        );
-                    }
-                    else{
-                        if ($user->failed_try > 20) {
-                            $bot->getClient()->sendMessage(
-                                (new Text())
-                                    ->setSender($botSender)
-                                    ->setReceiver($receiverId)
-                                    ->setText('Было выполнено слишком много неверных попыток ввода пароля. В целях безопасности данные были удалены. Вы можете обратиться к нам для восстановления доступа')
-                            );
-                        }
-                        // проверю совпадение пароля, если не совпадает- зарегистрирую ошибку
-                        if(!$user->validatePassword($password)){
-                            $user->last_login_try = time();
-                            $user->failed_try = ++$user->failed_try;
-                            $user->save();
-                        }
-                        else{
-                            // подпишу пользователя на обновление информации
-                            $bot->getClient()->sendMessage(
-                                (new Text())
-                                    ->setSender($botSender)
-                                    ->setReceiver($receiverId)
-                                    ->setText('Вы ввели правильные данные, спасибо! Мы будем посылать вам информацию по мере поступления!')
-                            );
-                            self::subscribe($receiverId, $user->username);
-                            // проверю наличие заключения и файлов
-                            $isFiles = ExecutionHandler::isExecution($user->username);
-                            $isConclusion = ExecutionHandler::isConclusion($user->username);
-                            if(!$isFiles && !$isConclusion){
-                                $bot->getClient()->sendMessage(
-                                    (new Text())
-                                        ->setSender($botSender)
-                                        ->setReceiver($receiverId)
-                                        ->setText('Данные по вашему обследованию пока не получены. Мы напишем вам сразу же, как они будут получены')
-                                );
-                            }
-                            else{
-                                // отправлю ссылки на скачивание файлов
-                                if($isConclusion){
-                                    Table_viber_download_links::getConclusionLinks($user->username);
-                                }
-                            }
-                        }
-                    }
-                })
+//                ->onText(/**
+//                 * @param $event Event
+//                 */ '|^[aа]?\d+ \d{4}$|isu', static function ($event) use ($bot, $botSender) {
+//                    $receiverId = $event->getSender()->getId();
+//                    // попробую найти обследование по переданным данным
+//                    $text = $event->getMessage()->getText();
+//                    self::logMessaging($receiverId, 'ищу обследование' . $text);
+//                    [$id, $password] = explode(' ', $text);
+//                    self::logMessaging($receiverId, "id is $id pass is $password");
+//
+//                    if(!empty($id)){
+//                        $user = User::findByUsername($id);
+//                        $bot->getClient()->sendMessage(
+//                            (new Text())
+//                                ->setSender($botSender)
+//                                ->setReceiver($receiverId)
+//                                ->setText('hehe')
+//                        );
+//                        if($id === null){
+//                            $bot->getClient()->sendMessage(
+//                                (new Text())
+//                                    ->setSender($botSender)
+//                                    ->setReceiver($receiverId)
+//                                    ->setText('Вы ввели неверный номер обследования или неправильный пароль. Можете попробовать ещё раз или обратиться к нам за помощью по номеру 2020200')
+//                            );
+//                        }
+//                        else{
+//
+//                            $bot->getClient()->sendMessage(
+//                                (new Text())
+//                                    ->setSender($botSender)
+//                                    ->setReceiver($receiverId)
+//                                    ->setText('Кажется, я что-то нашёл...')
+//                            );
+//                            if ($user->failed_try > 20) {
+//                                $bot->getClient()->sendMessage(
+//                                    (new Text())
+//                                        ->setSender($botSender)
+//                                        ->setReceiver($receiverId)
+//                                        ->setText('Было выполнено слишком много неверных попыток ввода пароля. В целях безопасности данные были удалены. Вы можете обратиться к нам для восстановления доступа')
+//                                );
+//                            }
+//                            // проверю совпадение пароля, если не совпадает- зарегистрирую ошибку
+//                            if(!$user->validatePassword($password)){
+//                                $user->last_login_try = time();
+//                                $user->failed_try = ++$user->failed_try;
+//                                $user->save();
+//                                $bot->getClient()->sendMessage(
+//                                    (new Text())
+//                                        ->setSender($botSender)
+//                                        ->setReceiver($receiverId)
+//                                        ->setText('Вы ввели неверный номер обследования или неправильный пароль. Можете попробовать ещё раз или обратиться к нам за помощью по номеру 2020200')
+//                                );
+//                            }
+//                            else{
+//                                // подпишу пользователя на обновление информации
+//                                $bot->getClient()->sendMessage(
+//                                    (new Text())
+//                                        ->setSender($botSender)
+//                                        ->setReceiver($receiverId)
+//                                        ->setText('Вы ввели правильные данные, спасибо! Мы будем посылать вам информацию по мере поступления!')
+//                                );
+//                                self::subscribe($receiverId, $user->username);
+//                                // проверю наличие заключения и файлов
+//                                $isFiles = ExecutionHandler::isExecution($user->username);
+//                                $isConclusion = ExecutionHandler::isConclusion($user->username);
+//                                if(!$isFiles && !$isConclusion){
+//                                    $bot->getClient()->sendMessage(
+//                                        (new Text())
+//                                            ->setSender($botSender)
+//                                            ->setReceiver($receiverId)
+//                                            ->setText('Данные по вашему обследованию пока не получены. Мы напишем вам сразу же, как они будут получены')
+//                                    );
+//                                }
+//                                else{
+//                                    // отправлю ссылки на скачивание файлов
+//                                    if($isConclusion){
+//                                        Table_viber_download_links::getConclusionLinks($user->username);
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                    else{
+//                        $bot->getClient()->sendMessage(
+//                            (new Text())
+//                                ->setSender($botSender)
+//                                ->setReceiver($receiverId)
+//                                ->setText('Не распознал номер обследования, напишите ещё раз...')
+//                        );
+//                    }
+//                })
                 ->onText('|.+|s', static function ($event) use ($bot, $botSender) {
-                    $receiverId = $event->getSender()->getId();
+                    $this->receiverId = $event->getSender()->getId();
                     $text = $event->getMessage()->getText();
-                    self::logMessaging($receiverId, $text);
-                    $bot->getClient()->sendMessage(
-                        (new Text())
-                            ->setSender($botSender)
-                            ->setReceiver($receiverId)
-                            ->setText('Я вас не понял')
-                    );
+                    $this->handleTextRequest($this->receiverId , $text);
                 })
                 ->run();
         } catch (Exception $e) {
@@ -199,16 +234,38 @@ class Viber extends Model
     {
         // проверю, не подписан ли уже пользователь
         $existentSubscribe = ViberSubscriptions::findOne(['viber_id' => $receiverId]);
-        if($existentSubscribe !== null){
+        if ($existentSubscribe !== null) {
             $existentSubscribe->patient_id = $patientId;
             $existentSubscribe->save();
-        }
-        else{
+        } else {
             (new ViberSubscriptions(['patient_id' => $patientId, 'viber_id' => $receiverId]))->save();
         }
     }
 
-    public static function logMessaging($receiverId, $text){
+    public static function logMessaging($receiverId, $text): void
+    {
         (new ViberMessaging(['timestamp' => time(), 'text' => $text, 'receiver_id' => $receiverId]))->save();
+    }
+
+    public function handleTextRequest($receiverId, $text): void
+    {
+        self::logMessaging($receiverId, $text);
+        $executionPattern = '/^([aа]?\d+) (\d{4})$/ui';
+        if (preg_match($executionPattern, $text, $matches)) {
+            $this->sendMessage('Я нашёл обследование');
+        }
+        else{
+            $this->sendMessage('Я не понял, что вы имели в виду');
+        }
+    }
+
+    private function sendMessage(string $text): void
+    {
+        $this->bot->getClient()->sendMessage(
+            (new Text())
+                ->setSender($this->botSender)
+                ->setReceiver($this->receiverId)
+                ->setText($text)
+        );
     }
 }
