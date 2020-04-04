@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\ViberSubscriptions;
 use app\priv\Info;
 use Exception;
 use Viber\Api\Event;
@@ -145,6 +146,14 @@ class Viber extends Model
                             $user->save();
                         }
                         else{
+                            // подпишу пользователя на обновление информации
+                            $bot->getClient()->sendMessage(
+                                (new Text())
+                                    ->setSender($botSender)
+                                    ->setReceiver($receiverId)
+                                    ->setText('Вы ввели правильные данные, спасибо! Мы будем посылать вам информацию по мере поступления!')
+                            );
+                            self::subscribe($receiverId, $user->username);
                             // проверю наличие заключения и файлов
                             $isFiles = ExecutionHandler::isExecution($user->username);
                             $isConclusion = ExecutionHandler::isConclusion($user->username);
@@ -170,6 +179,19 @@ class Viber extends Model
             $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_err_' . time() . '.log';
             $report = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
             file_put_contents($file, $report);
+        }
+    }
+
+    public static function subscribe($receiverId, $patientId): void
+    {
+        // проверю, не подписан ли уже пользователь
+        $existentSubscribe = ViberSubscriptions::findOne(['viber_id' => $receiverId]);
+        if($existentSubscribe !== null){
+            $existentSubscribe->patient_id = $patientId;
+            $existentSubscribe->save();
+        }
+        else{
+            (new ViberSubscriptions(['patient_id' => $patientId, 'viber_id' => $receiverId]))->save();
         }
     }
 }

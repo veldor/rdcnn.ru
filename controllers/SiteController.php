@@ -9,6 +9,7 @@ use app\models\Test;
 use app\models\User;
 use app\models\Utils;
 use app\priv\Info;
+use phpDocumentor\Reflection\Types\Object_;
 use Yii;
 use yii\base\Exception;
 use yii\filters\AccessControl;
@@ -72,10 +73,10 @@ class SiteController extends Controller
      * Displays homepage.
      *
      * @param null $executionNumber
-     * @return string
+     * @return string|Response
      * @throws Exception
      */
-    public function actionIndex($executionNumber = null): string
+    public function actionIndex($executionNumber = null)
     {
         // если пользователь не залогинен- показываю ему страницу с предложением ввести номер обследования и пароль
         if (Yii::$app->user->isGuest) {
@@ -99,10 +100,12 @@ class SiteController extends Controller
         }
         // если пользователь залогинен как администратор- показываю ему страницу для скачивания
         if (Yii::$app->user->can('manage')) {
-            // получу информацию о обследовании
-            $execution = User::findByUsername($executionNumber);
-            if ($execution !== null) {
-                return $this->render('personal', ['execution' => $execution]);
+            if($executionNumber !== null){
+                // получу информацию о обследовании
+                $execution = User::findByUsername($executionNumber);
+                if ($execution !== null) {
+                    return $this->render('personal', ['execution' => $execution]);
+                }
             }
 
 // страница не найдена, перенаправлю на страницу менеджмента
