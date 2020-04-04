@@ -15,7 +15,7 @@ ShowLoadingAsset::register($this);
 /* @var $this View */
 /* @var $execution User */
 
-$this->title = "РДЦ, обследование " . $execution->username;
+$this->title = 'РДЦ, обследование ' . $execution->username;
 
 /*$pdf = new FPDI();
 

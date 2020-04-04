@@ -210,7 +210,6 @@ class Viber extends Model
                 ->onText('|.+|s', static function ($event) use ($bot, $botSender) {
                     $receiverId = $event->getSender()->getId();
                     $text = $event->getMessage()->getText();
-                    self::logAction('я тут');
                     self::handleTextRequest($receiverId, $text, $bot, $botSender);
                 })
                 ->run();
@@ -230,6 +229,51 @@ class Viber extends Model
             $existentSubscribe->save();
         } else {
             (new ViberSubscriptions(['patient_id' => $patientId, 'viber_id' => $receiverId]))->save();
+            self::logAction('подписка оформлена');
+        }
+    }
+
+
+    /**
+     * @param $receiverId
+     * @param $text
+     * @param $bot
+     * @param $botSender
+     * @throws \yii\base\Exception
+     */
+    public static function handleTextRequest($receiverId, $text, $bot, $botSender): void
+    {
+        self::logMessaging($receiverId, $text);
+        $executionPattern = '/^([aа]?\d+) (\d{4})$/ui';
+        if (preg_match($executionPattern, $text, $matches)) {
+            $executionNumber = $matches[1];
+            self::sendMessage($bot, $botSender, $receiverId, 'Ищу информацию об обследовании № ' . $executionNumber);
+            $execution = User::findByUsername($executionNumber);
+            if ($execution === null) {
+                self::sendMessage($bot, $botSender, $receiverId, "Обследование №$executionNumber не найдено! Попробуйте ввести данные ещё раз.");
+            } else {
+                // проверю, подходит ли пароль
+                if ($execution->failed_try > 20) {
+                    self::sendMessage($bot, $botSender, $receiverId, 'Было выполнено слишком много неверных попыток ввода пароля. В целях безопасности данные были удалены. Вы можете обратиться к нам для восстановления доступа');
+                    return;
+                }
+
+                $password = $matches[2];
+// проверю совпадение пароля, если не совпадает- зарегистрирую ошибку
+                if (!$execution->validatePassword($password)) {
+                    $execution->last_login_try = time();
+                    $execution->failed_try = ++$execution->failed_try;
+                    $execution->save();
+                    self::sendMessage($bot, $botSender, $receiverId, 'Вы ввели неверный номер обследования или неправильный пароль. Можете попробовать ещё раз или обратиться к нам за помощью по номеру 2020200');
+                }
+                else{
+                    self::sendMessage($bot, $botSender, $receiverId, 'Вы ввели верные данные, спасибо. Вы получите результаты как только они будут готовы!');
+                    self::subscribe($receiverId, $execution->id);
+                    ExecutionHandler::checkAvailabilityForBots($execution->id, true, $receiverId);
+                }
+            }
+        } else {
+            self::sendMessage($bot, $botSender, $receiverId, 'Делаю вид, что работаю');
         }
     }
 
@@ -238,27 +282,40 @@ class Viber extends Model
         (new ViberMessaging(['timestamp' => time(), 'text' => $text, 'receiver_id' => $receiverId]))->save();
     }
 
-    public static function handleTextRequest($receiverId, $text, $bot, $botSender): void
-    {
-        self::logMessaging($receiverId, $text);
-        $executionPattern = '/^([aа]?\d+) (\d{4})$/ui';
-        if (preg_match($executionPattern, $text, $matches)) {
-        }
-    }
-
-    private static function logAction($text)
+    private static function logAction($text): void
     {
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_log_' . time() . '.log';
         file_put_contents($file, $text);
     }
 
-    private static function sendMessage($bot, $botSender, $receiverId)
+    /**
+     * Отправляю ссобщение пользователю
+     * @param $bot
+     * @param $botSender
+     * @param $receiverId
+     * @param $text
+     */
+    private static function sendMessage($bot, $botSender, $receiverId, $text): void
     {
         $bot->getClient()->sendMessage(
             (new Text())
                 ->setSender($botSender)
                 ->setReceiver($receiverId)
-                ->setText('hehe')
+                ->setText($text)
         );
+    }
+
+    /**
+     * @param string $subscriberId
+     * @param string $link
+     */
+    public static function sendTempLink(string $subscriberId, string $link): void
+    {
+        $bot = new Bot(['token' => Info::VIBER_API_KEY]);
+        $botSender = new Sender([
+            'name' => 'Бот РДЦ',
+            'avatar' => 'https://developers.viber.com/img/favicon.ico',
+        ]);
+        self::sendMessage($bot, $botSender, $subscriberId, 'Выдаю ссылку на скачивание файла ' . $link);
     }
 }

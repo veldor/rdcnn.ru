@@ -4,6 +4,8 @@
 namespace app\models;
 
 
+use app\models\database\TempDownloadLinks;
+use app\models\database\ViberSubscriptions;
 use app\priv\Info;
 use RuntimeException;
 use Throwable;
@@ -30,26 +32,29 @@ class ExecutionHandler extends Model
             $id = Yii::$app->user->identity->username;
         }
         $user = User::findByUsername($id);
-        $isExecution = self::isExecution($id);
-        $isConclusion = self::isConclusion($id);
-        $timeLeft = 0;
-        // посмотрю, сколько времении ещё будет доступно обследование
-        $startTime = $user->created_at;
-        if (!empty($startTime)) {
-            // найдено время старта
-            $now = time();
-            $lifetime = $startTime + Info::DATA_SAVING_TIME;
-            if ($now < $lifetime) {
-                $timeLeft = Utils::secondsToTime($lifetime - $now);
-            } else {
-                AdministratorActions::simpleDeleteItem($id);
-                return ['status' => 2];
+        if ($user !== null) {
+            $isExecution = self::isExecution($id);
+            $isConclusion = self::isConclusion($id);
+            $timeLeft = 0;
+            // посмотрю, сколько времении ещё будет доступно обследование
+            $startTime = $user->created_at;
+            if (!empty($startTime)) {
+                // найдено время старта
+                $now = time();
+                $lifetime = $startTime + Info::DATA_SAVING_TIME;
+                if ($now < $lifetime) {
+                    $timeLeft = Utils::secondsToTime($lifetime - $now);
+                } else {
+                    AdministratorActions::simpleDeleteItem($id);
+                    return ['status' => 2];
+                }
             }
+
+            $addConc = self::isAdditionalConclusions($id);
+
+            return ['status' => 1, 'execution' => $isExecution, 'conclusion' => $isConclusion, 'timeLeft' => $timeLeft, 'addConc' => $addConc];
         }
-
-        $addConc = self::isAdditionalConclusions($id);
-
-        return ['status' => 1, 'execution' => $isExecution, 'conclusion' => $isConclusion, 'timeLeft' => $timeLeft, 'addConc' => $addConc];
+            return [];
     }
 
     public static function checkFiles($executionNumber): array
@@ -158,11 +163,6 @@ class ExecutionHandler extends Model
 
                         } else {
                             $report .= "dir $dir not handled \n";
-                            // пока ничего не делаю
-                            //todo убедиться, что система работает
-                            /*// удалю папку
-                            self::rmRec($path);
-                            $deleteCounter++;*/
                         }
                     } else {
                         $report .= "dir $dir waiting for timeout \n";
@@ -212,12 +212,10 @@ class ExecutionHandler extends Model
                                 rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
                                 $report .= "file $file renamed to $filePureName";
                             }
-                        }
-                        else{
+                        } else {
                             $report .= "file $file in conclusions waiting for timeout \n";
                         }
-                    }
-                    else{
+                    } else {
                         $report .= "file $file not handled \n";
                     }
                 }
@@ -228,7 +226,7 @@ class ExecutionHandler extends Model
         if (!empty($cloudDir) && is_dir($cloudDir)) {
             $report .= "handle cloud dir \n";
             $files = array_slice(scandir($cloudDir), 2);
-            if(!empty($files)){
+            if (!empty($files)) {
                 $report .= 'found ' . count($files) . " files in cloud dir \n";
                 foreach ($files as $file) {
                     $path = Yii::getAlias('@cloudDirectory') . '\\' . $file;
@@ -252,12 +250,10 @@ class ExecutionHandler extends Model
                                 // перемещу файл в папку с заключениями
                                 rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
                                 $report .= "file $file handled and moved by $filePureName \n";
-                            }
-                            else{
+                            } else {
                                 $report .= "file $file wait for timeout \n";
                             }
-                        }
-                        else{
+                        } else {
                             $report .= "file $file not handled \n";
                         }
                     }
@@ -329,7 +325,7 @@ class ExecutionHandler extends Model
     {
 // проверю, зарегистрирован ли пользователь с данным именем. Если нет- зарегистрирую
         $user = User::findByUsername($name);
-        if (empty($user)) {
+        if ($user === null) {
             $transaction = new DbTransaction();
             self::createUser($name);
             self::startTimer($name);
@@ -337,7 +333,43 @@ class ExecutionHandler extends Model
         }
     }
 
-    public function scenarios() :array
+    /**
+     * @param int $id
+     * @param bool $resend
+     * @param string|null $subscriberId
+     * @throws Exception
+     */
+    public static function checkAvailabilityForBots(int $id, bool $resend = false, string $subscriberId = null): void
+    {
+        // получу обследование
+        $execution = User::findIdentity($id);
+        if ($execution !== null) {
+            // сначала получу аккаунты, которые подписаны на это обследование
+            $subscribers = ViberSubscriptions::findAll(['patient_id' => $id]);
+            if($resend){
+                if (!empty($subscribers)) {
+                    // проверю наличие заключений и файлов обследования
+                    if (self::isExecution($execution->username)) {
+                        $fileName = $execution->username . '.zip';
+                        $link = Yii::$app->security->generateRandomString(255);
+                        // создам ссылку на скачивание
+                        (new TempDownloadLinks(['file_name' => $fileName, 'file_type' => 'execution', 'link' => $link, 'execution_id' => $execution->id]))->save();
+                        Viber::sendTempLink($subscriberId, $link);
+                    }
+                    if(self::isConclusion($execution->username)){
+                        // получу все заключения, что есть
+                        $fileName = $execution->username . '.pdf';
+                        $link = Yii::$app->security->generateRandomString(255);
+                        // создам ссылку на скачивание
+                        (new TempDownloadLinks(['file_name' => $fileName, 'file_type' => 'conclusion', 'link' => $link, 'execution_id' => $execution->id]))->save();
+                        Viber::sendTempLink($subscriberId, $link);
+                    }
+                }
+            }
+        }
+    }
+
+    public function scenarios(): array
     {
         return [
             self::SCENARIO_ADD => ['executionNumber', 'executionData', 'executionResponse'],
@@ -345,14 +377,6 @@ class ExecutionHandler extends Model
     }
 
     public $executionNumber;
-    /**
-     * @var UploadedFile
-     */
-    public $executionData;
-    /**
-     * @var UploadedFile
-     */
-    public $executionResponse;
 
     public function attributeLabels(): array
     {
@@ -407,7 +431,7 @@ class ExecutionHandler extends Model
     public static function isExecution($name): bool
     {
         $filename = Yii::getAlias('@executionsDirectory') . '\\' . $name . '.zip';
-        if(is_file($filename)){
+        if (is_file($filename)) {
             Table_availability::setDataLoaded($name);
             return true;
         }
@@ -422,7 +446,7 @@ class ExecutionHandler extends Model
     public static function isConclusion($name): bool
     {
         $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $name . '.pdf';
-        if(is_file($filename)){
+        if (is_file($filename)) {
             Table_availability::setDataLoaded($name);
             return true;
         }
