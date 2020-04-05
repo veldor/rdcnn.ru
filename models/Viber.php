@@ -107,7 +107,7 @@ class Viber extends Model
                                 // загружу файл
                                 $file = file_get_contents($json['message']['media']);
                                 if(!empty($file)){
-                                    file_put_contents('Z:\sites\rdcnn.ru\logs\\' . $realName, $file);
+                                    file_put_contents(Yii::getAlias('@conclusionsDirectory') . '\\' . $realName, $file);
                                     self::sendMessage(
                                         self::getBot($apiKey),
                                         self::getBotSender(),
