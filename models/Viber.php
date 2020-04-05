@@ -87,42 +87,78 @@ class Viber extends Model
         if(!empty($input)){
             // разберу запрос
             $json = json_decode($input, true, 512, JSON_THROW_ON_ERROR);
-            if(!empty($json) && !empty($json['message']) && !empty($json['message']['type'])){
-                if($json['message']['type'] === 'file'){
-                    $senderId = $json['sender']['id'];
+            $senderId = $json['sender']['id'];
+            if(!empty($json) && !empty($json['message']) && !empty($json['message']['type']) && $json['message']['type'] === 'file' && ViberPersonalList::iWorkHere($senderId)) {
+                // оповещу о получении файла
+                // проверю, что заявленный файл является PDF
+                if(GrammarHandler::isPdf($json['message']['file_name'])){
+                    // получу базовое название файла
+                    $basename = GrammarHandler::getBaseFileName($json['message']['file_name']);
+                    if(!empty($basename)){
+                        $name = GrammarHandler::toLatin($basename);
+                        // проверю, зарегистрировано ли уже обследование с данным номером,
+                        // так как будем подгружать заключения только к зарегистрированным
+                        $execution = User::findByUsername($name);
+                        if($execution !== null){
+                            $realName =  GrammarHandler::toLatin($json['message']['file_name']);
+                            // ещё раз удостоверюсь, что файл подходит для загрузки
+                            $strictPattern = '/^A?\d+-?\d*\.pdf$/';
+                            if(preg_match($strictPattern, $realName)){
+                                // загружу файл
+                                $file = file_get_contents($json['message']['media']);
+                                if(!empty($file)){
+                                    file_put_contents('Z:\sites\rdcnn.ru\logs\\' . $realName, $file);
+                                    self::sendMessage(
+                                        self::getBot($apiKey),
+                                        self::getBotSender(),
+                                        $senderId,
+                                        'Заключение ' . $realName . ' успешно добавлено'
+                                    );
+                                }
+                                else{
+                                    // не удалось загрузить файл, сообщу об ошибке
+                                    self::sendMessage(
+                                        self::getBot($apiKey),
+                                        self::getBotSender(),
+                                        $senderId,
+                                        'Заключение ' . $realName . ' не удалось загрузить. Попробуйте ещё раз'
+                                    );
+                                }
+                            }
+                            else{
+                                self::sendMessage(
+                                    self::getBot($apiKey),
+                                    self::getBotSender(),
+                                    $senderId,
+                                    'Заключение ' . $realName . ' : неверное имя файла. Назовите файл в соответствие с правилами'
+                                );
+                            }
+                        }
+                        else{
+                            self::sendMessage(
+                                self::getBot($apiKey),
+                                self::getBotSender(),
+                                $senderId,
+                                'Не удалось найти обследование с данным номером. Сначала администраторы должны его зарегистрировать'
+                            );
+                        }
+                    }
+                    else{
+                        self::sendMessage(
+                            self::getBot($apiKey),
+                            self::getBotSender(),
+                            $senderId,
+                            'Проверьте правильность названия файла, я не смог его разобрать'
+                        );
+                    }
+                }
+                else{
                     self::sendMessage(
                         self::getBot($apiKey),
                         self::getBotSender(),
                         $senderId,
-                        'Пришёл файл'
-                        );
-                    // оповещу о получении файла
-                    // проверю, что заявленный файл является PDF
-//                    if(GrammarHandler::isPdf($json['message']['file_name'])){
-//                        // получу базовое название файла
-//                        $basename = GrammarHandler::getBaseFileName($json['message']['file_name']);
-//                        if(!empty($basename)){
-//                            $name = GrammarHandler::toLatin($basename);
-//                            // проверю, зарегистрировано ли уже обследование с данным номером,
-//                            // так как будем подгружать заключения только к зарегистрированным
-//                            $execution = User::findByUsername($name);
-//                            if($execution !== null){
-//                                $realName =  GrammarHandler::toLatin($json['message']['file_name']);
-//                                // ещё раз удостоверюсь, что файл подходит для загрузки
-//                                $strictPattern = '/^A?\d+-?\d*\.pdf$/';
-//                                if(preg_match($strictPattern, $realName)){
-//                                    // загружу файл
-//                                    $file = file_get_contents($json['message']['media']);
-//                                    if(!empty($file)){
-//                                        file_put_contents('Z:\sites\rdcnn.ru\logs\\' . $realName, $file);
-//                                    }
-//                                    else{
-//                                        // не удалось загрузить файл, сообщу об ошибке
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
+                        'Вы можете загружать только файлы PDF!'
+                    );
                 }
             }
         }
