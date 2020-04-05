@@ -6,6 +6,7 @@ namespace app\models;
 
 use app\models\database\TempDownloadLinks;
 use app\models\database\ViberMessaging;
+use app\models\database\ViberPersonalList;
 use app\models\database\ViberSubscriptions;
 use app\priv\Info;
 use Exception;
@@ -246,6 +247,7 @@ class Viber extends Model
      */
     public static function handleTextRequest($receiverId, $text, $bot, $botSender): void
     {
+        $lowerText = mb_strtolower($text);
         self::logMessaging($receiverId, $text);
         $executionPattern = '/^([aа]?\d+) (\d{4})$/ui';
         if (preg_match($executionPattern, $text, $matches)) {
@@ -268,23 +270,38 @@ class Viber extends Model
                     $execution->failed_try = ++$execution->failed_try;
                     $execution->save();
                     self::sendMessage($bot, $botSender, $receiverId, 'Вы ввели неверный номер обследования или неправильный пароль. Можете попробовать ещё раз или обратиться к нам за помощью по номеру 2020200');
-                }
-                else{
+                } else {
                     self::sendMessage($bot, $botSender, $receiverId, 'Вы ввели верные данные, спасибо. Вы получите результаты как только они будут готовы!');
                     self::subscribe($receiverId, $execution->id);
                     ExecutionHandler::checkAvailabilityForBots($execution->id, true, $receiverId);
                 }
             }
-        }
-        elseif(mb_strtolower($text) === 'я работаю в рдц'){
+        } elseif ($lowerText === 'я работаю в рдц') {
             // запрос доступа к приватным данным
             self::sendMessage($bot, $botSender, $receiverId, 'Докажите');
-        }
-        elseif($text === Info::VIBER_SECRET){
+        } elseif ($text === Info::VIBER_SECRET) {
             // регистрирую пользователя как нашего сотрудника
+            ViberPersonalList::register($receiverId);
             self::sendMessage($bot, $botSender, $receiverId, 'Ок, вы работаете у нас. Теперь у вас есть доступ к закрытым функциям. Чтобы увидеть список команд, введите "команды"');
-        }
-        else {
+        } elseif ($lowerText === 'команды') {
+            if(ViberPersonalList::iWorkHere($receiverId)){
+                // отправлю список команд, которые может выполнять сотрудник
+                self::sendMessage(
+                    $bot,
+                    $botSender,
+                    $receiverId,
+                    "
+                    'заключения' : выводит список пациентов без заключений\n
+                    'файлы' : выводит список пациентов без загруженных файлов обследования\n
+                    'статистика загрузок' : выводит статистику загрузок заключений и файлов\n
+                    список будет дополняться по мере развития
+                    "
+                );
+            }
+            else{
+                self::sendMessage($bot, $botSender, $receiverId, 'Не понимаю, что вы имеете в виду');
+            }
+        } else {
             self::sendMessage($bot, $botSender, $receiverId, 'Делаю вид, что работаю');
         }
     }
@@ -329,11 +346,10 @@ class Viber extends Model
             'avatar' => 'https://developers.viber.com/img/favicon.ico',
         ]);
         $linkInfo = TempDownloadLinks::findOne(['link' => $link]);
-        if($linkInfo !== null){
-            if($linkInfo->file_type === 'conclusion'){
+        if ($linkInfo !== null) {
+            if ($linkInfo->file_type === 'conclusion') {
                 self::sendMessage($bot, $botSender, $subscriberId, 'Заключение врача готово!');
-            }
-            else{
+            } else {
                 self::sendMessage($bot, $botSender, $subscriberId, 'Файлы сканирования загружены!');
             }
             self::sendFile($subscriberId, $link);
@@ -347,14 +363,13 @@ class Viber extends Model
     private static function sendFile(string $subscriberId, string $link): void
     {
         $linkInfo = TempDownloadLinks::findOne(['link' => $link]);
-        if($linkInfo !== null){
-            if($linkInfo->file_type === 'execution'){
+        if ($linkInfo !== null) {
+            if ($linkInfo->file_type === 'execution') {
                 $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
-            }
-            else{
+            } else {
                 $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $linkInfo->file_name;
             }
-            if(is_file($file)){
+            if (is_file($file)) {
                 $bot = new Bot(['token' => Info::VIBER_API_KEY]);
                 $botSender = new Sender([
                     'name' => 'Бот РДЦ',
