@@ -14,10 +14,10 @@ use yii\web\UploadedFile;
 
 class AdministratorActions extends Model
 {
-    const SCENARIO_CHANGE_PASSWORD = 'change_password';
-    const SCENARIO_DELETE_ITEM = 'delete_item';
-    const SCENARIO_ADD_EXECUTION = 'add_execution';
-    const SCENARIO_ADD_CONCLUSION = 'add_conclusion';
+    public const SCENARIO_CHANGE_PASSWORD = 'change_password';
+    public const SCENARIO_DELETE_ITEM = 'delete_item';
+    public const SCENARIO_ADD_EXECUTION = 'add_execution';
+    public const SCENARIO_ADD_CONCLUSION = 'add_conclusion';
 
     public $executionId;
     /**
@@ -97,7 +97,7 @@ class AdministratorActions extends Model
     public static function simpleDeleteItem($id): void
     {
         $execution = User::findByUsername($id);
-        if(!empty($execution)){
+        if($execution !== null){
             $conclusionFile = Yii::getAlias('@conclusionsDirectory') . '\\' . $id . '.pdf';
             if(is_file($conclusionFile)){
                 unlink($conclusionFile);
@@ -109,7 +109,7 @@ class AdministratorActions extends Model
             }
             // удалю запись в таблице выдачи разрешений
             $auth = Table_auth_assigment::findOne(["user_id" => $execution->id]);
-            if(!empty($auth)){
+            if($auth !== null){
                 try {
                     $auth->delete();
                 } catch (StaleObjectException $e) {
@@ -128,7 +128,8 @@ class AdministratorActions extends Model
         }
     }
 
-    public function scenarios(){
+    public function scenarios() :array
+    {
         return [
             self::SCENARIO_CHANGE_PASSWORD => ['executionId'],
             self::SCENARIO_DELETE_ITEM => ['executionId'],
@@ -152,7 +153,7 @@ class AdministratorActions extends Model
      * @return array
      * @throws Exception
      */
-    public function changePassword()
+    public function changePassword(): array
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
@@ -216,7 +217,7 @@ class AdministratorActions extends Model
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
-            if(empty($execution)){
+            if($execution === null){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];
             }
             if(empty($this->execution)){

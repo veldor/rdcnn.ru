@@ -12,7 +12,6 @@ use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
-use yii\web\UploadedFile;
 
 class ExecutionHandler extends Model
 {
@@ -346,24 +345,22 @@ class ExecutionHandler extends Model
         if ($execution !== null) {
             // сначала получу аккаунты, которые подписаны на это обследование
             $subscribers = ViberSubscriptions::findAll(['patient_id' => $id]);
-            if($resend){
-                if (!empty($subscribers)) {
-                    // проверю наличие заключений и файлов обследования
-                    if (self::isExecution($execution->username)) {
-                        $fileName = $execution->username . '.zip';
-                        $link = Yii::$app->security->generateRandomString(255);
-                        // создам ссылку на скачивание
-                        (new TempDownloadLinks(['file_name' => $fileName, 'file_type' => 'execution', 'link' => $link, 'execution_id' => $execution->id]))->save();
-                        Viber::sendTempLink($subscriberId, $link);
-                    }
-                    if(self::isConclusion($execution->username)){
-                        // получу все заключения, что есть
-                        $fileName = $execution->username . '.pdf';
-                        $link = Yii::$app->security->generateRandomString(255);
-                        // создам ссылку на скачивание
-                        (new TempDownloadLinks(['file_name' => $fileName, 'file_type' => 'conclusion', 'link' => $link, 'execution_id' => $execution->id]))->save();
-                        Viber::sendTempLink($subscriberId, $link);
-                    }
+            if($resend && !empty($subscribers)) {
+                // проверю наличие заключений и файлов обследования
+                if (self::isExecution($execution->username)) {
+                    $fileName = $execution->username . '.zip';
+                    $link = Yii::$app->security->generateRandomString(255);
+                    // создам ссылку на скачивание
+                    (new TempDownloadLinks(['file_name' => $fileName, 'file_type' => 'execution', 'link' => $link, 'execution_id' => $execution->id]))->save();
+                    Viber::sendTempLink($subscriberId, $link);
+                }
+                if(self::isConclusion($execution->username)){
+                    // получу все заключения, что есть
+                    $fileName = $execution->username . '.pdf';
+                    $link = Yii::$app->security->generateRandomString(255);
+                    // создам ссылку на скачивание
+                    (new TempDownloadLinks(['file_name' => $fileName, 'file_type' => 'conclusion', 'link' => $link, 'execution_id' => $execution->id]))->save();
+                    Viber::sendTempLink($subscriberId, $link);
                 }
             }
         }
@@ -447,7 +444,7 @@ class ExecutionHandler extends Model
     {
         $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $name . '.pdf';
         if (is_file($filename)) {
-            Table_availability::setDataLoaded($name);
+            Table_availability::setConclusionLoaded($name);
             return true;
         }
         return false;

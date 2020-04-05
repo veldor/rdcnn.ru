@@ -66,7 +66,7 @@ class Table_availability extends ActiveRecord
                 // оповещу пользователя через вайбер, если он есть
                 Viber::notifyConclusionLoaded();
             }
-            else if(!$existentData->is_execution){
+            else if(!$existentData->is_conclusion){
                 $existentData->is_conclusion = true;
                 $existentData->save();
                 Viber::notifyConclusionLoaded();

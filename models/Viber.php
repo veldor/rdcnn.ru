@@ -305,7 +305,7 @@ class Viber extends Model
                     self::sendMessage($bot, $botSender, $receiverId, 'есть');
                     $list = 'Не загружены заключения:\n';
                     foreach ($withoutConclusions as $withoutConclusion) {
-                        $user = User::findIdentity($withoutConclusion->userId);
+                        $user = User::findByUsername($withoutConclusion->userId);
                         if($user !== null){
                             $list .= "{$user->username}\n";
                         }
