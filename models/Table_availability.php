@@ -40,9 +40,11 @@ class Table_availability extends ActiveRecord
                 Viber::notifyExecutionLoaded();
             }
             else if(!$existentData->is_execution){
-                $existentData->is_execution = true;
-                $existentData->save();
-                Viber::notifyExecutionLoaded();
+                if($existentData->is_execution === false){
+                    $existentData->is_execution = true;
+                    $existentData->save();
+                    Viber::notifyExecutionLoaded($username);
+                }
             }
         }
     }
@@ -53,7 +55,6 @@ class Table_availability extends ActiveRecord
      */
     public static function setConclusionLoaded(string $username): void
     {
-
         // получу данные о пользователе
         $user = User::findByUsername($username);
         if($user !== null){

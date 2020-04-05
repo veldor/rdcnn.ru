@@ -52,9 +52,24 @@ class Viber extends Model
         ]);
     }
 
-    public static function notifyExecutionLoaded()
+    /**
+     * @param $userName
+     * @throws \yii\base\Exception
+     */
+    public static function notifyExecutionLoaded($userName): void
     {
-
+        // создам временную ссылку на скачивание и отправлю её подписанным на данное обследование
+        $execution = User::findByUsername($userName);
+        if($execution !== null){
+            // найду всех, кто подписан на данное обследование
+            $subscribers = ViberSubscriptions::findAll(['patient_id' => $execution->id]);
+            if(!empty($subscribers)){
+                foreach ($subscribers as $subscriber) {
+                    $link = TempDownloadLinks::createLink($execution, 'execution');
+                    self::sendTempLink($subscriber->viber_id, $link);
+                }
+            }
+        }
     }
 
     public static function notifyConclusionLoaded()

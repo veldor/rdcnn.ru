@@ -4,6 +4,9 @@
 namespace app\models\database;
 
 
+use app\models\User;
+use Yii;
+use yii\base\Exception;
 use yii\db\ActiveRecord;
 
 /**
@@ -19,5 +22,22 @@ class TempDownloadLinks extends ActiveRecord
     public static function tableName():string
     {
         return 'temp_download_links';
+    }
+
+    /**
+     * @param User $execution
+     * @param string $type
+     * @return TempDownloadLinks|null
+     * @throws Exception
+     */
+    public static function createLink(User $execution, string $type): ?TempDownloadLinks
+    {
+        $link = Yii::$app->security->generateRandomString(255);
+        if($type === 'execution'){
+            $link = new self(['file_name' => $execution->username . '.zip', 'file_type' => 'execution', 'link' => $link, 'execution_id' => $execution->id]);
+            $link->save();
+            return $link;
+        }
+        return null;
     }
 }
