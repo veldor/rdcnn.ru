@@ -14,10 +14,9 @@ use yii\db\ActiveRecord;
  * @property bool $is_conclusion [tinyint(1)]
  * @property bool $is_execution [tinyint(1)]
  */
-
 class Table_availability extends ActiveRecord
 {
-    public static function tableName():string
+    public static function tableName(): string
     {
         return 'dataavailability';
     }
@@ -31,22 +30,19 @@ class Table_availability extends ActiveRecord
     {
         // получу данные о пользователе
         $user = User::findByUsername($username);
-        if($user !== null){
+        if ($user !== null) {
             // поверю, если данные ещё не заносились- добавлю и уведомлю о загруженном заключении
             $existentData = self::findOne(['userId' => $username]);
-            if($existentData === null){
+            if ($existentData === null) {
                 // добавлю новую запись
                 $newData = new self(['userId' => $username, 'is_execution' => true, 'startTime' => $user->created_at]);
                 $newData->save();
                 // оповещу пользователя через вайбер, если он есть
                 Viber::notifyExecutionLoaded($username);
-            }
-            else if(!$existentData->is_execution){
-                if($existentData->is_execution === false){
-                    $existentData->is_execution = true;
-                    $existentData->save();
-                    Viber::notifyExecutionLoaded($username);
-                }
+            } else if (!$existentData->is_execution) {
+                $existentData->is_execution = true;
+                $existentData->save();
+                Viber::notifyExecutionLoaded($username);
             }
         }
     }
@@ -59,17 +55,16 @@ class Table_availability extends ActiveRecord
     {
         // получу данные о пользователе
         $user = User::findByUsername($username);
-        if($user !== null){
+        if ($user !== null) {
             // поверю, если данные ещё не заносились- добавлю и уведомлю о загруженном заключении
             $existentData = self::findOne(['userId' => $username]);
-            if($existentData === null){
+            if ($existentData === null) {
                 // добавлю новую запись
                 $newData = new self(['userId' => $username, 'is_conclusion' => true, 'startTime' => $user->created_at]);
                 $newData->save();
                 // оповещу пользователя через вайбер, если он есть
                 Viber::notifyConclusionLoaded();
-            }
-            else if(!$existentData->is_conclusion){
+            } else if (!$existentData->is_conclusion) {
                 $existentData->is_conclusion = true;
                 $existentData->save();
                 Viber::notifyConclusionLoaded();

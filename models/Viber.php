@@ -66,7 +66,9 @@ class Viber extends Model
             if(!empty($subscribers)){
                 foreach ($subscribers as $subscriber) {
                     $link = TempDownloadLinks::createLink($execution, 'execution');
-                    self::sendTempLink($subscriber->viber_id, $link);
+                    if($link !== null){
+                        self::sendTempLink($subscriber->viber_id, $link->link);
+                    }
                 }
             }
         }

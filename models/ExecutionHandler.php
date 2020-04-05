@@ -327,7 +327,6 @@ class ExecutionHandler extends Model
         if ($user === null) {
             $transaction = new DbTransaction();
             self::createUser($name);
-            self::startTimer($name);
             $transaction->commitTransaction();
         }
     }
