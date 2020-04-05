@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use yii\base\Exception;
 use yii\db\ActiveRecord;
 
 /**
@@ -24,6 +25,7 @@ class Table_availability extends ActiveRecord
     /**
      * регистрация загруженных данных обследования
      * @param $username
+     * @throws Exception
      */
     public static function setDataLoaded($username): void
     {
@@ -37,7 +39,7 @@ class Table_availability extends ActiveRecord
                 $newData = new self(['userId' => $username, 'is_execution' => true, 'startTime' => $user->created_at]);
                 $newData->save();
                 // оповещу пользователя через вайбер, если он есть
-                Viber::notifyExecutionLoaded();
+                Viber::notifyExecutionLoaded($username);
             }
             else if(!$existentData->is_execution){
                 if($existentData->is_execution === false){

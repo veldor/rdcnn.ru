@@ -420,6 +420,7 @@ class ExecutionHandler extends Model
      * Проверю наличие файлов
      * @param $name
      * @return bool
+     * @throws Exception
      */
     public static function isExecution($name): bool
     {
@@ -444,18 +445,6 @@ class ExecutionHandler extends Model
             return true;
         }
         return false;
-    }
-
-    public static function startTimer($id): void
-    {
-        // проверю, нет ли ещё в базе данного пациента
-        $contains = Table_availability::findOne(['userId' => $id]);
-        if ($contains === null) {
-            $timer = new Table_availability();
-            $timer->userId = $id;
-            $timer->startTime = time();
-            $timer->save();
-        }
     }
 
     public static function recurse_copy($src, $dst): void

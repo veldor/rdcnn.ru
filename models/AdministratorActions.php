@@ -1,10 +1,9 @@
-<?php
+<?php /** @noinspection PhpUndefinedClassInspection */
 
 
 namespace app\models;
 
 
-use app\priv\Info;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -29,6 +28,10 @@ class AdministratorActions extends Model
      */
     public $conclusion;
 
+    /**
+     * @return array
+     * @throws Exception
+     */
     public static function checkPatients(): array
     {
         $response = [];
@@ -54,6 +57,7 @@ class AdministratorActions extends Model
         return $response;
     }
 
+    /** @noinspection OnlyWritesOnParameterInspection */
     public static function selectCenter(): void
     {
         $center =  Yii::$app->request->post('center');
@@ -61,6 +65,7 @@ class AdministratorActions extends Model
         $session['center'] = $center;
     }
 
+    /** @noinspection OnlyWritesOnParameterInspection */
     public static function selectTime(): void
     {
         $time =  Yii::$app->request->post('timeInterval');
@@ -69,27 +74,13 @@ class AdministratorActions extends Model
     }
 
 
+    /** @noinspection OnlyWritesOnParameterInspection */
     public static function selectSort(): void
     {
         $sortBy =  Yii::$app->request->post('sortBy');
         $session = Yii::$app->session;
         $session['sortBy'] = $sortBy;
     }
-
-/*    public static function clearGarbage()
-    {
-        // получу список всех пациентов
-        $patients = User::findAllRegistered();
-        // определю время жизни учётной записи
-        $lifetime = time() - Info::DATA_SAVING_TIME;
-        if(!empty($patients)){
-            foreach ($patients as $patient) {
-                if($patient->created_at < $lifetime){
-                    self::simpleDeleteItem($patient->username);
-                }
-            }
-        }
-    }*/
 
     /**
      * @param $id
@@ -108,7 +99,7 @@ class AdministratorActions extends Model
                 unlink($executionFile);
             }
             // удалю запись в таблице выдачи разрешений
-            $auth = Table_auth_assigment::findOne(["user_id" => $execution->id]);
+            $auth = Table_auth_assigment::findOne(['user_id' => $execution->id]);
             if($auth !== null){
                 try {
                     $auth->delete();
@@ -208,11 +199,15 @@ class AdministratorActions extends Model
                 ++$counter;
             }
             Table_availability::setConclusionLoaded($execution->username);
-            ExecutionHandler::startTimer($this->executionId);
             return ['status' => 1, 'message' => 'Заключение добавлено'];
         }
         return ['status' => 2, 'message' => $this->errors];
     }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
     public function addExecution(): array
     {
         if($this->validate()){
@@ -225,7 +220,8 @@ class AdministratorActions extends Model
             }
             $filename = Yii::getAlias('@executionsDirectory') . '\\' . $execution->username . '.zip';
             $this->execution->saveAs($filename);
-            ExecutionHandler::startTimer($this->executionId);
+            // оповещу подписынных в вайбере о добавлении файлов
+            Viber::notifyExecutionLoaded($execution->username);
             return ['status' => 1, 'message' => 'Файлы обследования добавлены'];
         }
         return ['status' => 2, 'message' => $this->errors];

@@ -118,6 +118,7 @@ class AdministratorController extends Controller
     /**
      * @return array
      * @throws NotFoundHttpException
+     * @throws Exception
      */
     public function actionAddExecutionData(): array
     {
