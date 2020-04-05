@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\utils\TimeHandler;
 use yii\db\ActiveRecord;
 
 /**
@@ -35,5 +36,52 @@ class Table_statistics extends ActiveRecord
     {
         $newCounter = new self(['user_id' => $userId, 'type' => 'print_conclusion', 'timestamp' => time()]);
         $newCounter->save();
+    }
+
+    /**
+     * Верну в текстовом формате статистику по использованию ЛК
+     * @return string
+     */
+    public static function getFullState(): string
+    {
+        $answer = '';
+        // получу общее количество скачанных заключений
+        $answer .= 'Всего загружено заключений: ' . self::getTotalConclusionsCount() . "\n";
+        $answer .= 'Всего распечатано заключений: ' . self::getTotalConclusionsPrintCount() . "\n";
+        $answer .= 'Всего скачано файлов: ' . self::getTotalExecutionsCount() . "\n";
+        $answer .= 'Загружено заключений сегодня: ' . self::getTodayConclusionsCount() . "\n";
+        $answer .= 'Распечатано заключений сегодня: ' . self::getTodayConclusionsPrintCount() . "\n";
+        $answer .= 'Скачано файлов сегодня: ' . self::getTodayExecutionsCount() . "\n";
+        return $answer;
+    }
+
+    /**
+     * @return int
+     */
+    private static function getTotalConclusionsCount():int
+    {
+        return self::find()->where(['type' => 'download_conclusion'])->count();
+    }
+
+    private static function getTotalExecutionsCount(): int
+    {
+        return self::find()->where(['type' => 'download_execution'])->count();
+    }
+    private static function getTotalConclusionsPrintCount(): int
+    {
+        return self::find()->where(['type' => 'print_conclusion'])->count();
+    }
+
+    private static function getTodayConclusionsCount()
+    {
+        return self::find()->where(['type' => 'download_conclusion'])->andWhere(['>', 'timestamp', TimeHandler::getTodayStart()])->count();
+    }
+    private static function getTodayConclusionsPrintCount()
+    {
+        return self::find()->where(['type' => 'print_conclusion'])->andWhere(['>', 'timestamp', TimeHandler::getTodayStart()])->count();
+    }
+    private static function getTodayExecutionsCount()
+    {
+        return self::find()->where(['type' => 'download_execution'])->andWhere(['>', 'timestamp', TimeHandler::getTodayStart()])->count();
     }
 }

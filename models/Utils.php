@@ -18,22 +18,23 @@ class Utils extends Model
         return $dtF->diff($dtT)->format('%a дней, %h часов, %i минут %s секунд');
     }
 
-    public static function isCenterFiltered()
+    /**
+     * @return bool
+     */
+    public static function isCenterFiltered(): bool
     {
-        if (!empty(Yii::$app->session['center']) && Yii::$app->session['center'] != "all") {
-            return true;
-        }
-        return false;
+        return !empty(Yii::$app->session['center']) && Yii::$app->session['center'] !== 'all';
     }
 
-    public static function isFiltered(User $execution)
+    /**
+     * @param User $execution
+     * @return bool
+     */
+    public static function isFiltered(User $execution): bool
     {
         // если фильтр по авроре- номер должен начинаться с буквы A, если НВ- с цифры
-        $firstSymbol = substr($execution->username, 0, 1);
-        if ((Yii::$app->session['center'] == 'aurora' && $firstSymbol == 'A') || (Yii::$app->session['center'] == 'nv' && !empty((int)$firstSymbol))) {
-            return false;
-        }
-        return true;
+        $firstSymbol = $execution->username[0];
+        return !((Yii::$app->session['center'] === 'aurora' && $firstSymbol === 'A') || (Yii::$app->session['center'] === 'nv' && !empty((int)$firstSymbol)));
     }
 
     public static function getSort()
@@ -46,18 +47,15 @@ class Utils extends Model
 
     public static function isTimeFiltered()
     {
-        if (!empty(Yii::$app->session['timeInterval']) && Yii::$app->session['timeInterval'] != "all") {
-            return true;
-        }
-        return false;
+        return !empty(Yii::$app->session['timeInterval']) && Yii::$app->session['timeInterval'] !== 'all';
     }
 
     public static function getStartInterval()
     {
-        if (Yii::$app->session['timeInterval'] == 'today') {
+        if (Yii::$app->session['timeInterval'] === 'today') {
             $time = time();
         }
-        if (Yii::$app->session['timeInterval'] == 'yesterday') {
+        if (Yii::$app->session['timeInterval'] === 'yesterday') {
             $time = time() - 86400;
         }
         $dtNow = new DateTime();
@@ -69,10 +67,10 @@ class Utils extends Model
 
     public static function getEndInterval()
     {
-        if (Yii::$app->session['timeInterval'] == 'today') {
+        if (Yii::$app->session['timeInterval'] === 'today') {
             $time = time();
         }
-        if (Yii::$app->session['timeInterval'] == 'yesterday') {
+        if (Yii::$app->session['timeInterval'] === 'yesterday') {
             $time = time() - 86400;
         }
         $dtNow = new DateTime();
@@ -91,7 +89,7 @@ class Utils extends Model
         // найду в папке с файлами обследований все папки, и почищу их
         $files = scandir(Info::EXEC_FOLDER);
         foreach ($files as $file) {
-            if ($file != "." && $file != "..") {
+            if ($file !== '.' && $file !== '..') {
                 $path = Info::EXEC_FOLDER . "/$file";
                 if (is_dir($path)) {
                     ExecutionHandler::rmRec($path);
@@ -108,13 +106,13 @@ class Utils extends Model
          * @return mixed
          */ $executionsList, function ($execution1, $execution2){
             switch (self::getSort()){
-                case "byTime":
+                case 'byTime':
                     return $execution1->created_at < $execution2->created_at;
-                case "byNumber":
+                case 'byNumber':
                     return $execution1->username < $execution2->username;
-                case "byExecutions":
+                case 'byExecutions':
                     return ExecutionHandler::isExecution($execution1->username) > ExecutionHandler::isExecution($execution2->username);
-                case "byConclusion":
+                case 'byConclusion':
                     return ExecutionHandler::isConclusion($execution1->username) > ExecutionHandler::isConclusion($execution2->username);
             }
         });

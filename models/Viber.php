@@ -27,6 +27,7 @@ class Viber extends Model
 
     public const CONCLUSIONS = 'заключения';
     public const EXECUTIONS = 'файлы';
+    const DOWNLOADS_COUNT = 'статистика загрузок';
 
     public static function notifyExecutionLoaded()
     {
@@ -334,6 +335,10 @@ class Viber extends Model
             else{
                 self::sendMessage($bot, $botSender, $receiverId, 'Вау, все файлы загружены!');
             }
+        }
+        elseif($lowerText === self::DOWNLOADS_COUNT){
+            // получу данные по загрузкам
+            self::sendMessage($bot, $botSender, $receiverId, Table_statistics::getFullState());
         }
         else {
             self::sendMessage($bot, $botSender, $receiverId, 'Делаю вид, что работаю');

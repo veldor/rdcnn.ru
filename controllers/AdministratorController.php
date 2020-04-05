@@ -10,6 +10,7 @@ use app\models\FileUtils;
 use app\models\Table_availability;
 use app\models\User;
 use app\models\Utils;
+use app\models\utils\TimeHandler;
 use app\priv\Info;
 use Throwable;
 use Yii;
@@ -169,15 +170,6 @@ class AdministratorController extends Controller
 
     public function actionTest(): void
     {
-        $withoutConclusions = Table_availability::getWithoutExecutions();
-        var_dump($withoutConclusions);
-        $list = "Не загружены заключения:\n";
-        foreach ($withoutConclusions as $withoutConclusion) {
-            $user = User::findByUsername($withoutConclusion->userId);
-            if($user !== null){
-                $list .= "{$user->username}\n";
-            }
-        }
-        echo $list;
+        echo TimeHandler::getTodayStart();
     }
 }
