@@ -175,6 +175,7 @@ class Viber extends Model
             $bot
                 // При подключении бота
                 ->onConversation(static function () use ($bot, $botSender) {
+                    self::logAction('new conversation...');
                     return (new Text())
                         ->setSender($botSender)
                         ->setText('Добрый день. Я бот РДЦ. Выберите, что вы хотите сделать')

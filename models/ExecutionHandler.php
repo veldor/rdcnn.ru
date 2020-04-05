@@ -369,7 +369,7 @@ class ExecutionHandler extends Model
     public function scenarios(): array
     {
         return [
-            self::SCENARIO_ADD => ['executionNumber', 'executionData', 'executionResponse'],
+            self::SCENARIO_ADD => ['executionNumber'],
         ];
     }
 
@@ -379,16 +379,12 @@ class ExecutionHandler extends Model
     {
         return [
             'executionNumber' => 'Номер обследования',
-            'executionData' => 'Данные обследования',
-            'executionResponse' => 'Заключение',
         ];
     }
 
     public function rules(): array
     {
         return [
-            [['executionData'], 'file', 'skipOnEmpty' => true, 'extensions' => 'zip', 'maxSize' => 1048576000],
-            [['executionResponse'], 'file', 'skipOnEmpty' => true, 'extensions' => 'pdf', 'maxSize' => 104857600],
             [['executionNumber'], 'required', 'on' => self::SCENARIO_ADD],
             ['executionNumber', 'string', 'length' => [1, 255]],
             ['executionNumber', 'match', 'pattern' => '/^[а-яa-z0-9]+$/iu']
