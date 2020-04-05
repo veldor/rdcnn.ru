@@ -81,4 +81,12 @@ class Table_availability extends ActiveRecord
     {
         return self::findAll(['is_conclusion' => 0]);
     }
+
+    /**
+     * @return Table_availability[]|null
+     */
+    public static function getWithoutExecutions(): ?array
+    {
+        return self::findAll(['is_execution' => 0]);
+    }
 }
