@@ -65,7 +65,7 @@ class Viber extends Model
 // так будет выглядеть наш бот (имя и аватар - можно менять)
         $botSender = new Sender([
             'name' => 'Бот РДЦ',
-            'avatar' => 'https://developers.viber.com/img/favicon.ico',
+            'avatar' => 'https://rdcnn.ru/images/bot.png',
         ]);
 
         try {
@@ -382,7 +382,7 @@ class Viber extends Model
         $bot = new Bot(['token' => Info::VIBER_API_KEY]);
         $botSender = new Sender([
             'name' => 'Бот РДЦ',
-            'avatar' => 'https://developers.viber.com/img/favicon.ico',
+            'avatar' => 'https://rdcnn.ru/images/bot.png',
         ]);
         $linkInfo = TempDownloadLinks::findOne(['link' => $link]);
         if ($linkInfo !== null) {
@@ -412,7 +412,7 @@ class Viber extends Model
                 $bot = new Bot(['token' => Info::VIBER_API_KEY]);
                 $botSender = new Sender([
                     'name' => 'Бот РДЦ',
-                    'avatar' => 'https://developers.viber.com/img/favicon.ico',
+                    'avatar' => 'https://rdcnn.ru/images/bot.png',
                 ]);
                 $bot->getClient()->sendMessage(
                     (new File())
