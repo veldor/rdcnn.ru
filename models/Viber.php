@@ -10,7 +10,6 @@ use app\models\database\ViberPersonalList;
 use app\models\database\ViberSubscriptions;
 use app\priv\Info;
 use Exception;
-use http\Url;
 use Viber\Api\Event;
 use Viber\Api\Keyboard;
 use Viber\Api\Keyboard\Button;
@@ -21,9 +20,12 @@ use Viber\Bot;
 use Viber\Client;
 use Yii;
 use yii\base\Model;
+use yii\helpers\Url;
 
 class Viber extends Model
 {
+
+    public const CONCLUSIONS = 'заключения';
 
     public static function notifyExecutionLoaded()
     {
@@ -284,21 +286,35 @@ class Viber extends Model
             ViberPersonalList::register($receiverId);
             self::sendMessage($bot, $botSender, $receiverId, 'Ок, вы работаете у нас. Теперь у вас есть доступ к закрытым функциям. Чтобы увидеть список команд, введите "команды"');
         } elseif ($lowerText === 'команды') {
-            if(ViberPersonalList::iWorkHere($receiverId)){
+            if (ViberPersonalList::iWorkHere($receiverId)) {
                 // отправлю список команд, которые может выполнять сотрудник
                 self::sendMessage(
                     $bot,
                     $botSender,
                     $receiverId,
-                    "
-                    'заключения' : выводит список пациентов без заключений\n
-                    'файлы' : выводит список пациентов без загруженных файлов обследования\n
-                    'статистика загрузок' : выводит статистику загрузок заключений и файлов\n
-                    список будет дополняться по мере развития
-                    "
+                    "'" . self::CONCLUSIONS . "' : выводит список пациентов без заключений\n'файлы' : выводит список пациентов без загруженных файлов обследования\n'статистика загрузок' : выводит статистику загрузок заключений и файлов\nсписок будет дополняться по мере развития"
                 );
+            } else {
+                self::sendMessage($bot, $botSender, $receiverId, 'Не понимаю, что вы имеете в виду');
             }
-            else{
+        } elseif ($lowerText === self::CONCLUSIONS) {
+            if (ViberPersonalList::iWorkHere($receiverId)) {
+                // получу список обследований без заключений
+                $withoutConclusions = Table_availability::getWithoutConclusions();
+                if(!empty($withoutConclusions)){
+                    $list = 'Не загружены заключения:\n';
+                    foreach ($withoutConclusions as $withoutConclusion) {
+                        $user = User::findIdentity($withoutConclusion->userId);
+                        if($user !== null){
+                            $list .= "{$user->username}\n";
+                        }
+                    }
+                    self::sendMessage($bot, $botSender, $receiverId, $list);
+                }
+                else{
+                    self::sendMessage($bot, $botSender, $receiverId, 'Вау, все заключения загружены!');
+                }
+            } else {
                 self::sendMessage($bot, $botSender, $receiverId, 'Не понимаю, что вы имеете в виду');
             }
         } else {
@@ -381,7 +397,7 @@ class Viber extends Model
                         ->setReceiver($subscriberId)
                         ->setSize(222)
                         ->setFileName($linkInfo->file_name)
-                        ->setMedia(\yii\helpers\Url::toRoute(['download/download-temp', 'link' => $link], 'https'))
+                        ->setMedia(Url::toRoute(['download/download-temp', 'link' => $link], 'https'))
                 );
             }
         }

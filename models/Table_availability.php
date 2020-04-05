@@ -29,19 +29,21 @@ class Table_availability extends ActiveRecord
     {
         // получу данные о пользователе
         $user = User::findByUsername($username);
-        // поверю, если данные ещё не заносились- добавлю и уведомлю о загруженном заключении
-        $existentData = self::findOne(['userId' => $username]);
-        if($existentData === null){
-            // добавлю новую запись
-            $newData = new self(['userId' => $username, 'is_execution' => true, 'startTime' => $user->created_at]);
-            $newData->save();
-            // оповещу пользователя через вайбер, если он есть
-            Viber::notifyExecutionLoaded();
-        }
-        else if(!$existentData->is_execution){
-            $existentData->is_execution = true;
-            $existentData->save();
-            Viber::notifyExecutionLoaded();
+        if($user !== null){
+            // поверю, если данные ещё не заносились- добавлю и уведомлю о загруженном заключении
+            $existentData = self::findOne(['userId' => $username]);
+            if($existentData === null){
+                // добавлю новую запись
+                $newData = new self(['userId' => $username, 'is_execution' => true, 'startTime' => $user->created_at]);
+                $newData->save();
+                // оповещу пользователя через вайбер, если он есть
+                Viber::notifyExecutionLoaded();
+            }
+            else if(!$existentData->is_execution){
+                $existentData->is_execution = true;
+                $existentData->save();
+                Viber::notifyExecutionLoaded();
+            }
         }
     }
 
@@ -54,19 +56,29 @@ class Table_availability extends ActiveRecord
 
         // получу данные о пользователе
         $user = User::findByUsername($username);
-        // поверю, если данные ещё не заносились- добавлю и уведомлю о загруженном заключении
-        $existentData = self::findOne(['userId' => $username]);
-        if($existentData === null){
-            // добавлю новую запись
-            $newData = new self(['userId' => $username, 'is_conclusion' => true, 'startTime' => $user->created_at]);
-            $newData->save();
-            // оповещу пользователя через вайбер, если он есть
-            Viber::notifyConclusionLoaded();
+        if($user !== null){
+            // поверю, если данные ещё не заносились- добавлю и уведомлю о загруженном заключении
+            $existentData = self::findOne(['userId' => $username]);
+            if($existentData === null){
+                // добавлю новую запись
+                $newData = new self(['userId' => $username, 'is_conclusion' => true, 'startTime' => $user->created_at]);
+                $newData->save();
+                // оповещу пользователя через вайбер, если он есть
+                Viber::notifyConclusionLoaded();
+            }
+            else if(!$existentData->is_execution){
+                $existentData->is_conclusion = true;
+                $existentData->save();
+                Viber::notifyConclusionLoaded();
+            }
         }
-        else if(!$existentData->is_execution){
-            $existentData->is_conclusion = true;
-            $existentData->save();
-            Viber::notifyConclusionLoaded();
-        }
+    }
+
+    /**
+     * @return Table_availability[]|null
+     */
+    public static function getWithoutConclusions(): ?array
+    {
+        return self::findAll(['is_conclusion' => 0]);
     }
 }
