@@ -8,6 +8,7 @@ use app\models\database\TempDownloadLinks;
 use app\models\database\ViberMessaging;
 use app\models\database\ViberPersonalList;
 use app\models\database\ViberSubscriptions;
+use app\models\utils\GrammarHandler;
 use app\priv\Info;
 use Exception;
 use Viber\Api\Event;
@@ -27,7 +28,27 @@ class Viber extends Model
 
     public const CONCLUSIONS = 'заключения';
     public const EXECUTIONS = 'файлы';
-    const DOWNLOADS_COUNT = 'статистика загрузок';
+    public const DOWNLOADS_COUNT = 'статистика загрузок';
+
+    /**
+     * @param $apiKey
+     * @return Bot
+     */
+    public static function getBot($apiKey): Bot
+    {
+        return new Bot(['token' => $apiKey]);
+    }
+
+    /**
+     * @return Sender
+     */
+    public static function getBotSender(): Sender
+    {
+        return new Sender([
+            'name' => 'Бот РДЦ',
+            'avatar' => 'https://rdcnn.ru/images/bot.png',
+        ]);
+    }
 
     public static function notifyExecutionLoaded()
     {
@@ -61,6 +82,51 @@ class Viber extends Model
     public static function handleRequest(): void
     {
         $apiKey = Info::VIBER_API_KEY;
+        // придётся добавить свою обработку- проверяю загрузку файлов
+        $input = file_get_contents('php://input');
+        if(!empty($input)){
+            // разберу запрос
+            $json = json_decode($input, true, 512, JSON_THROW_ON_ERROR);
+            if(!empty($json) && !empty($json['message']) && !empty($json['message']['type'])){
+                if($json['message']['type'] === 'file'){
+                    $senderId = $json['sender']['id'];
+                    self::sendMessage(
+                        self::getBot($apiKey),
+                        self::getBotSender(),
+                        $senderId,
+                        'Пришёл файл'
+                        );
+                    // оповещу о получении файла
+                    // проверю, что заявленный файл является PDF
+//                    if(GrammarHandler::isPdf($json['message']['file_name'])){
+//                        // получу базовое название файла
+//                        $basename = GrammarHandler::getBaseFileName($json['message']['file_name']);
+//                        if(!empty($basename)){
+//                            $name = GrammarHandler::toLatin($basename);
+//                            // проверю, зарегистрировано ли уже обследование с данным номером,
+//                            // так как будем подгружать заключения только к зарегистрированным
+//                            $execution = User::findByUsername($name);
+//                            if($execution !== null){
+//                                $realName =  GrammarHandler::toLatin($json['message']['file_name']);
+//                                // ещё раз удостоверюсь, что файл подходит для загрузки
+//                                $strictPattern = '/^A?\d+-?\d*\.pdf$/';
+//                                if(preg_match($strictPattern, $realName)){
+//                                    // загружу файл
+//                                    $file = file_get_contents($json['message']['media']);
+//                                    if(!empty($file)){
+//                                        file_put_contents('Z:\sites\rdcnn.ru\logs\\' . $realName, $file);
+//                                    }
+//                                    else{
+//                                        // не удалось загрузить файл, сообщу об ошибке
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+                }
+            }
+        }
+
 
 // так будет выглядеть наш бот (имя и аватар - можно менять)
         $botSender = new Sender([
@@ -350,7 +416,7 @@ class Viber extends Model
         (new ViberMessaging(['timestamp' => time(), 'text' => $text, 'receiver_id' => $receiverId]))->save();
     }
 
-    private static function logAction($text): void
+    public static function logAction($text): void
     {
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/viber_log_' . time() . '.log';
         file_put_contents($file, $text);

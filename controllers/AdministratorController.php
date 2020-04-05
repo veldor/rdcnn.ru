@@ -10,7 +10,9 @@ use app\models\FileUtils;
 use app\models\Table_availability;
 use app\models\User;
 use app\models\Utils;
+use app\models\utils\GrammarHandler;
 use app\models\utils\TimeHandler;
+use app\models\Viber;
 use app\priv\Info;
 use Throwable;
 use Yii;
@@ -170,6 +172,37 @@ class AdministratorController extends Controller
 
     public function actionTest(): void
     {
-        echo TimeHandler::getTodayStart();
+        $fileValue = file_get_contents('Z:\sites\rdcnn.ru\logs\viber_log_1586077378.log');
+        $json = json_decode($fileValue, true, 512, JSON_THROW_ON_ERROR);
+        if(!empty($json) && !empty($json['message']) && !empty($json['message']['type'])){
+            if($json['message']['type'] === 'file'){
+                // проверю, что заявленный файл является PDF
+                if(GrammarHandler::isPdf($json['message']['file_name'])){
+                    // получу базовое название файла
+                    $basename = GrammarHandler::getBaseFileName($json['message']['file_name']);
+                    if(!empty($basename)){
+                        $name = GrammarHandler::toLatin($basename);
+                        // проверю, зарегистрировано ли уже обследование с данным номером,
+                        // так как будем подгружать заключения только к зарегистрированным
+                        $execution = User::findByUsername($name);
+                        if($execution !== null){
+                            $realName =  GrammarHandler::toLatin($json['message']['file_name']);
+                            // ещё раз удостоверюсь, что файл подходит для загрузки
+                            $strictPattern = '/^A?\d+-?\d*\.pdf$/';
+                            if(preg_match($strictPattern, $realName)){
+                                // загружу файл
+                                $file = file_get_contents($json['message']['media']);
+                                if(!empty($file)){
+                                    file_put_contents('Z:\sites\rdcnn.ru\logs\\' . $realName, $file);
+                                }
+                                else{
+                                    // не удалось загрузить файл, сообщу об ошибке
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
