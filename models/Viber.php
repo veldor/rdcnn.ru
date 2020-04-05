@@ -301,7 +301,8 @@ class Viber extends Model
             if (ViberPersonalList::iWorkHere($receiverId)) {
                 // получу список обследований без заключений
                 $withoutConclusions = Table_availability::getWithoutConclusions();
-                if(!empty($withoutConclusions)){
+                if($withoutConclusions !== null){
+                    self::sendMessage($bot, $botSender, $receiverId, 'есть');
                     $list = 'Не загружены заключения:\n';
                     foreach ($withoutConclusions as $withoutConclusion) {
                         $user = User::findIdentity($withoutConclusion->userId);

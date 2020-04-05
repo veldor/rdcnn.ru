@@ -7,6 +7,8 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
+use app\models\Table_availability;
+use app\models\User;
 use app\models\Utils;
 use app\priv\Info;
 use Throwable;
@@ -31,7 +33,7 @@ class AdministratorController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage', 'delete-unhandled-folder', 'rename-unhandled-folder', 'print-missed-conclusions-list'],
+                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage', 'delete-unhandled-folder', 'rename-unhandled-folder', 'print-missed-conclusions-list', 'test'],
                         'roles' => ['manager'],
                         //'ips' => Info::ACCEPTED_IPS,
                     ],
@@ -126,7 +128,11 @@ class AdministratorController extends Controller
         throw new NotFoundHttpException();
     }
 
-    public function actionPatientsCheck(){
+    /**
+     * @return array
+     */
+    public function actionPatientsCheck(): array
+    {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return AdministratorActions::checkPatients();
     }
@@ -159,5 +165,18 @@ class AdministratorController extends Controller
     public function actionPrintMissedConclusionsList(): string
     {
         return $this->render('missed-conclusions-list');
+    }
+
+    public function actionTest(): void
+    {
+        $withoutConclusions = Table_availability::getWithoutConclusions();
+        $list = 'Не загружены заключения:\n';
+        foreach ($withoutConclusions as $withoutConclusion) {
+            $user = User::findIdentity($withoutConclusion->userId);
+            if($user !== null){
+                $list .= "{$user->username}\n";
+            }
+        }
+        echo $list;
     }
 }
