@@ -275,7 +275,16 @@ class Viber extends Model
                     ExecutionHandler::checkAvailabilityForBots($execution->id, true, $receiverId);
                 }
             }
-        } else {
+        }
+        elseif(mb_strtolower($text) === 'я работаю в рдц'){
+            // запрос доступа к приватным данным
+            self::sendMessage($bot, $botSender, $receiverId, 'Докажите');
+        }
+        elseif($text === Info::VIBER_SECRET){
+            // регистрирую пользователя как нашего сотрудника
+            self::sendMessage($bot, $botSender, $receiverId, 'Ок, вы работаете у нас. Теперь у вас есть доступ к закрытым функциям. Чтобы увидеть список команд, введите "команды"');
+        }
+        else {
             self::sendMessage($bot, $botSender, $receiverId, 'Делаю вид, что работаю');
         }
     }
@@ -319,8 +328,16 @@ class Viber extends Model
             'name' => 'Бот РДЦ',
             'avatar' => 'https://developers.viber.com/img/favicon.ico',
         ]);
-        self::sendMessage($bot, $botSender, $subscriberId, 'Заключение врача готово!');
-        self::sendFile($subscriberId, $link);
+        $linkInfo = TempDownloadLinks::findOne(['link' => $link]);
+        if($linkInfo !== null){
+            if($linkInfo->file_type === 'conclusion'){
+                self::sendMessage($bot, $botSender, $subscriberId, 'Заключение врача готово!');
+            }
+            else{
+                self::sendMessage($bot, $botSender, $subscriberId, 'Файлы сканирования загружены!');
+            }
+            self::sendFile($subscriberId, $link);
+        }
     }
 
     /**
@@ -347,7 +364,7 @@ class Viber extends Model
                     (new File())
                         ->setSender($botSender)
                         ->setReceiver($subscriberId)
-                        ->setSize(filesize($file))
+                        ->setSize(222)
                         ->setFileName($linkInfo->file_name)
                         ->setMedia(\yii\helpers\Url::toRoute(['download/download-temp', 'link' => $link], 'https'))
                 );
