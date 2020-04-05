@@ -170,6 +170,7 @@ class AdministratorController extends Controller
     public function actionTest(): void
     {
         $withoutConclusions = Table_availability::getWithoutExecutions();
+        var_dump($withoutConclusions);
         $list = "Не загружены заключения:\n";
         foreach ($withoutConclusions as $withoutConclusion) {
             $user = User::findByUsername($withoutConclusion->userId);

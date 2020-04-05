@@ -302,7 +302,7 @@ class Viber extends Model
         } elseif ($lowerText === self::CONCLUSIONS && $workHere) {
                 // получу список обследований без заключений
                 $withoutConclusions = Table_availability::getWithoutConclusions();
-                if($withoutConclusions !== null){
+                if(!empty($withoutConclusions)){
                     $list = "Не загружены заключения:\n";
                     foreach ($withoutConclusions as $withoutConclusion) {
                         $user = User::findByUsername($withoutConclusion->userId);
@@ -318,12 +318,15 @@ class Viber extends Model
         }
         elseif($lowerText === self::EXECUTIONS && $workHere){
             $withoutExecutions = Table_availability::getWithoutExecutions();
-            if($withoutExecutions !== null){
+            if(!empty($withoutExecutions)){
                 $list = "Не загружены файлы:\n";
                 foreach ($withoutExecutions as $withoutExecution) {
                     $user = User::findByUsername($withoutExecution->userId);
                     if($user !== null){
                         $list .= "{$user->username}\n";
+                    }
+                    else{
+                        $list .= "{$withoutExecution->userId} не найден\n";
                     }
                 }
                 self::sendMessage($bot, $botSender, $receiverId, $list);

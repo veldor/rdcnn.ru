@@ -75,17 +75,17 @@ class Table_availability extends ActiveRecord
     }
 
     /**
-     * @return Table_availability[]|null
+     * @return Table_availability[]
      */
-    public static function getWithoutConclusions(): ?array
+    public static function getWithoutConclusions(): array
     {
         return self::findAll(['is_conclusion' => 0]);
     }
 
     /**
-     * @return Table_availability[]|null
+     * @return Table_availability[]
      */
-    public static function getWithoutExecutions(): ?array
+    public static function getWithoutExecutions(): array
     {
         return self::findAll(['is_execution' => 0]);
     }
