@@ -22,6 +22,7 @@ use Viber\Client;
 use Yii;
 use yii\base\Model;
 use yii\helpers\Url;
+use yii\web\NotFoundHttpException;
 
 class Viber extends Model
 {
@@ -29,6 +30,7 @@ class Viber extends Model
     public const CONCLUSIONS = 'заключения';
     public const EXECUTIONS = 'файлы';
     public const DOWNLOADS_COUNT = 'статистика загрузок';
+    public const VIBER_FILE_SIZE_LIMIT = 52428800;
 
     /**
      * @param $apiKey
@@ -84,29 +86,29 @@ class Viber extends Model
         $apiKey = Info::VIBER_API_KEY;
         // придётся добавить свою обработку- проверяю загрузку файлов
         $input = file_get_contents('php://input');
-        if(!empty($input)){
+        if (!empty($input)) {
             // разберу запрос
             $json = json_decode($input, true, 512, JSON_THROW_ON_ERROR);
             $senderId = $json['sender']['id'];
-            if(!empty($json) && !empty($json['message']) && !empty($json['message']['type']) && $json['message']['type'] === 'file' && ViberPersonalList::iWorkHere($senderId)) {
+            if (!empty($json) && !empty($json['message']) && !empty($json['message']['type']) && $json['message']['type'] === 'file' && ViberPersonalList::iWorkHere($senderId)) {
                 // оповещу о получении файла
                 // проверю, что заявленный файл является PDF
-                if(GrammarHandler::isPdf($json['message']['file_name'])){
+                if (GrammarHandler::isPdf($json['message']['file_name'])) {
                     // получу базовое название файла
                     $basename = GrammarHandler::getBaseFileName($json['message']['file_name']);
-                    if(!empty($basename)){
+                    if (!empty($basename)) {
                         $name = GrammarHandler::toLatin($basename);
                         // проверю, зарегистрировано ли уже обследование с данным номером,
                         // так как будем подгружать заключения только к зарегистрированным
                         $execution = User::findByUsername($name);
-                        if($execution !== null){
-                            $realName =  GrammarHandler::toLatin($json['message']['file_name']);
+                        if ($execution !== null) {
+                            $realName = GrammarHandler::toLatin($json['message']['file_name']);
                             // ещё раз удостоверюсь, что файл подходит для загрузки
                             $strictPattern = '/^A?\d+-?\d*\.pdf$/';
-                            if(preg_match($strictPattern, $realName)){
+                            if (preg_match($strictPattern, $realName)) {
                                 // загружу файл
                                 $file = file_get_contents($json['message']['media']);
-                                if(!empty($file)){
+                                if (!empty($file)) {
                                     file_put_contents(Yii::getAlias('@conclusionsDirectory') . '\\' . $realName, $file);
                                     self::sendMessage(
                                         self::getBot($apiKey),
@@ -114,8 +116,7 @@ class Viber extends Model
                                         $senderId,
                                         'Заключение ' . $realName . ' успешно добавлено'
                                     );
-                                }
-                                else{
+                                } else {
                                     // не удалось загрузить файл, сообщу об ошибке
                                     self::sendMessage(
                                         self::getBot($apiKey),
@@ -124,8 +125,7 @@ class Viber extends Model
                                         'Заключение ' . $realName . ' не удалось загрузить. Попробуйте ещё раз'
                                     );
                                 }
-                            }
-                            else{
+                            } else {
                                 self::sendMessage(
                                     self::getBot($apiKey),
                                     self::getBotSender(),
@@ -133,8 +133,7 @@ class Viber extends Model
                                     'Заключение ' . $realName . ' : неверное имя файла. Назовите файл в соответствие с правилами'
                                 );
                             }
-                        }
-                        else{
+                        } else {
                             self::sendMessage(
                                 self::getBot($apiKey),
                                 self::getBotSender(),
@@ -142,8 +141,7 @@ class Viber extends Model
                                 'Не удалось найти обследование с данным номером. Сначала администраторы должны его зарегистрировать'
                             );
                         }
-                    }
-                    else{
+                    } else {
                         self::sendMessage(
                             self::getBot($apiKey),
                             self::getBotSender(),
@@ -151,8 +149,7 @@ class Viber extends Model
                             'Проверьте правильность названия файла, я не смог его разобрать'
                         );
                     }
-                }
-                else{
+                } else {
                     self::sendMessage(
                         self::getBot($apiKey),
                         self::getBotSender(),
@@ -401,50 +398,49 @@ class Viber extends Model
                     "'" . self::CONCLUSIONS . "' : выводит список пациентов без заключений\n'файлы' : выводит список пациентов без загруженных файлов обследования\n'статистика загрузок' : выводит статистику загрузок заключений и файлов\nсписок будет дополняться по мере развития"
                 );
             } else {
-                self::sendMessage($bot, $botSender, $receiverId, 'Не понимаю, что вы имеете в виду');
+                self::sendMessage(
+                    $bot,
+                    $botSender,
+                    $receiverId,
+                    'Введите через пробел ваш номер обследования и пароль, чтобы получить результаты'
+                );
             }
         } elseif ($lowerText === self::CONCLUSIONS && $workHere) {
-                // получу список обследований без заключений
-                $withoutConclusions = Table_availability::getWithoutConclusions();
-                if(!empty($withoutConclusions)){
-                    $list = "Не загружены заключения:\n";
-                    foreach ($withoutConclusions as $withoutConclusion) {
-                        $user = User::findByUsername($withoutConclusion->userId);
-                        if($user !== null){
-                            $list .= "{$user->username}\n";
-                        }
+            // получу список обследований без заключений
+            $withoutConclusions = Table_availability::getWithoutConclusions();
+            if (!empty($withoutConclusions)) {
+                $list = "Не загружены заключения:\n";
+                foreach ($withoutConclusions as $withoutConclusion) {
+                    $user = User::findByUsername($withoutConclusion->userId);
+                    if ($user !== null) {
+                        $list .= "{$user->username}\n";
                     }
-                    self::sendMessage($bot, $botSender, $receiverId, $list);
                 }
-                else{
-                    self::sendMessage($bot, $botSender, $receiverId, 'Вау, все заключения загружены!');
-                }
-        }
-        elseif($lowerText === self::EXECUTIONS && $workHere){
+                self::sendMessage($bot, $botSender, $receiverId, $list);
+            } else {
+                self::sendMessage($bot, $botSender, $receiverId, 'Вау, все заключения загружены!');
+            }
+        } elseif ($lowerText === self::EXECUTIONS && $workHere) {
             $withoutExecutions = Table_availability::getWithoutExecutions();
-            if(!empty($withoutExecutions)){
+            if (!empty($withoutExecutions)) {
                 $list = "Не загружены файлы:\n";
                 foreach ($withoutExecutions as $withoutExecution) {
                     $user = User::findByUsername($withoutExecution->userId);
-                    if($user !== null){
+                    if ($user !== null) {
                         $list .= "{$user->username}\n";
-                    }
-                    else{
+                    } else {
                         $list .= "{$withoutExecution->userId} не найден\n";
                     }
                 }
                 self::sendMessage($bot, $botSender, $receiverId, $list);
-            }
-            else{
+            } else {
                 self::sendMessage($bot, $botSender, $receiverId, 'Вау, все файлы загружены!');
             }
-        }
-        elseif($lowerText === self::DOWNLOADS_COUNT){
+        } elseif ($lowerText === self::DOWNLOADS_COUNT) {
             // получу данные по загрузкам
             self::sendMessage($bot, $botSender, $receiverId, Table_statistics::getFullState());
-        }
-        else {
-            self::sendMessage($bot, $botSender, $receiverId, 'Делаю вид, что работаю');
+        } else {
+            self::sendMessage($bot, $botSender, $receiverId, 'Не понял, что вы имеете в виду :( Чтобы узнать, что я умею- напишите мне "команды"');
         }
     }
 
@@ -508,24 +504,67 @@ class Viber extends Model
         if ($linkInfo !== null) {
             if ($linkInfo->file_type === 'execution') {
                 $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
+                $typeText = 'Загрузите файлы сканирования по ссылке: ';
             } else {
                 $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $linkInfo->file_name;
+                $typeText = 'Загрузите заключение врача по ссылке: ';
             }
             if (is_file($file)) {
-                $bot = new Bot(['token' => Info::VIBER_API_KEY]);
-                $botSender = new Sender([
-                    'name' => 'Бот РДЦ',
-                    'avatar' => 'https://rdcnn.ru/images/bot.png',
-                ]);
-                $bot->getClient()->sendMessage(
-                    (new File())
-                        ->setSender($botSender)
-                        ->setReceiver($subscriberId)
-                        ->setSize(222)
-                        ->setFileName($linkInfo->file_name)
-                        ->setMedia(Url::toRoute(['download/download-temp', 'link' => $link], 'https'))
-                );
+                // проверю, что размер файла не превышает максимально допустимый
+                $fileSize = filesize($file);
+                $bot = self::getBot(Info::VIBER_API_KEY);
+                $botSender = self::getBotSender();
+                if ($fileSize < self::VIBER_FILE_SIZE_LIMIT) {
+                    $bot->getClient()->sendMessage(
+                        (new File())
+                            ->setSender($botSender)
+                            ->setReceiver($subscriberId)
+                            ->setSize(filesize($file))
+                            ->setFileName($linkInfo->file_name)
+                            ->setMedia(Url::toRoute(['download/download-temp', 'link' => $link], 'https'))
+                    );
+                }
+                else{
+                    // отправлю ссылку на скачивание файла
+                    self::sendMessage(
+                        $bot,
+                        $botSender,
+                        $subscriberId,
+                        $typeText . Url::toRoute(['download/download-temp', 'link' => $link], 'https')
+                    );
+                }
             }
         }
+    }
+
+    /**
+     * @param $link
+     * @throws NotFoundHttpException
+     */
+    public static function downloadTempFile($link): void
+    {
+        // получу данные
+        $linkInfo = TempDownloadLinks::findOne(['link' => $link]);
+        if($linkInfo !== null){
+            $executionInfo = User::findIdentity($linkInfo->execution_id);
+            if($executionInfo !== null){
+                // получу путь к файлу
+                if($linkInfo->file_type === 'execution'){
+                    $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
+                    $fileName = 'Заключение врача по обследованию ' . $executionInfo->username;
+                }
+                else if($linkInfo->file_type === 'conclusion'){
+                    $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $linkInfo->file_name;
+                    $fileName = 'Файлы сканирования по обследованию ' . $executionInfo->username;
+                }
+            }
+            if(!empty($file) && !empty($fileName) && is_file($file)){
+                // отдам файл на выгрузку
+                Yii::$app->response->sendFile($file, $fileName, ['inline' => true]);
+                return;
+            }
+        }
+            // страница не найдена, видимо, ссылка истекла
+            throw new NotFoundHttpException('Не удалось найти файлы по данной ссылке, видимо, они удалены по истечению срока давности. Вы можете обратиться к нам за повторной публикацией файлов');
     }
 }

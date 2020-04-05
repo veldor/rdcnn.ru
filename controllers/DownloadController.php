@@ -6,6 +6,7 @@ namespace app\controllers;
 
 use app\models\Table_statistics;
 use app\models\User;
+use app\models\Viber;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -161,6 +162,6 @@ class DownloadController extends Controller
     }
 
     public function actionDownloadTemp($link){
-
+        Viber::downloadTempFile($link);
     }
 }
