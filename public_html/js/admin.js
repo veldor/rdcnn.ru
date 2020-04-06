@@ -22,6 +22,16 @@ function handleLoader(element) {
     });
 }
 
+function copyPass() {
+    let pass = $(this).attr('data-password');
+    copyPassTextarea.removeClass('hidden');
+    copyPassTextarea.text(pass);
+    copyPassTextarea.select();
+    document.execCommand('copy');
+    copyPassTextarea.addClass('hidden');
+    $(this).html('<span class="text-info">Пароль скопирован</span>');
+}
+
 function handleActivator(element) {
     element.tooltip();
     element.on('click.doAction', function () {
@@ -39,14 +49,12 @@ function handleActivator(element) {
                         let modal = makeInformerModal("Успешно", message, function () {
                         });
                         let copyPassBtn = modal.find('button#copyPassBtn');
+                        modal.on('shown.bs.modal', function () {
+                            copyPassBtn.focus();
+                        });
                         copyPassBtn.on('click.copy', function () {
-                            let pass = $(this).attr('data-password');
-                            copyPassTextarea.removeClass('hidden');
-                            copyPassTextarea.text(pass);
-                            copyPassTextarea.select();
-                            document.execCommand('copy');
-                            copyPassTextarea.addClass('hidden');
-                            $(this).html('<span class="text-info">Пароль скопирован</span>');
+                            copyPass.call(this);
+                            $('button#acceptActionBtn').focus();
                         });
                     }, attributes);
                 }, function () {
@@ -113,7 +121,6 @@ function checkPatientDataFilling() {
                 if (answer.hasOwnProperty(i) && answer[i].length > 0) {
                     // найден список неопознанных папок, отображу его
                     unhandledFoldersContainer.removeClass('hidden');
-
                     // очищу список
                     unhandledFoldersList.html("");
                     let item;
@@ -222,8 +229,8 @@ function checkPatientDataFilling() {
                         }
                         let conclusionContainer = $('td[data-conclusion="' + item['id'] + '"]');
                         if (conclusionContainer.length) {
-                            if (item['conclusion']) {
-                                conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span>").removeClass('field-danger').addClass('field-success');
+                            if (item['conclusionsCount'] > 0) {
+                                conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span> <b>(" + item['conclusionsCount'] + ")</b>").removeClass('field-danger').addClass('field-success');
                             } else {
                                 conclusionContainer.html("<span class='glyphicon glyphicon-remove text-danger status-icon'></span>").addClass('field-danger').removeClass('field-success');
                             }
@@ -239,7 +246,7 @@ function checkPatientDataFilling() {
                         if (!item['execution']) {
                             ++withoutExecutionsCounter;
                         }
-                        if (!item['conclusion']) {
+                        if (item['conclusionsCount'] === 0) {
                             ++withoutConclusionsCounter;
                         }
                     }
@@ -273,16 +280,13 @@ function checkPatientDataFilling() {
 }
 
 function handleForm() {
-    let copyPassTextarea = $('textarea#forPasswordCopy');
     let form = $('form#addPatientForm');
     let idInput = $('#executionhandler-executionnumber');
-
     let pasteFromClipboard = $('#pasteFromClipboard');
     pasteFromClipboard.on('click', function () {
         idInput.focus();
         idInput.select();
         setTimeout(function () {
-            console.log('paste');
             document.execCommand("Paste", null, null);
         }, 500);
         document.execCommand('Paste');
@@ -295,14 +299,12 @@ function handleForm() {
                 let message = data['message'] ? data['message'] : 'Операция успешно завершена';
                 let modal = makeInformerModal("Успешно", message);
                 let copyPassBtn = modal.find('button#copyPassBtn');
+                modal.on('shown.bs.modal', function () {
+                    copyPassBtn.focus();
+                });
                 copyPassBtn.on('click.copy', function () {
-                    let pass = $(this).attr('data-password');
-                    copyPassTextarea.removeClass('hidden');
-                    copyPassTextarea.text(pass);
-                    copyPassTextarea.select();
-                    document.execCommand('copy');
-                    copyPassTextarea.addClass('hidden');
-                    $(this).html('<span class="text-info">Пароль скопирован</span>');
+                    copyPass.call(this);
+                    $('button#acceptActionBtn').focus();
                 });
             }, form);
         }

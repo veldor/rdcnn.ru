@@ -27,10 +27,11 @@ class TempDownloadLinks extends ActiveRecord
     /**
      * @param User $execution
      * @param string $type
+     * @param string|null $filename
      * @return TempDownloadLinks|null
      * @throws Exception
      */
-    public static function createLink(User $execution, string $type): ?TempDownloadLinks
+    public static function createLink(User $execution, string $type, string $filename = null): ?TempDownloadLinks
     {
         $link = Yii::$app->security->generateRandomString(255);
         if($type === 'execution'){
@@ -38,6 +39,12 @@ class TempDownloadLinks extends ActiveRecord
             $link->save();
             return $link;
         }
+        if($type === 'conclusion'){
+            $link = new self(['file_name' => $filename, 'file_type' => 'conclusion', 'link' => $link, 'execution_id' => $execution->id]);
+            $link->save();
+            return $link;
+        }
         return null;
     }
+
 }

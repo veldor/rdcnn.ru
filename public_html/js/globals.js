@@ -7,74 +7,43 @@ function serialize(obj) {
     return str.join("&");
 }
 
+function createModal(header, text, normalReset) {
+    let modal = $('<div id="myModal" class="modal fade mode-choose"><div class="modal-dialog  modal-lg"><div class="modal-content"><div class="modal-header">' + header + '</div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-danger"  data-dismiss="modal" type="button" id="cancelActionButton">Отмена</button></div></div></div>');
+    $('body').append(modal);
+    if (!normalReset)
+        dangerReload();
+    modal.modal({
+        keyboard: true,
+        show: true
+    });
+    modal.on('hidden.bs.modal', function () {
+        normalReload();
+        modal.remove();
+        $('div.wrap div.container, div.wrap nav').removeClass('blured');
+    });
+    $('div.wrap div.container, div.wrap nav').addClass('blured');
+    return modal;
+}
+
 // Функция вызова пустого модального окна
 function makeModal(header, text, delayed, normalReset, delay) {
-    if(delay){
+    if (!text)
+        text = '';
+    if (delay) {
         setTimeout(function () {
-            if (!text)
-                text = '';
-            let modal = $('<div id="myModal" class="modal fade mode-choose"><div class="modal-dialog  modal-lg"><div class="modal-content"><div class="modal-header">' + header + '</div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-danger"  data-dismiss="modal" type="button" id="cancelActionButton">Отмена</button></div></div></div>');
-            $('body').append(modal);
-            if(!normalReset)
-                dangerReload();
-            modal.modal({
-                keyboard: true,
-                show: true
-            });
-            modal.on('hidden.bs.modal', function () {
-                normalReload();
-                modal.remove();
-                $('div.wrap div.container, div.wrap nav').removeClass('blured');
-            });
-            $('div.wrap div.container, div.wrap nav').addClass('blured');
-            return modal;
-        }, delay);
-    }
-    else{
+                return createModal(header, text, normalReset);
+            }
+            , delay);
+    } else {
         if (delayed) {
             // открытие модали поверх другой модали
             let modal = $("#myModal");
             if (modal.length === 1) {
                 modal.modal('hide');
-                let newModal = $('<div id="myModal" class="modal fade mode-choose"><div class="modal-dialog  modal-lg"><div class="modal-content"><div class="modal-header">' + header + '</div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-danger"  data-dismiss="modal" type="button" id="cancelActionButton">Отмена</button></div></div></div>');
-                modal.on('hidden.bs.modal', function () {
-                    modal.remove();
-                    if (!text)
-                        text = '';
-                    $('body').append(newModal);
-                    if (!normalReset)
-                        dangerReload();
-                    newModal.modal({
-                        keyboard: true,
-                        show: true
-                    });
-                    newModal.on('hidden.bs.modal', function () {
-                        normalReload();
-                        newModal.remove();
-                        $('div.wrap div.container, div.wrap nav').removeClass('blured');
-                    });
-                    $('div.wrap div.container, div.wrap nav').addClass('blured');
-                });
-                return newModal;
+                return createModal(header, text, normalReset);
             }
         }
-        if (!text)
-            text = '';
-        let modal = $('<div id="myModal" class="modal fade mode-choose"><div class="modal-dialog  modal-lg"><div class="modal-content"><div class="modal-header">' + header + '</div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-danger"  data-dismiss="modal" type="button" id="cancelActionButton">Отмена</button></div></div></div>');
-        $('body').append(modal);
-        if(!normalReset)
-            dangerReload();
-        modal.modal({
-            keyboard: true,
-            show: true
-        });
-        modal.on('hidden.bs.modal', function () {
-            normalReload();
-            modal.remove();
-            $('div.wrap div.container, div.wrap nav').removeClass('blured');
-        });
-        $('div.wrap div.container, div.wrap nav').addClass('blured');
-        return modal;
+        return createModal(header, text, normalReset);
     }
 }
 
@@ -155,6 +124,9 @@ function makeInformerModal(header, text, acceptAction, declineAction) {
     let modal = $('<div class="modal fade mode-choose"><div class="modal-dialog text-center"><div class="modal-content"><div class="modal-header"><h3>' + header + '</h3></div><div class="modal-body">' + text + '</div><div class="modal-footer"><button class="btn btn-success" type="button" id="acceptActionBtn">Ок</button></div></div></div>');
     $('body').append(modal);
     let acceptButton = modal.find('button#acceptActionBtn');
+    modal.on('shown.bs.modal', function () {
+        acceptButton.focus();
+    });
     if (declineAction) {
         let declineBtn = $('<button class="btn btn-warning" role="button">Отмена</button>');
         declineBtn.insertAfter(acceptButton);
@@ -234,7 +206,9 @@ function stringify(data) {
     } else if (typeof data === 'object') {
         let answer = '';
         for (let i in data) {
-            answer += data[i] + '<br/>';
+            if (data.hasOwnProperty(i)) {
+                answer += data[i] + '<br/>';
+            }
         }
         return answer;
     }
@@ -250,13 +224,15 @@ function simpleAnswerHandlerReload(data) {
         }
     }
 }
+
 // ТИПИЧНАЯ ОБРАБОТКА ОТВЕТА AJAX
 function simpleAnswerHandler(data) {
     if (data['status']) {
         if (data['status'] === 1) {
             let header = data['header'] ? data['header'] : "Успешно";
             let message = data['message'] ? data['message'] : 'Операция успешно завершена';
-            makeInformerModal(header, message, function () {});
+            makeInformerModal(header, message, function () {
+            });
         }
     }
 }
@@ -288,5 +264,55 @@ function sendAjaxWithFile(url, callback, form) {
     }).fail(function () {// noinspection JSUnresolvedVariable
         deleteWaiter();
         normalReload();
+    });
+}
+
+// ========================================================== ИНФОРМЕР
+// СОЗДАЮ ИНФОРМЕР
+function makeInformer(type, header, body) {
+    if (!body)
+        body = '';
+    const container = $('div#alertsContentDiv');
+    const informer = $('<div class="alert-wrapper"><div class="alert alert-' + type + ' alert-dismissable my-alert"><div class="panel panel-' + type + '"><div class="panel-heading">' + header + '<button type="button" class="close">&times;</button></div><div class="panel-body">' + body + '</div></div></div></div>');
+    informer.find('button.close').on('click.hide', function (e) {
+        e.preventDefault();
+        closeAlert(informer)
+    });
+    container.append(informer);
+    showAlert(informer)
+}
+
+// ПОКАЗЫВАЮ ИНФОРМЕР
+function showAlert(alertDiv) {
+    // считаю расстояние от верха страницы до места, где располагается информер
+    const topShift = alertDiv[0].offsetTop;
+    const elemHeight = alertDiv[0].offsetHeight;
+    let shift = topShift + elemHeight;
+    alertDiv.css({'top': -shift + 'px', 'opacity': '0.1'});
+    // анимирую появление информера
+    alertDiv.animate({
+        top: 0,
+        opacity: 1
+    }, 500, function () {
+        // запускаю таймер самоуничтожения через 5 секунд
+        /*setTimeout(function () {
+            closeAlert(alertDiv)
+        }, 5000);*/
+    });
+
+}
+
+// СКРЫВАЮ ИНФОРМЕР
+function closeAlert(alertDiv) {
+    const elemWidth = alertDiv[0].offsetWidth;
+    alertDiv.animate({
+        left: elemWidth
+    }, 500, function () {
+        alertDiv.animate({
+            height: 0,
+            opacity: 0
+        }, 300, function () {
+            alertDiv.remove();
+        });
     });
 }

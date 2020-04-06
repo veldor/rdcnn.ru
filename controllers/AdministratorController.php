@@ -7,13 +7,7 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
-use app\models\Table_availability;
-use app\models\User;
 use app\models\Utils;
-use app\models\utils\GrammarHandler;
-use app\models\utils\TimeHandler;
-use app\models\Viber;
-use app\priv\Info;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -134,6 +128,7 @@ class AdministratorController extends Controller
 
     /**
      * @return array
+     * @throws Exception
      */
     public function actionPatientsCheck(): array
     {

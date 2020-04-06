@@ -50,7 +50,7 @@ class AdministratorActions extends Model
                     $patientInfo = [];
                     $patientInfo['id'] = $item->username;
                     $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
-                    $patientInfo['conclusion'] = ExecutionHandler::isConclusion($item->username);
+                    $patientInfo['conclusionsCount'] = ExecutionHandler::countConclusions($item->username);
                     $response['patientList'][] = $patientInfo;
             }
         }
@@ -198,7 +198,6 @@ class AdministratorActions extends Model
                 $file->saveAs($filename);
                 ++$counter;
             }
-            Table_availability::setConclusionLoaded($execution->username);
             return ['status' => 1, 'message' => 'Заключение добавлено'];
         }
         return ['status' => 2, 'message' => $this->errors];
@@ -206,7 +205,6 @@ class AdministratorActions extends Model
 
     /**
      * @return array
-     * @throws Exception
      */
     public function addExecution(): array
     {
@@ -220,8 +218,6 @@ class AdministratorActions extends Model
             }
             $filename = Yii::getAlias('@executionsDirectory') . '\\' . $execution->username . '.zip';
             $this->execution->saveAs($filename);
-            // оповещу подписынных в вайбере о добавлении файлов
-            Viber::notifyExecutionLoaded($execution->username);
             return ['status' => 1, 'message' => 'Файлы обследования добавлены'];
         }
         return ['status' => 2, 'message' => $this->errors];

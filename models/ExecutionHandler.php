@@ -6,6 +6,7 @@ namespace app\models;
 
 use app\models\database\TempDownloadLinks;
 use app\models\database\ViberSubscriptions;
+use app\models\utils\GrammarHandler;
 use app\priv\Info;
 use RuntimeException;
 use Throwable;
@@ -129,12 +130,12 @@ class ExecutionHandler extends Model
             }
         }
         // автоматическая обработка папок
-        $dirs = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
+        $entities = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
         $pattern = '/^[aа]?[0-9]+$/ui';
         // проверю папки
-        if (!empty($dirs)) {
-            foreach ($dirs as $dir) {
-                $path = Yii::getAlias('@executionsDirectory') . '/' . $dir;
+        if (!empty($entities)) {
+            foreach ($entities as $entity) {
+                $path = Yii::getAlias('@executionsDirectory') . '/' . $entity;
                 if (is_dir($path)) {
                     // для начала проверю папку, если она изменена менее 5 минут назад- пропускаю её
                     $stat = stat($path);
@@ -142,8 +143,8 @@ class ExecutionHandler extends Model
                     $difference = time() - $changeTime;
                     if ($difference > 300) {
                         // проверю, соответствует ли название папки шаблону
-                        if (preg_match($pattern, $dir)) {
-                            $dirLatin = self::toLatin(mb_strtoupper($dir));
+                        if (preg_match($pattern, $entity)) {
+                            $dirLatin = self::toLatin(mb_strtoupper($entity));
                             // вероятно, папка содержит файлы обследования
                             // проверю, что папка не пуста
                             if (count(scandir($path)) > 2) {
@@ -151,27 +152,63 @@ class ExecutionHandler extends Model
                                 self::checkUser($dirLatin);
                                 // сохраню содержимое папки в архив
                                 self::PackFiles($dirLatin, $path);
-                                $report .= "dir $dir handled and load to $path \n";
-                                // отмечу, что данные обследования загружены
-                                Table_availability::setDataLoaded($dirLatin);
+                                $report .= "dir $entity handled and load to $path \n";
                             } else {
                                 // удалю папку
                                 self::rmRec($path);
-                                $report .= "dir $dir is empty and deleted \n";
+                                $report .= "dir $entity is empty and deleted \n";
                             }
 
                         } else {
-                            $report .= "dir $dir not handled \n";
+                            $report .= "dir $entity not handled \n";
                         }
                     } else {
-                        $report .= "dir $dir waiting for timeout \n";
+                        $report .= "dir $entity waiting for timeout \n";
+                    }
+                }
+            }
+            // теперь перепроверю данные для получения актуальной информации о имеющихся файлах
+            $entities = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
+            $pattern = '/^A?[0-9]+.zip$/';
+            if(!empty($entities)){
+                foreach ($entities as $entity) {
+                    $path = Yii::getAlias('@executionsDirectory') . '/' . $entity;
+                    if(is_file($path) && preg_match($pattern, $entity)){
+                        // найден файл, обработаю информацию о нём
+                        $existentFile = Table_availability::findOne(['is_execution' => true, 'file_name' => $entity]);
+                        if($existentFile !== null){
+                            // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
+                            $md5 = md5_file($path);
+                            $stat = stat($path);
+                            $changeTime = $stat['mtime'];
+                            if($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5){
+                                // отправлю новую версию файла пользователю
+                                $existentFile->md5 = $md5;
+                                $existentFile->file_create_time = $changeTime;
+                                $existentFile->save();
+                                Viber::notifyExecutionLoaded($entity);
+                            }
+                        }
+                        else{
+                            // найду пользователя
+                            $user = User::findByUsername(GrammarHandler::getBaseFileName($entity));
+                            if($user !== null){
+                                // внесу информацию о файле в базу
+                                $md5 = md5_file($path);
+                                $stat = stat($path);
+                                $changeTime = $stat['mtime'];
+                                (new Table_availability(['file_name' => $entity, 'is_execution' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
+                                // оповещу мессенджеры о наличии файла
+                                Viber::notifyExecutionLoaded($entity);
+                            }
+                        }
                     }
                 }
             }
         }
-        $dir = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
-        if (!is_dir($dir) && !is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
-            throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));
+        $entity = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
+        if (!is_dir($entity) && !is_dir($entity) && !mkdir($entity) && !is_dir($entity)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $entity));
         }
         // теперь обработаю заключения
         $pattern = '/^[aа]?\W?\d+-?\.?\d*\.pdf$/ui';
@@ -259,6 +296,46 @@ class ExecutionHandler extends Model
                 }
             }
         }
+
+        // теперь проверю актуальность данных по доступности заключений
+        $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
+        if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
+            $files = array_slice(scandir($conclusionsDir), 2);
+            $strictPattern =  '/^A?\d+-?\d*\.pdf$/ui';
+            foreach ($files as $file) {
+                $path = Yii::getAlias('@conclusionsDirectory') . '/' . $file;
+                if(is_file($path) && preg_match($strictPattern, $file)){
+                    $existentFile = Table_availability::findOne(['is_conclusion' => true, 'file_name' => $file]);
+                    if($existentFile !== null){
+// проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
+                        $md5 = md5_file($path);
+                        $stat = stat($path);
+                        $changeTime = $stat['mtime'];
+                        if($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5){
+                            // отправлю новую версию файла пользователю
+                            $existentFile->md5 = $md5;
+                            $existentFile->file_create_time = $changeTime;
+                            $existentFile->save();
+                            Viber::notifyConclusionLoaded($file);
+                        }
+                    }
+                    else{
+                        // найду пользователя
+                        $user = User::findByUsername(GrammarHandler::getBaseFileName($file));
+                        if($user !== null){
+                            // внесу информацию о файле в базу
+                            $md5 = md5_file($path);
+                            $stat = stat($path);
+                            $changeTime = $stat['mtime'];
+                            (new Table_availability(['file_name' => $file, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
+                            // оповещу мессенджеры о наличии файла
+                            Viber::notifyConclusionLoaded($file);
+                        }
+                    }
+                }
+            }
+        }
+
         $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update_' . time() . '.log';
         $report .= 'end report';
         file_put_contents($file, $report);
@@ -365,6 +442,25 @@ class ExecutionHandler extends Model
         }
     }
 
+    /**
+     * Посчитаю количество загруженных заключений
+     * @param string $username <p>Номер обследования</p>
+     * @return int
+     */
+    public static function countConclusions(string $username): int
+    {
+        // посчитаю заключения по конкретному обследованию
+        $entities = array_slice(scandir(Yii::getAlias('@conclusionsDirectory')), 2);
+        $conclusionsCount = 0;
+        $pattern = '/' . $username . '-\d.+\pdf/';
+        foreach ($entities as $entity) {
+            if($entity === $username . '.pdf' || preg_match($pattern, $entity)){
+                $conclusionsCount++;
+            }
+        }
+        return $conclusionsCount;
+    }
+
     public function scenarios(): array
     {
         return [
@@ -419,13 +515,11 @@ class ExecutionHandler extends Model
      * Проверю наличие файлов
      * @param $name
      * @return bool
-     * @throws Exception
      */
     public static function isExecution($name): bool
     {
         $filename = Yii::getAlias('@executionsDirectory') . '\\' . $name . '.zip';
         if (is_file($filename)) {
-            Table_availability::setDataLoaded($name);
             return true;
         }
         return false;
@@ -440,7 +534,6 @@ class ExecutionHandler extends Model
     {
         $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $name . '.pdf';
         if (is_file($filename)) {
-            Table_availability::setConclusionLoaded($name);
             return true;
         }
         return false;
