@@ -166,8 +166,9 @@ class AdministratorController extends Controller
         return $this->render('missed-conclusions-list');
     }
 
+    /**
+     */
     public function actionTest(): void
     {
-
     }
 }

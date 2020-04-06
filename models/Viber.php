@@ -412,7 +412,7 @@ class Viber extends Model
                 } else {
                     self::sendMessage($bot, $botSender, $receiverId, 'Вы ввели верные данные, спасибо. Вы получите результаты как только они будут готовы!');
                     self::subscribe($receiverId, $execution->id);
-                    ExecutionHandler::checkAvailabilityForBots($execution->id, true, $receiverId);
+                    ExecutionHandler::checkAvailabilityForBots($execution->id, $receiverId);
                 }
             }
         } elseif ($lowerText === 'я работаю в рдц') {

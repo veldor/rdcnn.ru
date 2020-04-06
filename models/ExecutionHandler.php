@@ -414,14 +414,14 @@ class ExecutionHandler extends Model
      * @param string|null $subscriberId
      * @throws Exception
      */
-    public static function checkAvailabilityForBots(int $id, bool $resend = false, string $subscriberId = null): void
+    public static function checkAvailabilityForBots(int $id, string $subscriberId = null): void
     {
         // получу обследование
         $execution = User::findIdentity($id);
         if ($execution !== null) {
             // сначала получу аккаунты, которые подписаны на это обследование
             $subscribers = ViberSubscriptions::findAll(['patient_id' => $id]);
-            if($resend && !empty($subscribers)) {
+            if(!empty($subscribers)) {
                 // проверю наличие заключений и файлов обследования
                 $existentFile = Table_availability::findOne(['is_execution' => true, 'userId' => $execution->username]);
                 if ($existentFile !== null) {
@@ -430,7 +430,9 @@ class ExecutionHandler extends Model
                         'execution',
                         $existentFile->file_name
                     );
-                    Viber::sendTempLink($subscriberId, $link);
+                    if($link !== null){
+                        Viber::sendTempLink($subscriberId, $link->link);
+                    }
                 }
                 // получу все доступные заключения
                 $existentConclusions = Table_availability::findAll(['is_conclusion' => 1, 'userId' => $execution->username]);
@@ -442,7 +444,7 @@ class ExecutionHandler extends Model
                             $existentConclusion->file_name
                         );
                         if($link !== null){
-                            Viber::sendTempLink($subscriberId, $link);
+                            Viber::sendTempLink($subscriberId, $link->link);
                         }
                     }
                 }
