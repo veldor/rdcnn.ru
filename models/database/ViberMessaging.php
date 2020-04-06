@@ -11,6 +11,7 @@ use yii\db\ActiveRecord;
  * @property string $receiver_id [varchar(255)]
  * @property int $timestamp [int(11)]
  * @property string $text
+ * @property int $message_token [int(25)]
  */
 
 class ViberMessaging extends ActiveRecord

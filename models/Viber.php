@@ -106,7 +106,7 @@ class Viber extends Model
         $webHookUrl = 'https://rdcnn.ru/viber/connect';
         try {
             $client = new Client(['token' => $apiKey]);
-            $result = $client->setWebhook($webHookUrl);
+            $client->setWebhook($webHookUrl);
             echo "Success!\n";
         } catch (Exception $e) {
             echo 'Error: ' . $e->getMessage() . "\n";
@@ -119,7 +119,6 @@ class Viber extends Model
         $apiKey = Info::VIBER_API_KEY;
         // придётся добавить свою обработку- проверяю загрузку файлов
         $input = file_get_contents('php://input');
-        self::logAction($input);
         if (!empty($input)) {
             // разберу запрос
             $json = json_decode($input, true, 512, JSON_THROW_ON_ERROR);
@@ -387,7 +386,7 @@ class Viber extends Model
     {
         $lowerText = mb_strtolower($text);
         $workHere = ViberPersonalList::iWorkHere($receiverId);
-        self::logMessaging($receiverId, $text);
+        self::logMessaging($receiverId, $text, self::getMessageToken());
         $executionPattern = '/^([aа]?\d+) (\d{4})$/ui';
         if (preg_match($executionPattern, $text, $matches)) {
             $executionNumber = $matches[1];
@@ -478,9 +477,14 @@ class Viber extends Model
         }
     }
 
-    public static function logMessaging($receiverId, $text): void
+    /**
+     * @param $receiverId
+     * @param $text <p>Текст сообщения</p>
+     * @param $messageToken <p>Токен сообщения</p>
+     */
+    public static function logMessaging($receiverId, $text, $messageToken): void
     {
-        (new ViberMessaging(['timestamp' => time(), 'text' => $text, 'receiver_id' => $receiverId]))->save();
+        (new ViberMessaging(['timestamp' => time(), 'text' => $text, 'receiver_id' => $receiverId, 'message_token' => $messageToken]))->save();
     }
 
     public static function logAction($text): void
@@ -600,5 +604,11 @@ class Viber extends Model
         }
             // страница не найдена, видимо, ссылка истекла
             throw new NotFoundHttpException('Не удалось найти файлы по данной ссылке, видимо, они удалены по истечению срока давности. Вы можете обратиться к нам за повторной публикацией файлов');
+    }
+
+    public static function getMessageToken(){
+        $input = file_get_contents('php://input');
+        $json = json_decode($input, true, 512, JSON_THROW_ON_ERROR);
+        return $json['message_token'];
     }
 }
