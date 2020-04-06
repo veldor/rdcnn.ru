@@ -423,20 +423,28 @@ class ExecutionHandler extends Model
             $subscribers = ViberSubscriptions::findAll(['patient_id' => $id]);
             if($resend && !empty($subscribers)) {
                 // проверю наличие заключений и файлов обследования
-                if (self::isExecution($execution->username)) {
-                    $fileName = $execution->username . '.zip';
-                    $link = Yii::$app->security->generateRandomString(255);
-                    // создам ссылку на скачивание
-                    (new TempDownloadLinks(['file_name' => $fileName, 'file_type' => 'execution', 'link' => $link, 'execution_id' => $execution->id]))->save();
+                $existentFile = Table_availability::findOne(['is_execution' => true, 'userId' => $execution->username]);
+                if ($existentFile !== null) {
+                    $link = TempDownloadLinks::createLink(
+                        $execution,
+                        'execution',
+                        $existentFile->file_name
+                    );
                     Viber::sendTempLink($subscriberId, $link);
                 }
-                if(self::isConclusion($execution->username)){
-                    // получу все заключения, что есть
-                    $fileName = $execution->username . '.pdf';
-                    $link = Yii::$app->security->generateRandomString(255);
-                    // создам ссылку на скачивание
-                    (new TempDownloadLinks(['file_name' => $fileName, 'file_type' => 'conclusion', 'link' => $link, 'execution_id' => $execution->id]))->save();
-                    Viber::sendTempLink($subscriberId, $link);
+                // получу все доступные заключения
+                $existentConclusions = Table_availability::findAll(['is_conclusion' => 1, 'userId' => $execution->username]);
+                if($existentConclusions !== null){
+                    foreach ($existentConclusions as $existentConclusion) {
+                        $link = TempDownloadLinks::createLink(
+                            $execution,
+                            'conclusion',
+                            $existentConclusion->file_name
+                        );
+                        if($link !== null){
+                            Viber::sendTempLink($subscriberId, $link);
+                        }
+                    }
                 }
             }
         }
