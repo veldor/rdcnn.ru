@@ -116,6 +116,10 @@ class Viber extends Model
     /** @noinspection PhpUndefinedMethodInspection */
     public static function handleRequest(): void
     {
+        // проверю, если сообщение уже обработано- ничего не делаю
+        if(self::handledYet()){
+            return;
+        }
         $apiKey = Info::VIBER_API_KEY;
         // придётся добавить свою обработку- проверяю загрузку файлов
         $input = file_get_contents('php://input');
@@ -610,5 +614,9 @@ class Viber extends Model
         $input = file_get_contents('php://input');
         $json = json_decode($input, true, 512, JSON_THROW_ON_ERROR);
         return $json['message_token'];
+    }
+
+    public static function handledYet(){
+        return ViberMessaging::find()->where(['message_token' => self::getMessageToken()])->count();
     }
 }
