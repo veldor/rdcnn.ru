@@ -54,7 +54,7 @@ class ExecutionHandler extends Model
 
             return ['status' => 1, 'execution' => $isExecution, 'conclusion' => $isConclusion, 'timeLeft' => $timeLeft, 'addConc' => $addConc];
         }
-            return [];
+        return [];
     }
 
     public static function checkFiles($executionNumber): array
@@ -170,36 +170,34 @@ class ExecutionHandler extends Model
             // теперь перепроверю данные для получения актуальной информации о имеющихся файлах
             $entities = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
             $pattern = '/^A?[0-9]+.zip$/';
-            if(!empty($entities)){
+            if (!empty($entities)) {
                 foreach ($entities as $entity) {
                     $path = Yii::getAlias('@executionsDirectory') . '/' . $entity;
-                    if(is_file($path) && preg_match($pattern, $entity)){
+                    if (is_file($path) && preg_match($pattern, $entity)) {
                         // найден файл, обработаю информацию о нём
                         $existentFile = Table_availability::findOne(['is_execution' => true, 'file_name' => $entity]);
                         $user = User::findByUsername(GrammarHandler::getBaseFileName($entity));
-                        if($existentFile !== null){
-                            // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
-                            $md5 = md5_file($path);
-                            $stat = stat($path);
-                            $changeTime = $stat['mtime'];
-                            if($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5){
-                                // отправлю новую версию файла пользователю
-                                $existentFile->md5 = $md5;
-                                $existentFile->file_create_time = $changeTime;
-                                $existentFile->save();
-                                Viber::notifyExecutionLoaded($user);
-                            }
-                        }
-                        else{
-                            // найду пользователя
-                            if($user !== null){
+                        if ($user !== null) {
+                            if ($existentFile !== null) {
+                                // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
+                                $md5 = md5_file($path);
+                                $stat = stat($path);
+                                $changeTime = $stat['mtime'];
+                                if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
+                                    // отправлю новую версию файла пользователю
+                                    $existentFile->md5 = $md5;
+                                    $existentFile->file_create_time = $changeTime;
+                                    $existentFile->save();
+                                    Viber::notifyExecutionLoaded($user->username);
+                                }
+                            } else {
                                 // внесу информацию о файле в базу
                                 $md5 = md5_file($path);
                                 $stat = stat($path);
                                 $changeTime = $stat['mtime'];
                                 (new Table_availability(['file_name' => $entity, 'is_execution' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
                                 // оповещу мессенджеры о наличии файла
-                                Viber::notifyExecutionLoaded($user);
+                                Viber::notifyExecutionLoaded($user->username);
                             }
                         }
                     }
@@ -301,28 +299,27 @@ class ExecutionHandler extends Model
         $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
             $files = array_slice(scandir($conclusionsDir), 2);
-            $strictPattern =  '/^A?\d+-?\d*\.pdf$/ui';
+            $strictPattern = '/^A?\d+-?\d*\.pdf$/ui';
             foreach ($files as $file) {
                 $path = Yii::getAlias('@conclusionsDirectory') . '/' . $file;
-                if(is_file($path) && preg_match($strictPattern, $file)){
+                if (is_file($path) && preg_match($strictPattern, $file)) {
                     $existentFile = Table_availability::findOne(['is_conclusion' => true, 'file_name' => $file]);
-                    if($existentFile !== null){
+                    if ($existentFile !== null) {
 // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
                         $md5 = md5_file($path);
                         $stat = stat($path);
                         $changeTime = $stat['mtime'];
-                        if($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5){
+                        if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
                             // отправлю новую версию файла пользователю
                             $existentFile->md5 = $md5;
                             $existentFile->file_create_time = $changeTime;
                             $existentFile->save();
                             Viber::notifyConclusionLoaded($file);
                         }
-                    }
-                    else{
+                    } else {
                         // найду пользователя
                         $user = User::findByUsername(GrammarHandler::getBaseFileName($file));
-                        if($user !== null){
+                        if ($user !== null) {
                             // внесу информацию о файле в базу
                             $md5 = md5_file($path);
                             $stat = stat($path);
@@ -421,7 +418,7 @@ class ExecutionHandler extends Model
         if ($execution !== null) {
             // сначала получу аккаунты, которые подписаны на это обследование
             $subscribers = ViberSubscriptions::findAll(['patient_id' => $id]);
-            if(!empty($subscribers)) {
+            if (!empty($subscribers)) {
                 // проверю наличие заключений и файлов обследования
                 $existentFile = Table_availability::findOne(['is_execution' => true, 'userId' => $execution->username]);
                 if ($existentFile !== null) {
@@ -430,20 +427,20 @@ class ExecutionHandler extends Model
                         'execution',
                         $existentFile->file_name
                     );
-                    if($link !== null){
+                    if ($link !== null) {
                         Viber::sendTempLink($subscriberId, $link->link);
                     }
                 }
                 // получу все доступные заключения
                 $existentConclusions = Table_availability::findAll(['is_conclusion' => 1, 'userId' => $execution->username]);
-                if($existentConclusions !== null){
+                if ($existentConclusions !== null) {
                     foreach ($existentConclusions as $existentConclusion) {
                         $link = TempDownloadLinks::createLink(
                             $execution,
                             'conclusion',
                             $existentConclusion->file_name
                         );
-                        if($link !== null){
+                        if ($link !== null) {
                             Viber::sendTempLink($subscriberId, $link->link);
                         }
                     }
@@ -464,7 +461,7 @@ class ExecutionHandler extends Model
         $conclusionsCount = 0;
         $pattern = '/' . $username . '-\d.+\pdf/';
         foreach ($entities as $entity) {
-            if($entity === $username . '.pdf' || preg_match($pattern, $entity)){
+            if ($entity === $username . '.pdf' || preg_match($pattern, $entity)) {
                 $conclusionsCount++;
             }
         }
