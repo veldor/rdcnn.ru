@@ -53,7 +53,7 @@ class Viber extends Model
     }
 
     /**
-     * @param $userName
+     * @param string $userName
      * @throws \yii\base\Exception
      */
     public static function notifyExecutionLoaded($userName): void
@@ -107,7 +107,6 @@ class Viber extends Model
         try {
             $client = new Client(['token' => $apiKey]);
             $result = $client->setWebhook($webHookUrl);
-            var_dump($result);
             echo "Success!\n";
         } catch (Exception $e) {
             echo 'Error: ' . $e->getMessage() . "\n";
@@ -120,6 +119,7 @@ class Viber extends Model
         $apiKey = Info::VIBER_API_KEY;
         // придётся добавить свою обработку- проверяю загрузку файлов
         $input = file_get_contents('php://input');
+        self::logAction($input);
         if (!empty($input)) {
             // разберу запрос
             $json = json_decode($input, true, 512, JSON_THROW_ON_ERROR);

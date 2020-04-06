@@ -176,6 +176,7 @@ class ExecutionHandler extends Model
                     if(is_file($path) && preg_match($pattern, $entity)){
                         // найден файл, обработаю информацию о нём
                         $existentFile = Table_availability::findOne(['is_execution' => true, 'file_name' => $entity]);
+                        $user = User::findByUsername(GrammarHandler::getBaseFileName($entity));
                         if($existentFile !== null){
                             // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
                             $md5 = md5_file($path);
@@ -186,12 +187,11 @@ class ExecutionHandler extends Model
                                 $existentFile->md5 = $md5;
                                 $existentFile->file_create_time = $changeTime;
                                 $existentFile->save();
-                                Viber::notifyExecutionLoaded($entity);
+                                Viber::notifyExecutionLoaded($user);
                             }
                         }
                         else{
                             // найду пользователя
-                            $user = User::findByUsername(GrammarHandler::getBaseFileName($entity));
                             if($user !== null){
                                 // внесу информацию о файле в базу
                                 $md5 = md5_file($path);
@@ -199,7 +199,7 @@ class ExecutionHandler extends Model
                                 $changeTime = $stat['mtime'];
                                 (new Table_availability(['file_name' => $entity, 'is_execution' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
                                 // оповещу мессенджеры о наличии файла
-                                Viber::notifyExecutionLoaded($entity);
+                                Viber::notifyExecutionLoaded($user);
                             }
                         }
                     }
