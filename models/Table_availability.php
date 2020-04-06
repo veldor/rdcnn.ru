@@ -23,18 +23,38 @@ class Table_availability extends ActiveRecord
     }
 
     /**
-     * @return Table_availability[]
+     * @return string
      */
-    public static function getWithoutConclusions(): array
+    public static function getWithoutConclusions(): string
     {
-        return self::findAll(['is_conclusion' => 0]);
+        $answer = '';
+        $persons = User::findAllRegistered();
+        if(!empty($persons)){
+            foreach ($persons as $person) {
+                // если не найдено заключений по данному пациенту- верну его
+                if(!self::find()->where(['userId' => $person->username, 'is_conclusion' => 1])->count()){
+                    $answer .= "{$person->username}\n";
+                }
+            }
+        }
+        return $answer;
     }
 
     /**
-     * @return Table_availability[]
+     * @return string
      */
-    public static function getWithoutExecutions(): array
+    public static function getWithoutExecutions(): string
     {
-        return self::findAll(['is_execution' => 0]);
+        $answer = '';
+        $persons = User::findAllRegistered();
+        if(!empty($persons)){
+            foreach ($persons as $person) {
+                // если не найдено заключений по данному пациенту- верну его
+                if(!self::find()->where(['userId' => $person->username, 'is_execution' => 1])->count()){
+                    $answer .= "{$person->username}\n";
+                }
+            }
+        }
+        return $answer;
     }
 }
