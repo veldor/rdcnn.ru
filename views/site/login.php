@@ -10,7 +10,7 @@
 
     LoginAsset::register($this);
 
-    $this->title = "РДЦ, личный кабинет";
+    $this->title = 'РДЦ, личный кабинет';
 
     ?>
     <div class="site-login text-center">

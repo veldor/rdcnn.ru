@@ -144,7 +144,7 @@ class ExecutionHandler extends Model
                     if ($difference > 300) {
                         // проверю, соответствует ли название папки шаблону
                         if (preg_match($pattern, $entity)) {
-                            $dirLatin = self::toLatin(mb_strtoupper($entity));
+                            $dirLatin = GrammarHandler::toLatin($entity);
                             // вероятно, папка содержит файлы обследования
                             // проверю, что папка не пуста
                             if (count(scandir($path)) > 2) {
@@ -226,7 +226,7 @@ class ExecutionHandler extends Model
                         $difference = time() - $changeTime;
                         if ($difference > 30) {
                             // переименую файл в нормальный вид
-                            $fileLatin = self::toLatin(ucfirst(trim($file)));
+                            $fileLatin = GrammarHandler::toLatin($file);
                             // уберу пробелы
                             $filePureName = preg_replace('/\s/', '', $fileLatin);
                             // заменю разделитель-точку на тире
@@ -273,7 +273,7 @@ class ExecutionHandler extends Model
                             $difference = time() - $changeTime;
                             if ($difference > 30) {
                                 // переименую файл в нормальный вид
-                                $fileLatin = self::toLatin(ucfirst(trim($file)));
+                                $fileLatin = GrammarHandler::toLatin($file);
                                 // уберу пробелы
                                 $filePureName = preg_replace('/\s/', '', $fileLatin);
                                 // проверю наличие учётной записи
@@ -363,13 +363,6 @@ class ExecutionHandler extends Model
         return $password;
     }
 
-    public static function toLatin($executionNumber)
-    {
-        $input = ['А'];
-        $replace = ['A'];
-        return str_replace($input, $replace, $executionNumber);
-    }
-
     /**
      * @param $executionNumber
      * @param string $executionDir
@@ -380,7 +373,7 @@ class ExecutionHandler extends Model
         $viewer_dir = Yii::getAlias('@dicomViewerDirectory');
         self::recurse_copy($viewer_dir, $executionDir);
         $fileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '_tmp.zip';
-        $trueFileWay = Yii::getAlias('@executionsDirectory') . '\\' . self::toLatin(mb_strtoupper($executionNumber)) . '.zip';
+        $trueFileWay = Yii::getAlias('@executionsDirectory') . '\\' . GrammarHandler::toLatin($executionNumber) . '.zip';
         // создам архив и удалю исходное
         shell_exec('cd /d ' . $executionDir . ' && "' . Info::WINRAR_FOLDER . '"  a -afzip -r -df  ' . $fileWay . ' .');
         // удалю пустую директорию
@@ -505,7 +498,7 @@ class ExecutionHandler extends Model
             if (empty($this->executionNumber)) {
                 return ['status' => 2, 'message' => 'Не указан номер обследования'];
             }
-            $this->executionNumber = self::toLatin($this->executionNumber);
+            $this->executionNumber = GrammarHandler::toLatin($this->executionNumber);
             // проверю, не зарегистрировано ли уже обследование
             if (User::findByUsername($this->executionNumber) !== null) {
                 return ['status' => 4, 'message' => 'Это обследование уже зарегистрировано, вы можете изменить информацию о нём в списке'];

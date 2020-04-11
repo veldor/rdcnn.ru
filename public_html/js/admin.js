@@ -2,6 +2,8 @@ let checkInterval;
 let copyPassTextarea;
 let unhandledFoldersContainer;
 let unhandledFoldersList;
+let waitingFoldersContainer;
+let waitingFoldersList;
 let patientsCount;
 let withoutExecutions;
 let withoutConclusions;
@@ -78,6 +80,8 @@ $(function () {
     copyPassTextarea = $('textarea#forPasswordCopy');
     unhandledFoldersContainer = $('div#unhandledFoldersContainer');
     unhandledFoldersList = $('tbody#unhandledFoldersList');
+    waitingFoldersContainer = $('div#waitingFoldersContainer');
+    waitingFoldersList = $('ul#waitingFoldersList');
     patientsCount = $('span#patientsCount');
     withoutConclusions = $('span#withoutConclusions');
     withoutExecutions = $('span#withoutExecutions');
@@ -117,6 +121,16 @@ $(function () {
 function checkPatientDataFilling() {
     sendSilentAjax('get', '/patients/check', function (answer) {
         for (let i in answer) {
+            if(i === "waitingFolders"){
+                if (answer.hasOwnProperty(i) && answer[i].length > 0) {
+                    waitingFoldersContainer.removeClass('hidden');
+                    // очищу список
+                    waitingFoldersList.html("");
+                    for (let counter = 0; counter < answer[i].length; counter++) {
+                        waitingFoldersList.append('<li class="text-center"><b class="text-info">' + answer[i][counter] + '</b></li>');
+                    }
+                }
+            }
             if (i === "unhandledFolders") {
                 if (answer.hasOwnProperty(i) && answer[i].length > 0) {
                     // найден список неопознанных папок, отображу его

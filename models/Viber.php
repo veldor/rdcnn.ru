@@ -362,7 +362,7 @@ class Viber extends Model
         } elseif ($lowerText === self::EXECUTIONS && $workHere) {
             $withoutExecutions = Table_availability::getWithoutExecutions();
             if (!empty($withoutExecutions)) {
-                $list = "Не загружены заключения:\n " . $withoutExecutions;
+                $list = "Не загружены файлы:\n " . $withoutExecutions;
                 self::sendMessage($bot, $botSender, $receiverId, $list);
             } else {
                 self::sendMessage($bot, $botSender, $receiverId, 'Вау, все файлы загружены!');

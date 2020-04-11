@@ -26,7 +26,7 @@ $(function () {
     let availabilityTimeContainer = $('#availabilityTime');
     let removeReasonContainer = $('#removeReasonContainer');
 
-    let clearDataBtn = $('.clearDataBtn');
+    let clearDataBtn = $('#clearDataBtn');
     clearDataBtn.on('click.clear', function () {
         makeInformerModal('Удалить данные?', 'Убрать все данные с сервера, чтобы никто не мог получить к ним доступ. Если вы удалите данные, то получить повторный доступ к ним вы сможете, обратившись в наш центр.', function () {
                 clearInterval(checkInterval);

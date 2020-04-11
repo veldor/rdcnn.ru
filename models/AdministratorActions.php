@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\utils\GrammarHandler;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -37,6 +38,8 @@ class AdministratorActions extends Model
         $response = [];
         // тут придётся проверять наличие неопознанных папок
         $unhandledFolders = FileUtils::checkUnhandledFolders();
+        $waitingFolders = FileUtils::checkWaitingFolders();
+        $response['waitingFolders'] = $waitingFolders;
         $response['unhandledFolders'] = $unhandledFolders;
         $response['patientList'] = [];
         // верну список пациентов со статусами данных
@@ -209,6 +212,7 @@ class AdministratorActions extends Model
     public function addExecution(): array
     {
         if($this->validate()){
+            $this->executionId = GrammarHandler::toLatin($this->executionId);
             $execution = User::findByUsername($this->executionId);
             if($execution === null){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];

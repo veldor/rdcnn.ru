@@ -10,7 +10,6 @@ return [
     'check/files/<executionNumber:[0-9a-zA-Z]+>' => 'administrator/files-check',
     'download/conclusion/<part:[0-9]+>' => 'download/conclusion',
     'print/conclusion/<part:[0-9]+>' => 'download/print-conclusion',
-    'clear-garbage' => 'administrator/clear-garbage',
     'check' => 'site/check',
     'delete-unhandled-folder' => 'administrator/delete-unhandled-folder',
     'rename-unhandled-folder' => 'administrator/rename-unhandled-folder',

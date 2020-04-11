@@ -7,7 +7,6 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
-use app\models\Utils;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -25,13 +24,27 @@ class AdministratorController extends Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function () {
-                    return $this->redirect('/error', 301);
+                    return $this->redirect('/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
                 },
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['add-execution', 'change-password', 'delete-item', 'add-conclusion', 'add-execution-data', 'patients-check', 'files-check', 'clear-garbage', 'delete-unhandled-folder', 'rename-unhandled-folder', 'print-missed-conclusions-list', 'test'],
-                        'roles' => ['manager'],
+                        'actions' => [
+                            'add-execution',
+                            'change-password',
+                            'delete-item',
+                            'add-conclusion',
+                            'add-execution-data',
+                            'patients-check',
+                            'files-check',
+                            'delete-unhandled-folder',
+                            'rename-unhandled-folder',
+                            'print-missed-conclusions-list',
+                            'test'
+                        ],
+                        'roles' => [
+                            'manager'
+                        ],
                         //'ips' => Info::ACCEPTED_IPS,
                     ],
                 ],
@@ -142,12 +155,6 @@ class AdministratorController extends Controller
         return ExecutionHandler::checkFiles($executionNumber);
     }
 
-    public function actionClearGarbage(): array
-    {
-        Utils::clearGarbage();
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        return ['status' => 1, 'message' => 'Весь мусор удалён.'];
-    }
     public function actionDeleteUnhandledFolder(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;

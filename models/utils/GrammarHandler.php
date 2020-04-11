@@ -28,6 +28,17 @@ class GrammarHandler
     {
         $input = ['А'];
         $replace = ['A'];
-        return str_replace($input, $replace, ucfirst($name));
+        return str_replace($input, $replace, self::my_mb_ucfirst(trim($name)));
+    }
+
+    /**
+     * Перевод первого символа строки в верхний регистр для UTF-8 строк
+     * @param $str
+     * @return string
+     */
+    private static function my_mb_ucfirst($str): string
+    {
+        $fc = mb_strtoupper(mb_substr($str, 0, 1));
+        return $fc.mb_substr($str, 1);
     }
 }
