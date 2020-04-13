@@ -60,13 +60,13 @@ class Viber extends Model
     {
         // создам временную ссылку на скачивание и отправлю её подписанным на данное обследование
         $execution = User::findByUsername($userName);
-        if($execution !== null){
+        if ($execution !== null) {
             // найду всех, кто подписан на данное обследование
             $subscribers = ViberSubscriptions::findAll(['patient_id' => $execution->id]);
-            if(!empty($subscribers)){
+            if (!empty($subscribers)) {
                 foreach ($subscribers as $subscriber) {
                     $link = TempDownloadLinks::createLink($execution, 'execution');
-                    if($link !== null){
+                    if ($link !== null) {
                         self::sendTempLink($subscriber->viber_id, $link->link);
                     }
                 }
@@ -82,13 +82,13 @@ class Viber extends Model
     {
         // создам временную ссылку на скачивание и отправлю её подписанным на данное обследование
         $execution = User::findByUsername(GrammarHandler::getBaseFileName($fileName));
-        if($execution !== null){
+        if ($execution !== null) {
             // найду всех, кто подписан на данное обследование
             $subscribers = ViberSubscriptions::findAll(['patient_id' => $execution->id]);
-            if(!empty($subscribers)){
+            if (!empty($subscribers)) {
                 foreach ($subscribers as $subscriber) {
                     $link = TempDownloadLinks::createLink($execution, 'conclusion', $fileName);
-                    if($link !== null){
+                    if ($link !== null) {
                         self::sendTempLink($subscriber->viber_id, $link->link);
                     }
                 }
@@ -117,7 +117,7 @@ class Viber extends Model
     public static function handleRequest(): void
     {
         // проверю, если сообщение уже обработано- ничего не делаю
-        if(self::handledYet()){
+        if (self::handledYet()) {
             return;
         }
         $apiKey = Info::VIBER_API_KEY;
@@ -341,26 +341,7 @@ class Viber extends Model
                     $botSender,
                     $receiverId,
                     "'" . self::CONCLUSIONS . "' : выводит список пациентов без заключений\n'файлы' : выводит список пациентов без загруженных файлов обследования\n'статистика загрузок' : выводит статистику загрузок заключений и файлов\nсписок будет дополняться по мере развития",
-                    [
-                                (new Button())
-                                    ->setBgColor('#2fa4e7')
-                                    ->setTextHAlign('center')
-                                    ->setActionType('reply')
-                                    ->setActionBody(self::CONCLUSIONS)
-                                    ->setText('Обследования без заключений'),
-                                (new Button())
-                                    ->setBgColor('#2fa4e7')
-                                    ->setTextHAlign('center')
-                                    ->setActionType('reply')
-                                    ->setActionBody('файлы')
-                                    ->setText('Обследования без изображений'),
-                                (new Button())
-                                    ->setBgColor('#2fa4e7')
-                                    ->setTextHAlign('center')
-                                    ->setActionType('reply')
-                                    ->setActionBody('статистика загрузок')
-                                    ->setText('Статистика загрузок'),
-                            ]);
+                    self::getAdminActionButtons());
             } else {
                 self::sendMessage(
                     $bot,
@@ -374,23 +355,57 @@ class Viber extends Model
             $withoutConclusions = Table_availability::getWithoutConclusions();
             if (!empty($withoutConclusions)) {
                 $list = "Не загружены заключения:\n " . $withoutConclusions;
-                self::sendMessage($bot, $botSender, $receiverId, $list);
+                self::sendMessageWithButtons(
+                    $bot,
+                    $botSender,
+                    $receiverId,
+                    $list,
+                    self::getAdminActionButtons()
+                );
             } else {
-                self::sendMessage($bot, $botSender, $receiverId, 'Вау, все заключения загружены!');
+                self::sendMessageWithButtons(
+                    $bot,
+                    $botSender,
+                    $receiverId,
+                    'Вау, все заключения загружены!',
+                    self::getAdminActionButtons()
+                );
             }
         } elseif ($lowerText === self::EXECUTIONS && $workHere) {
             $withoutExecutions = Table_availability::getWithoutExecutions();
             if (!empty($withoutExecutions)) {
                 $list = "Не загружены файлы:\n " . $withoutExecutions;
-                self::sendMessage($bot, $botSender, $receiverId, $list);
+                self::sendMessageWithButtons(
+                    $bot,
+                    $botSender,
+                    $receiverId,
+                    $list,
+                    self::getAdminActionButtons()
+                );
             } else {
-                self::sendMessage($bot, $botSender, $receiverId, 'Вау, все файлы загружены!');
+                self::sendMessageWithButtons(
+                    $bot,
+                    $botSender,
+                    $receiverId,
+                    'Вау, все файлы загружены!',
+                    self::getAdminActionButtons()
+                );
             }
         } elseif ($lowerText === self::DOWNLOADS_COUNT) {
             // получу данные по загрузкам
-            self::sendMessage($bot, $botSender, $receiverId, Table_statistics::getFullState());
+            self::sendMessageWithButtons(
+                $bot,
+                $botSender,
+                $receiverId,
+                Table_statistics::getFullState(),
+                self::getAdminActionButtons()
+            );
         } else {
-            self::sendMessage($bot, $botSender, $receiverId, 'Не понял, что вы имеете в виду :( Чтобы узнать, что я умею- напишите мне "команды"');
+            self::sendMessage($bot,
+                $botSender,
+                $receiverId,
+                'Не понял, что вы имеете в виду :( Чтобы узнать, что я умею- напишите мне "команды"'
+            );
         }
     }
 
@@ -478,8 +493,7 @@ class Viber extends Model
                             ->setFileName($linkInfo->file_name)
                             ->setMedia(Url::toRoute(['download/download-temp', 'link' => $link], 'https'))
                     );
-                }
-                else{
+                } else {
                     // отправлю ссылку на скачивание файла
                     self::sendMessage(
                         $bot,
@@ -500,36 +514,37 @@ class Viber extends Model
     {
         // получу данные
         $linkInfo = TempDownloadLinks::findOne(['link' => $link]);
-        if($linkInfo !== null){
+        if ($linkInfo !== null) {
             $executionInfo = User::findIdentity($linkInfo->execution_id);
-            if($executionInfo !== null){
+            if ($executionInfo !== null) {
                 // получу путь к файлу
-                if($linkInfo->file_type === 'execution'){
+                if ($linkInfo->file_type === 'execution') {
                     $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
                     $fileName = 'Заключение врача по обследованию ' . $executionInfo->username;
-                }
-                else if($linkInfo->file_type === 'conclusion'){
+                } else if ($linkInfo->file_type === 'conclusion') {
                     $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $linkInfo->file_name;
                     $fileName = 'Файлы сканирования по обследованию ' . $executionInfo->username;
                 }
             }
-            if(!empty($file) && !empty($fileName) && is_file($file)){
+            if (!empty($file) && !empty($fileName) && is_file($file)) {
                 // отдам файл на выгрузку
                 Yii::$app->response->sendFile($file, $fileName, ['inline' => true]);
                 return;
             }
         }
-            // страница не найдена, видимо, ссылка истекла
-            throw new NotFoundHttpException('Не удалось найти файлы по данной ссылке, видимо, они удалены по истечению срока давности. Вы можете обратиться к нам за повторной публикацией файлов');
+        // страница не найдена, видимо, ссылка истекла
+        throw new NotFoundHttpException('Не удалось найти файлы по данной ссылке, видимо, они удалены по истечению срока давности. Вы можете обратиться к нам за повторной публикацией файлов');
     }
 
-    public static function getMessageToken(){
+    public static function getMessageToken()
+    {
         $input = file_get_contents('php://input');
         $json = json_decode($input, true, 512, JSON_THROW_ON_ERROR);
         return $json['message_token'];
     }
 
-    public static function handledYet(){
+    public static function handledYet()
+    {
         return ViberMessaging::find()->where(['message_token' => self::getMessageToken()])->count();
     }
 
@@ -547,10 +562,36 @@ class Viber extends Model
                 ->setSender($botSender)
                 ->setReceiver($receiverId)
                 ->setText($text)
-            ->setKeyboard(
-                (new Keyboard())
-                    ->setButtons($buttons)
-            )
+                ->setKeyboard(
+                    (new Keyboard())
+                        ->setButtons($buttons)
+                )
         );
+    }
+
+    /**
+     * @return array
+     */
+    private static function getAdminActionButtons(): array
+    {
+        return [(new Button())
+            ->setBgColor('#2fa4e7')
+            ->setTextHAlign('center')
+            ->setActionType('reply')
+            ->setActionBody(self::CONCLUSIONS)
+            ->setText('Обследования без заключений'),
+            (new Button())
+                ->setBgColor('#2fa4e7')
+                ->setTextHAlign('center')
+                ->setActionType('reply')
+                ->setActionBody('файлы')
+                ->setText('Обследования без изображений'),
+            (new Button())
+                ->setBgColor('#2fa4e7')
+                ->setTextHAlign('center')
+                ->setActionType('reply')
+                ->setActionBody('статистика загрузок')
+                ->setText('Статистика загрузок'),
+            ];
     }
 }
