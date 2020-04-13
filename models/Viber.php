@@ -336,12 +336,31 @@ class Viber extends Model
         } elseif ($lowerText === 'команды') {
             if ($workHere) {
                 // отправлю список команд, которые может выполнять сотрудник
-                self::sendMessage(
+                self::sendMessageWithButtons(
                     $bot,
                     $botSender,
                     $receiverId,
-                    "'" . self::CONCLUSIONS . "' : выводит список пациентов без заключений\n'файлы' : выводит список пациентов без загруженных файлов обследования\n'статистика загрузок' : выводит статистику загрузок заключений и файлов\nсписок будет дополняться по мере развития"
-                );
+                    "'" . self::CONCLUSIONS . "' : выводит список пациентов без заключений\n'файлы' : выводит список пациентов без загруженных файлов обследования\n'статистика загрузок' : выводит статистику загрузок заключений и файлов\nсписок будет дополняться по мере развития",
+                    [
+                                (new Button())
+                                    ->setBgColor('#2fa4e7')
+                                    ->setTextHAlign('center')
+                                    ->setActionType('reply')
+                                    ->setActionBody(self::CONCLUSIONS)
+                                    ->setText('Обследования без заключений'),
+                                (new Button())
+                                    ->setBgColor('#2fa4e7')
+                                    ->setTextHAlign('center')
+                                    ->setActionType('reply')
+                                    ->setActionBody('файлы')
+                                    ->setText('Обследования без изображений'),
+                                (new Button())
+                                    ->setBgColor('#2fa4e7')
+                                    ->setTextHAlign('center')
+                                    ->setActionType('reply')
+                                    ->setActionBody('статистика загрузок')
+                                    ->setText('Статистика загрузок'),
+                            ]);
             } else {
                 self::sendMessage(
                     $bot,
@@ -512,5 +531,26 @@ class Viber extends Model
 
     public static function handledYet(){
         return ViberMessaging::find()->where(['message_token' => self::getMessageToken()])->count();
+    }
+
+    /**
+     * @param $bot Bot
+     * @param $botSender
+     * @param $receiverId
+     * @param string $text
+     * @param array $buttons
+     */
+    private static function sendMessageWithButtons($bot, $botSender, $receiverId, string $text, array $buttons): void
+    {
+        $bot->getClient()->sendMessage(
+            (new Text())
+                ->setSender($botSender)
+                ->setReceiver($receiverId)
+                ->setText($text)
+            ->setKeyboard(
+                (new Keyboard())
+                    ->setButtons($buttons)
+            )
+        );
     }
 }
