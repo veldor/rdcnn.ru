@@ -34,7 +34,7 @@ class ExecutionHandler extends Model
         $user = User::findByUsername($id);
         if ($user !== null) {
             $isExecution = self::isExecution($id);
-            $isConclusion = self::isConclusion($id);
+            $conclusions = Table_availability::getConclusions($id);
             $timeLeft = 0;
             // посмотрю, сколько времении ещё будет доступно обследование
             $startTime = $user->created_at;
@@ -49,10 +49,7 @@ class ExecutionHandler extends Model
                     return ['status' => 2];
                 }
             }
-
-            $addConc = self::isAdditionalConclusions($id);
-
-            return ['status' => 1, 'execution' => $isExecution, 'conclusion' => $isConclusion, 'timeLeft' => $timeLeft, 'addConc' => $addConc];
+            return ['status' => 1, 'execution' => $isExecution, 'conclusions' => $conclusions, 'timeLeft' => $timeLeft];
         }
         return [];
     }

@@ -34,7 +34,10 @@ class SiteController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['index', 'error'],
+                        'actions' => [
+                            'index',
+                            'error'
+                        ],
                         'roles' => ['?', '@'],
                     ],
                     [
@@ -52,7 +55,10 @@ class SiteController extends Controller
 
                     [
                         'allow' => true,
-                        'actions' => ['logout', 'availability-check'],
+                        'actions' => [
+                            'logout',
+                            'availability-check'
+                        ],
                         'roles' => ['@'],
                     ],
                 ],

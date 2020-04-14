@@ -57,4 +57,19 @@ class Table_availability extends ActiveRecord
         }
         return $answer;
     }
+
+    /**
+     * @param $id
+     */
+    public static function getConclusions($id)
+    {
+        $answer = [];
+        $existentConclusions = self::findAll(['userId' => $id, 'is_conclusion' => true]);
+        if(!empty($existentConclusions)){
+            foreach ($existentConclusions as $existentConclusion) {
+                $answer[] = $existentConclusion->file_name;
+            }
+        }
+        return $answer;
+    }
 }
