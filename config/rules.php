@@ -13,5 +13,6 @@ return [
     'check' => 'site/check',
     'delete-unhandled-folder' => 'administrator/delete-unhandled-folder',
     'rename-unhandled-folder' => 'administrator/rename-unhandled-folder',
-    'print-missed-conclusions-list' => 'administrator/print-missed-conclusions-list'
+    'print-missed-conclusions-list' => 'administrator/print-missed-conclusions-list',
+    'download/temp/<link:.+>' => 'download/download-temp'
 ];
