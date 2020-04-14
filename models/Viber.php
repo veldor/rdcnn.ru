@@ -326,6 +326,15 @@ class Viber extends Model
                     ExecutionHandler::checkAvailabilityForBots($execution->id, $receiverId);
                 }
             }
+        } elseif ($lowerText === 'привет') {
+            self::sendMessageWithButtons(
+                $bot,
+                $botSender,
+                $receiverId,
+                'Привет! Введите команду, если знаете, чего хотите, или нажмите на кнопку "команды", чтобы узнать, что я умею делать ;)',
+                self::getHelpButtons()
+            );
+
         } elseif ($lowerText === 'я работаю в рдц') {
             // запрос доступа к приватным данным
             self::sendMessage($bot, $botSender, $receiverId, 'Докажите');
@@ -592,6 +601,19 @@ class Viber extends Model
                 ->setActionType('reply')
                 ->setActionBody('статистика загрузок')
                 ->setText('Статистика загрузок'),
+            ];
+    }
+    /**
+     * @return array
+     */
+    private static function getHelpButtons(): array
+    {
+        return [(new Button())
+            ->setBgColor('#2fa4e7')
+            ->setTextHAlign('center')
+            ->setActionType('reply')
+            ->setActionBody('команды')
+            ->setText('Показать доступные команды'),
             ];
     }
 }
