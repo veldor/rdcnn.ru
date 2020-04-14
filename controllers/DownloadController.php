@@ -7,6 +7,7 @@ namespace app\controllers;
 use app\models\utils\DownloadHandler;
 use app\models\Viber;
 use yii\filters\AccessControl;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
@@ -29,12 +30,26 @@ class DownloadController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['execution', 'download-temp'],
+                        'actions' => ['download-temp'],
                         'roles' => ['@', '?'],
                     ],
                 ],
             ],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     * @throws BadRequestHttpException
+     */
+    public function beforeAction($action):bool
+    {
+        if ($action->id === 'download-temp') {
+            // отключу csrf для возможности запроса
+            $this->enableCsrfValidation = false;
+        }
+
+        return parent::beforeAction($action);
     }
 
     /**

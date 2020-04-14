@@ -11,6 +11,7 @@ use app\models\database\ViberSubscriptions;
 use app\models\utils\GrammarHandler;
 use app\priv\Info;
 use Exception;
+use phpDocumentor\Reflection\Types\Self_;
 use Viber\Api\Event;
 use Viber\Api\Keyboard;
 use Viber\Api\Keyboard\Button;
@@ -488,6 +489,7 @@ class Viber extends Model
                 $typeText = 'Загрузите заключение врача по ссылке: ';
             }
             if (is_file($file)) {
+                self::logAction(Url::toRoute(['download/download-temp', 'link' => $link], 'https'));
                 // проверю, что размер файла не превышает максимально допустимый
                 $fileSize = filesize($file);
                 $bot = self::getBot(Info::VIBER_API_KEY);
@@ -536,7 +538,7 @@ class Viber extends Model
             }
             if (!empty($file) && !empty($fileName) && is_file($file)) {
                 // отдам файл на выгрузку
-                Yii::$app->response->sendFile($file, $fileName, ['inline' => true]);
+                Yii::$app->response->sendFile($file, $fileName);
                 return;
             }
         }
