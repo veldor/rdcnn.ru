@@ -80,8 +80,26 @@ class FileUtils
 
     }
 
-    public static function getConclusions($name)
+    /**
+     * Получение списка папок, ожидающих обработки
+     * @return array <p>Возвращает список имён папок</p>
+     */
+    public static function checkWaitingFolders(): array
     {
-
+        // это список ожидающих папок
+        $waitingFoldersList = [];
+        // паттерн валидных папок
+        $pattern = '/^[aа]?\d+$/ui';
+        // получу список папок с заключениями
+        $dirs = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
+        foreach ($dirs as $dir) {
+            $path = Yii::getAlias('@executionsDirectory') . '/' . $dir;
+            // если папка не соответствует принятому названию- внесу её в список нераспознанных
+            // отфильтрую свежесозданные папки: они могут быть ещё в обработке
+            if (is_dir($path) && preg_match($pattern, $dir)) {
+                $waitingFoldersList[] = $dir;
+            }
+        }
+        return $waitingFoldersList;
     }
 }

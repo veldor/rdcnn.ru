@@ -38,7 +38,7 @@ class User extends ActiveRecord implements IdentityInterface
      * Null should be returned if such an identity cannot be found
      * or the identity is not in an active state (disabled, deleted, etc.)
      */
-    public static function findIdentity($id) :User
+    public static function findIdentity($id) :?User
     {
         return static::findOne($id);
     }
@@ -59,9 +59,9 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * @param $username
-     * @return User
+     * @return User|null
      */
-    public static function findByUsername($username): User
+    public static function findByUsername($username): ?User
     {
         // найти по имени администратора невозможно
         if($username !== self::ADMIN_NAME){

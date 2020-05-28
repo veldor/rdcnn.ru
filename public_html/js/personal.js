@@ -1,6 +1,9 @@
 let checkInterval;
-let addConc;
-let isAddConc = false;
+let conclusionsCount;
+let serialNumber;
+let isExecutionLoaded;
+let activeNotificator;
+let originalTitle;
 
 function makeInstruction() {
     let text = '<h2 class="text-center">Выберите операционную систему</h2>' +
@@ -12,21 +15,47 @@ function makeInstruction() {
     makeModal("<h2 class='text-center'>Я скачал файл, что дальше</h2>", text, false, true, 1000);
 }
 
-$(function () {
-        // назначу переменные для кнопок
-    let downloadConclusionBtn = $('.downloadConclusionBtn');
-    let printConclusionBtn = $('.printConclusionBtn');
-    let conclusionNotReadyBtn = $('.conclusionNotReadyBtn');
+function getConclusions(){
+    return $('a.conclusion');
+}
 
+function startTitleNotificator() {
+    console.log('start notificator');
+    originalTitle = document.title;
+    // пока пациент не перешел во вкладку- заставлю её менять название каждую секунду
+    if(!activeNotificator){
+        activeNotificator = setInterval(function () {
+            if(document.title === originalTitle){
+                document.title = 'Новые данные';
+            }
+            else{
+                document.title = originalTitle;
+            }
+        }, 1000);
+    }
+}
+
+$(function () {
+    // повешу отслеживание наведения фокуса на вкладку (для нотификации новых данных)
+    $(window).on('focus.stopTimer', function () {
+        console.log('focus');
+        if(activeNotificator){
+            clearInterval(activeNotificator);
+            activeNotificator = null;
+            document.title = originalTitle;
+        }
+    });
+    // получу количество доступных заключений на данный момент
+    conclusionsCount = getConclusions().length;
+    // проверю, загружено ли заключение
+    isExecutionLoaded = !!$('#executionReadyBtn'.length);
     let downloadExecutionBtn = $('.downloadExecutionBtn');
-    let executionNotReadyBtn = $('.executionNotReadyBtn');
 
 
     let availabilityTimeDivContainer = $('#availabilityTimeContainer');
     let availabilityTimeContainer = $('#availabilityTime');
-    let removeReasonContainer = $('#removeReasonContainer');
 
-    let clearDataBtn = $('.clearDataBtn');
+    let clearDataBtn = $('#clearDataBtn');
     clearDataBtn.on('click.clear', function () {
         makeInformerModal('Удалить данные?', 'Убрать все данные с сервера, чтобы никто не мог получить к ним доступ. Если вы удалите данные, то получить повторный доступ к ним вы сможете, обратившись в наш центр.', function () {
                 clearInterval(checkInterval);
@@ -38,52 +67,113 @@ $(function () {
             });
     });
 
-    function checkAvailability(){
+    function checkAvailability() {
         sendSilentAjax('get', '/availability/check', handleAvailability);
     }
 
     function handleAvailability(data) {
         // если запрос успешен
-        if(data['status'] === 1){
+        if (data['status'] === 1) {
             // проверю, если есть заключение- активирую пункты о скачивании
-            if(data['execution']){
-                downloadExecutionBtn.removeClass('invisible');
-                executionNotReadyBtn.addClass('invisible');
+            if (data['execution']) {
+                // если файлы загружены только что
+                if(!isExecutionLoaded){
+                    // удалю кнопку отсутствия файлов и добавлю кнопку скачивания
+                   $('div#executionContainer').html("<a id='executionReadyBtn' href='/download/execution' class='btn btn-primary  btn btn-block margin with-wrap' data-href='$conclusion'>Загрузить архив обследования</a>");
+                   // оповещу о загрузке файлов
+                    makeInformerModal(
+                        'Новые данные',
+                        'Архив обследования доступен для скачивания',
+                        function () {
+                        }
+                    );
+                    startTitleNotificator();
+                    isExecutionLoaded = true;
+                }
             }
-            if(data['conclusion']){
-                downloadConclusionBtn.removeClass('invisible');
-                printConclusionBtn.removeClass('invisible');
-                conclusionNotReadyBtn.addClass('invisible');
-                removeReasonContainer.removeClass('invisible');
+            else{
+                $('div#executionContainer').html("<a id='executionNotReadyBtn' class='btn btn-primary btn btn-block margin with-wrap disabled' role='button'>Архив обследования подготавливается</a>");
+                isExecutionLoaded = false;
             }
-            if(data['timeLeft']){
+            if (data.hasOwnProperty('conclusions') && data.conclusions) {
+                let container = $('div#conclusionsContainer');
+                // посчитаю количество заключений, если их больше, чем было до этого- оповещу пользователя о новом
+                if (data.conclusions.length > conclusionsCount) {
+                    makeInformerModal(
+                        'Новые данные',
+                        'Доступно для скачивания заключение по обследованию',
+                        function () {
+                        }
+                    );
+                    startTitleNotificator();
+                    // актуализирую данные
+                    let endCounter = conclusionsCount;
+                    let counterEnd;
+                    $(data.conclusions).each(function () {
+                        // если ссылка на заключение уже есть- ничего не делаю, если нет- добавляю ссылку
+                        if($('a.conclusion[data-href="' + this + '"]').length === 0){
+                            ++endCounter;
+                            counterEnd = '#' + endCounter;
+                            container.append("<a href='/conclusion/" + this + "' class='btn btn-primary btn-block margin with-wrap conclusion' data-href='" + this + "'>Загрузить заключение врача " + counterEnd + "</a><a target='_blank' href='/print-conclusion/" + this + "' class='btn btn-info btn-block margin with-wrap print-conclusion' data-href='" + this + "'>Распечатать заключение врача " + counterEnd + "</a>");
+                        }
+                    });
+                }
+                if (data.conclusions.length === 0 && conclusionsCount > 0) {
+                    // заключений не найдено, проверю, если их и не было- ничего не делаю, если были- удаляю
+                    // все пункты и добавляю заглушки
+                    container.html("<a id='conclusionNotReadyBtn' class='btn btn-primary btn-block margin with-wrap disabled' role='button'>Заключение врача в работе</a>");
+                }
+                // тут придётся ещё раз пройтись по списку актуальных заключений, чтобы проверить, нет ли лишних ссылок, и если они есть- удалить их из списка
+                let existentConclusions = getConclusions();
+                if(existentConclusions.length > 0 && data.conclusions.length > 0){
+                    // удалю заглушку об отсутствии заключений врача
+                    $('a#conclusionNotReadyBtn').remove();
+                    existentConclusions.each(function () {
+                        let href = $(this).attr('data-href');
+                        // если данного заключения нет в списке актуальных- удалю его и ссылку на распечатывание заключения
+                        if(!data.conclusions.includes(href)){
+                            $('a.print-conclusion[data-href="' + href + '"]').remove();
+                            $(this.remove());
+                        }
+                    });
+                }
+                // тут переназову список по порядку
+                existentConclusions = getConclusions();
+                if(existentConclusions.length > 0){
+                    // если заключение только одно- оно идёт без номера
+                    if(existentConclusions.length === 1){
+                        existentConclusions.text('Загрузить заключение врача');
+                        $('a.print-conclusion[data-href="' + existentConclusions.attr('data-href') + '"]').text('Распечатать заключение врача');
+                    }
+                    else{
+                        serialNumber = 1;
+                        existentConclusions.each(function () {
+                            $(this).text('Загрузить заключение врача №' + serialNumber);
+                            $('a.print-conclusion[data-href="' + $(this).attr('data-href') + '"]').text('Распечатать заключение врача №' + serialNumber);
+                            serialNumber++;
+                        });
+                    }
+                }
+                // обновлю данные о количестве заключений
+                conclusionsCount = data.conclusions.length;
+            }
+            if (data['timeLeft']) {
                 availabilityTimeDivContainer.removeClass('invisible hidden');
                 availabilityTimeContainer.html(data['timeLeft']);
             }
-            if(data['addConc']){
-                // проверю, есть ли уже ссылки на скачивание дополнительных заключений
-                if(isAddConc && addConc !== data['addConc']){
-                    location.reload();
-                }
-                else{
-                    addConc = data['addConc'];
-                    isAddConc = true;
-                }
-            }
             // проверю, если есть файлы обследования- активирую пункты о скачивании
-        }
-        else if(data['status'] === 2){
+        } else if (data['status'] === 2) {
             clearInterval(checkInterval);
             makeInformerModal('Результаты заключения не найдены', 'Возможно, они были удалены вами или истёк срок хранения. Для повторного получения результатов вы можете позвонить нам!');
         }
     }
+
     checkAvailability();
     checkInterval = setInterval(function () {
         checkAvailability();
-    }, 60000);
+    }, 10000);
 
     downloadExecutionBtn.on('click.showTooltip', function () {
         makeInstruction();
     });
 });
-

@@ -1,19 +1,21 @@
-<?php
+<?php /** @noinspection PhpUndefinedClassInspection */
 
 namespace app\controllers;
 
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\LoginForm;
-use app\models\Test;
 use app\models\User;
 use app\models\Utils;
+use app\models\utils\GrammarHandler;
 use app\priv\Info;
+use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\filters\AccessControl;
 use yii\helpers\Url;
 use yii\web\Controller;
+use yii\web\ErrorAction;
 use yii\web\Response;
 
 class SiteController extends Controller
@@ -32,7 +34,10 @@ class SiteController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['index', 'error'],
+                        'actions' => [
+                            'index',
+                            'error'
+                        ],
                         'roles' => ['?', '@'],
                     ],
                     [
@@ -50,7 +55,10 @@ class SiteController extends Controller
 
                     [
                         'allow' => true,
-                        'actions' => ['logout', 'availability-check'],
+                        'actions' => [
+                            'logout',
+                            'availability-check'
+                        ],
                         'roles' => ['@'],
                     ],
                 ],
@@ -62,7 +70,7 @@ class SiteController extends Controller
     {
         return [
             'error' => [
-                'class' => 'yii\web\ErrorAction',
+                'class' => ErrorAction::class,
             ],
         ];
     }
@@ -72,17 +80,17 @@ class SiteController extends Controller
      * Displays homepage.
      *
      * @param null $executionNumber
-     * @return string
+     * @return string|Response
      * @throws Exception
      */
-    public function actionIndex($executionNumber = null): string
+    public function actionIndex($executionNumber = null)
     {
         // если пользователь не залогинен- показываю ему страницу с предложением ввести номер обследования и пароль
         if (Yii::$app->user->isGuest) {
             if (Yii::$app->request->isGet) {
                 $model = new LoginForm(['scenario' => LoginForm::SCENARIO_USER_LOGIN]);
                 if ($executionNumber !== null) {
-                    $model->username = ExecutionHandler::toLatin($executionNumber);
+                    $model->username = GrammarHandler::toLatin($executionNumber);
                 }
                 return $this->render('login', ['model' => $model]);
             }
@@ -99,10 +107,12 @@ class SiteController extends Controller
         }
         // если пользователь залогинен как администратор- показываю ему страницу для скачивания
         if (Yii::$app->user->can('manage')) {
-            // получу информацию о обследовании
-            $execution = User::findByUsername($executionNumber);
-            if ($execution !== null) {
-                return $this->render('personal', ['execution' => $execution]);
+            if($executionNumber !== null){
+                // получу информацию о обследовании
+                $execution = User::findByUsername($executionNumber);
+                if ($execution !== null) {
+                    return $this->render('personal', ['execution' => $execution]);
+                }
             }
 
 // страница не найдена, перенаправлю на страницу менеджмента
@@ -186,7 +196,7 @@ class SiteController extends Controller
 
     /**
      * @return array
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function actionAvailabilityCheck(): array
     {

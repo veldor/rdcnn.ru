@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\utils\GrammarHandler;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -199,7 +200,7 @@ class LoginForm extends Model
         }
 
         // получу данные о пользователе
-        $user = User::findByUsername(ExecutionHandler::toLatin($this->username));
+        $user = User::findByUsername(GrammarHandler::toLatin($this->username));
         if ($user !== null) {
             if ($user->failed_try > 20) {
                 $this->addError('username', 'Было выполнено слишком много неверных попыток ввода пароля. В целях безопасности данные были удалены. Вы можете обратиться к нам для восстановления доступа');

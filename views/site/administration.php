@@ -6,6 +6,7 @@ use app\models\User;
 use app\models\Utils;
 use nirvana\showloading\ShowLoadingAsset;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
 
@@ -87,7 +88,7 @@ echo "<div class='col-sm-4'><label class='control-label' for='#sortBy'>Сорт�
 
 echo Html::endForm();
 
-echo "</div>";
+echo '</div>';
 
 // тут список нераспознанных папок
 
@@ -99,8 +100,18 @@ echo "
     </div>
 ";
 
+// тут список папок, ожидающих обработки
+
 echo "
-    <div class='col-sm-12 margin'><div class='col-sm-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-sm-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b><br/><a target='_blank' href='/print-missed-conclusions-list' class='btn btn-default'><span class='text-info'>Распечатать список</span></a></div><div class='col-sm-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
+    <div id='waitingFoldersContainer' class='col-sm-12 hidden margin'>
+        <h2 class='text-center text-info'><span class='glyphicon glyphicon-info-sign'></span> Файлы данных обследований ожидают обработки <span class='glyphicon glyphicon-info-sign'></span></h2>
+        <h3 class='text-info text-center'>Они появятся в результатах обследования через некоторое время</h3>
+        <ul id='waitingFoldersList'></ul>
+    </div>
+";
+
+echo "
+    <div class='col-sm-12 margin'><div class='col-sm-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-sm-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b><br/><a target='_blank' href='" . Url::toRoute('administrator/print-missed-conclusions-list') . "' class='btn btn-default'><span class='text-info'>Распечатать список</span></a></div><div class='col-sm-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
 ";
 
 $executionsCounter = 0;
@@ -109,10 +120,8 @@ if (!empty($executions)) {
     echo "<table class='table-hover table'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'>";
     foreach ($executions as $execution) {
         // проверю, если включена фильтрация по центру- выведу только те обследования, которые проведены в этом центре
-        if(Utils::isCenterFiltered()){
-            if(Utils::isFiltered($execution)){
-                continue;
-            }
+        if(Utils::isCenterFiltered() && Utils::isFiltered($execution)) {
+            continue;
         }
             ++ $executionsCounter;
         ?>
@@ -139,7 +148,7 @@ if (!empty($executions)) {
         </tr>
         <?php
     }
-    echo "</tbody></table>";
+    echo '</tbody></table>';
 }
 if($executionsCounter === 0){
     echo "<div class='col-sm-12'><h2 class='text-center'>Обследований не зарегистрировано</div>";
@@ -147,10 +156,7 @@ if($executionsCounter === 0){
 
 echo "<div class='col-sm-12 text-center'>";
 
-
-echo "<button class='btn btn-default' id='clearGarbageButton'><span class='text-danger'>Очистить мусор</span></button>";
-
-echo "</div>";
+echo '</div>';
 ?>
 
 <label><textarea class="hidden" id="forPasswordCopy"></textarea></label>

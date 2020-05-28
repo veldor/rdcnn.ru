@@ -8,11 +8,11 @@ return [
     'availability/check' => 'site/availability-check',
     'patients/check' => 'administrator/patients-check',
     'check/files/<executionNumber:[0-9a-zA-Z]+>' => 'administrator/files-check',
-    'download/conclusion/<part:[0-9]+>' => 'download/conclusion',
-    'print/conclusion/<part:[0-9]+>' => 'download/print-conclusion',
-    'clear-garbage' => 'administrator/clear-garbage',
+    'conclusion/<href:A?\d+-?\d*\.pdf>' => 'download/conclusion',
+    'print-conclusion/<href:A?\d+-?\d*\.pdf>' => 'download/print-conclusion',
     'check' => 'site/check',
     'delete-unhandled-folder' => 'administrator/delete-unhandled-folder',
     'rename-unhandled-folder' => 'administrator/rename-unhandled-folder',
-    'print-missed-conclusions-list' => 'administrator/print-missed-conclusions-list'
+    'print-missed-conclusions-list' => 'administrator/print-missed-conclusions-list',
+    'download/temp/<link:.+>' => 'download/download-temp'
 ];

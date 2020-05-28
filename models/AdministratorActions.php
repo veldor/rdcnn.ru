@@ -1,10 +1,10 @@
-<?php
+<?php /** @noinspection PhpUndefinedClassInspection */
 
 
 namespace app\models;
 
 
-use app\priv\Info;
+use app\models\utils\GrammarHandler;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -14,10 +14,10 @@ use yii\web\UploadedFile;
 
 class AdministratorActions extends Model
 {
-    const SCENARIO_CHANGE_PASSWORD = 'change_password';
-    const SCENARIO_DELETE_ITEM = 'delete_item';
-    const SCENARIO_ADD_EXECUTION = 'add_execution';
-    const SCENARIO_ADD_CONCLUSION = 'add_conclusion';
+    public const SCENARIO_CHANGE_PASSWORD = 'change_password';
+    public const SCENARIO_DELETE_ITEM = 'delete_item';
+    public const SCENARIO_ADD_EXECUTION = 'add_execution';
+    public const SCENARIO_ADD_CONCLUSION = 'add_conclusion';
 
     public $executionId;
     /**
@@ -29,11 +29,17 @@ class AdministratorActions extends Model
      */
     public $conclusion;
 
+    /**
+     * @return array
+     * @throws Exception
+     */
     public static function checkPatients(): array
     {
         $response = [];
         // тут придётся проверять наличие неопознанных папок
         $unhandledFolders = FileUtils::checkUnhandledFolders();
+        $waitingFolders = FileUtils::checkWaitingFolders();
+        $response['waitingFolders'] = $waitingFolders;
         $response['unhandledFolders'] = $unhandledFolders;
         $response['patientList'] = [];
         // верну список пациентов со статусами данных
@@ -47,13 +53,14 @@ class AdministratorActions extends Model
                     $patientInfo = [];
                     $patientInfo['id'] = $item->username;
                     $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
-                    $patientInfo['conclusion'] = ExecutionHandler::isConclusion($item->username);
+                    $patientInfo['conclusionsCount'] = ExecutionHandler::countConclusions($item->username);
                     $response['patientList'][] = $patientInfo;
             }
         }
         return $response;
     }
 
+    /** @noinspection OnlyWritesOnParameterInspection */
     public static function selectCenter(): void
     {
         $center =  Yii::$app->request->post('center');
@@ -61,6 +68,7 @@ class AdministratorActions extends Model
         $session['center'] = $center;
     }
 
+    /** @noinspection OnlyWritesOnParameterInspection */
     public static function selectTime(): void
     {
         $time =  Yii::$app->request->post('timeInterval');
@@ -69,6 +77,7 @@ class AdministratorActions extends Model
     }
 
 
+    /** @noinspection OnlyWritesOnParameterInspection */
     public static function selectSort(): void
     {
         $sortBy =  Yii::$app->request->post('sortBy');
@@ -76,28 +85,13 @@ class AdministratorActions extends Model
         $session['sortBy'] = $sortBy;
     }
 
-/*    public static function clearGarbage()
-    {
-        // получу список всех пациентов
-        $patients = User::findAllRegistered();
-        // определю время жизни учётной записи
-        $lifetime = time() - Info::DATA_SAVING_TIME;
-        if(!empty($patients)){
-            foreach ($patients as $patient) {
-                if($patient->created_at < $lifetime){
-                    self::simpleDeleteItem($patient->username);
-                }
-            }
-        }
-    }*/
-
     /**
      * @param $id
      */
     public static function simpleDeleteItem($id): void
     {
         $execution = User::findByUsername($id);
-        if(!empty($execution)){
+        if($execution !== null){
             $conclusionFile = Yii::getAlias('@conclusionsDirectory') . '\\' . $id . '.pdf';
             if(is_file($conclusionFile)){
                 unlink($conclusionFile);
@@ -108,8 +102,8 @@ class AdministratorActions extends Model
                 unlink($executionFile);
             }
             // удалю запись в таблице выдачи разрешений
-            $auth = Table_auth_assigment::findOne(["user_id" => $execution->id]);
-            if(!empty($auth)){
+            $auth = Table_auth_assigment::findOne(['user_id' => $execution->id]);
+            if($auth !== null){
                 try {
                     $auth->delete();
                 } catch (StaleObjectException $e) {
@@ -128,7 +122,8 @@ class AdministratorActions extends Model
         }
     }
 
-    public function scenarios(){
+    public function scenarios() :array
+    {
         return [
             self::SCENARIO_CHANGE_PASSWORD => ['executionId'],
             self::SCENARIO_DELETE_ITEM => ['executionId'],
@@ -152,11 +147,11 @@ class AdministratorActions extends Model
      * @return array
      * @throws Exception
      */
-    public function changePassword()
+    public function changePassword(): array
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
-            if(empty($execution)){
+            if($execution === null){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];
             }
             $password = User::generateNumericPassword();
@@ -176,7 +171,7 @@ class AdministratorActions extends Model
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
-            if(empty($execution)){
+            if($execution === null){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];
             }
             self::simpleDeleteItem($execution->username);
@@ -189,7 +184,7 @@ class AdministratorActions extends Model
     {
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
-            if(empty($execution)){
+            if($execution === null){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];
             }
             if(empty($this->conclusion)){
@@ -206,17 +201,20 @@ class AdministratorActions extends Model
                 $file->saveAs($filename);
                 ++$counter;
             }
-            Table_availability::setConclusionLoaded($execution->username);
-            ExecutionHandler::startTimer($this->executionId);
             return ['status' => 1, 'message' => 'Заключение добавлено'];
         }
         return ['status' => 2, 'message' => $this->errors];
     }
+
+    /**
+     * @return array
+     */
     public function addExecution(): array
     {
         if($this->validate()){
+            $this->executionId = GrammarHandler::toLatin($this->executionId);
             $execution = User::findByUsername($this->executionId);
-            if(empty($execution)){
+            if($execution === null){
                 return ['status' => 3, 'message' => 'Обследование не найдено'];
             }
             if(empty($this->execution)){
@@ -224,7 +222,6 @@ class AdministratorActions extends Model
             }
             $filename = Yii::getAlias('@executionsDirectory') . '\\' . $execution->username . '.zip';
             $this->execution->saveAs($filename);
-            ExecutionHandler::startTimer($this->executionId);
             return ['status' => 1, 'message' => 'Файлы обследования добавлены'];
         }
         return ['status' => 2, 'message' => $this->errors];
