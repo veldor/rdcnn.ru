@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\AuthAssignment;
 use app\models\database\TempDownloadLinks;
 use app\models\database\ViberSubscriptions;
 use app\models\utils\GrammarHandler;
@@ -113,7 +114,7 @@ class ExecutionHandler extends Model
      */
     public static function check(): void
     {
-        $report = "start report \n";
+        echo "start report \n";
         // проверю устаревшие данные
         // получу всех пользователей
         $users = User::findAllRegistered();
@@ -122,17 +123,17 @@ class ExecutionHandler extends Model
                 // ищу данные по доступности обследований.
                 if (($user->created_at + Info::DATA_SAVING_TIME) < time()) {
                     AdministratorActions::simpleDeleteItem($user->username);
-                    $report .= "user $user->username deleted by timeout \n";
+                    echo "user {$user->username} expired and deleted\n";
                 }
             }
         }
         // автоматическая обработка папок
-        $entities = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
+        $entities = array_slice(scandir(Info::EXEC_FOLDER), 2);
         $pattern = '/^[aа]?[0-9]+$/ui';
         // проверю папки
         if (!empty($entities)) {
             foreach ($entities as $entity) {
-                $path = Yii::getAlias('@executionsDirectory') . '/' . $entity;
+                $path = Info::EXEC_FOLDER . '/' . $entity;
                 if (is_dir($path)) {
                     // для начала проверю папку, если она изменена менее 5 минут назад- пропускаю её
                     $stat = stat($path);
@@ -149,27 +150,27 @@ class ExecutionHandler extends Model
                                 self::checkUser($dirLatin);
                                 // сохраню содержимое папки в архив
                                 self::PackFiles($dirLatin, $path);
-                                $report .= "dir $entity handled and load to $path \n";
+                                echo "dir $entity handled and load to $path \n";
                             } else {
                                 // удалю папку
                                 self::rmRec($path);
-                                $report .= "dir $entity is empty and deleted \n";
+                                echo "dir $entity is empty and deleted \n";
                             }
 
                         } else {
-                            $report .= "dir $entity not handled \n";
+                            echo "dir $entity not handled \n";
                         }
                     } else {
-                        $report .= "dir $entity waiting for timeout \n";
+                        echo "dir $entity waiting for timeout \n";
                     }
                 }
             }
             // теперь перепроверю данные для получения актуальной информации о имеющихся файлах
-            $entities = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
+            $entities = array_slice(scandir(Info::EXEC_FOLDER), 2);
             $pattern = '/^A?[0-9]+.zip$/';
             if (!empty($entities)) {
                 foreach ($entities as $entity) {
-                    $path = Yii::getAlias('@executionsDirectory') . '/' . $entity;
+                    $path =Info::EXEC_FOLDER . '/' . $entity;
                     if (is_file($path) && preg_match($pattern, $entity)) {
                         // найден файл, обработаю информацию о нём
                         $existentFile = Table_availability::findOne(['is_execution' => true, 'file_name' => $entity]);
@@ -209,11 +210,11 @@ class ExecutionHandler extends Model
         $pattern = '/^[aа]?\W?\d+-?\.?\d*\.pdf$/ui';
         $dotPattern = '/^([aа]?\W?\d+)\.(\d+\.pdf)$/ui';
         // проверю папку с заключениями
-        $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
+        $conclusionsDir = Info::CONC_FOLDER;
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
             $files = array_slice(scandir($conclusionsDir), 2);
             foreach ($files as $file) {
-                $path = Yii::getAlias('@conclusionsDirectory') . '\\' . $file;
+                $path = Info::CONC_FOLDER . '\\' . $file;
                 if (is_file($path)) {
                     // проверю, подходит ли файл под регулярку
                     if (preg_match($pattern, $file)) {
@@ -230,29 +231,35 @@ class ExecutionHandler extends Model
                             if (preg_match($dotPattern, $file, $arr)) {
                                 // переименую файл
                                 $filePureName = $arr[1] . '-' . $arr[2];
-                                rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
-                                $report .= "file $file renamed from dot to $filePureName \n";
+                                rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
+                                echo "file $file renamed from dot to $filePureName \n";
                             }
                             // проверю наличие учётной записи
                             // если это не дублирующее заключение
-                            if (stripos('-', $filePureName) < 0) {
-                                self::checkUser($filePureName);
+                            if (empty(strpos($filePureName, '-'))) {
+                                echo "check user $filePureName\n";
+                                self::checkUser(GrammarHandler::getBaseFileName($filePureName));
                             }
                             // если файл не соответствует строгому шаблону
                             if ($file !== $filePureName) {
-                                rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
-                                $report .= "file $file renamed to $filePureName";
+                                try{
+                                    rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
+                                    echo "file $file renamed to $filePureName \n";
+                                }
+                                catch (\Exception $e){
+                                    echo "skipped file $file no renamed to $filePureName with error {$e->getMessage()}\n";
+                                }
                             }
                         } else {
-                            $report .= "file $file in conclusions waiting for timeout \n";
+                            echo "file $file in conclusions waiting for timeout \n";
                         }
                     } else {
-                        $report .= "file $file not handled \n";
+                        echo "file $file not handled \n";
                     }
                 }
             }
         }
-        // из облачной папки
+/*        // из облачной папки (неактуально, проверяется скриптом)
         $cloudDir = Yii::getAlias('@cloudDirectory');
         if (!empty($cloudDir) && is_dir($cloudDir)) {
             $report .= "handle cloud dir \n";
@@ -290,16 +297,17 @@ class ExecutionHandler extends Model
                     }
                 }
             }
-        }
+        }*/
 
         // теперь проверю актуальность данных по доступности заключений
-        $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
+        $conclusionsDir = Info::CONC_FOLDER;
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
             $files = array_slice(scandir($conclusionsDir), 2);
             $strictPattern = '/^A?\d+-?\d*\.pdf$/ui';
             foreach ($files as $file) {
-                $path = Yii::getAlias('@conclusionsDirectory') . '/' . $file;
+                $path = Info::CONC_FOLDER . '/' . $file;
                 if (is_file($path) && preg_match($strictPattern, $file)) {
+                    echo "handle file {$file}\n";
                     $existentFile = Table_availability::findOne(['is_conclusion' => true, 'file_name' => $file]);
                     if ($existentFile !== null) {
 // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
@@ -314,8 +322,10 @@ class ExecutionHandler extends Model
                             Viber::notifyConclusionLoaded($file);
                         }
                     } else {
+                        $name = GrammarHandler::getBaseFileName($file);
+                        echo "check file owner {$file} by name " . $name . "\n";
                         // найду пользователя
-                        $user = User::findByUsername(GrammarHandler::getBaseFileName($file));
+                        $user = User::findByUsername($name);
                         if ($user !== null) {
                             // внесу информацию о файле в базу
                             $md5 = md5_file($path);
@@ -329,10 +339,6 @@ class ExecutionHandler extends Model
                 }
             }
         }
-
-        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/update_' . time() . '.log';
-        $report .= 'end report';
-        file_put_contents($file, $report);
     }
 
     /**
@@ -355,8 +361,13 @@ class ExecutionHandler extends Model
         $new->save();
         // выдам пользователю права на чтение
         $auth = Yii::$app->authManager;
-        $readerRole = $auth->getRole('reader');
-        $auth->assign($readerRole, $new->getId());
+        if($auth !== null){
+            $readerRole = $auth->getRole('reader');
+            $auth->assign($readerRole, $new->getId());
+            return $password;
+        }
+// Добавлю вручную
+        (new AuthAssignment(['user_id' => $new->id, 'item_name' => 'reader', 'created_at' => time()]))->save();
         return $password;
     }
 
@@ -367,10 +378,10 @@ class ExecutionHandler extends Model
     public static function PackFiles($executionNumber, string $executionDir): void
     {
 // скопирую в папку содержимое dicom-просмотровщика
-        $viewer_dir = Yii::getAlias('@dicomViewerDirectory');
+        $viewer_dir = Info::DICOM_VIEWER_FOLDER;
         self::recurse_copy($viewer_dir, $executionDir);
-        $fileWay = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber . '_tmp.zip';
-        $trueFileWay = Yii::getAlias('@executionsDirectory') . '\\' . GrammarHandler::toLatin($executionNumber) . '.zip';
+        $fileWay = Info::EXEC_FOLDER . '\\' . $executionNumber . '_tmp.zip';
+        $trueFileWay = Info::EXEC_FOLDER . '\\' . GrammarHandler::toLatin($executionNumber) . '.zip';
         // создам архив и удалю исходное
         shell_exec('cd /d ' . $executionDir . ' && "' . Info::WINRAR_FOLDER . '"  a -afzip -r -df  ' . $fileWay . ' .');
         // удалю пустую директорию
@@ -390,6 +401,7 @@ class ExecutionHandler extends Model
         $user = User::findByUsername($name);
         if ($user === null) {
             $transaction = new DbTransaction();
+            echo "create user {$name}\n";
             self::createUser($name);
             $transaction->commitTransaction();
         }
@@ -447,7 +459,7 @@ class ExecutionHandler extends Model
     public static function countConclusions(string $username): int
     {
         // посчитаю заключения по конкретному обследованию
-        $entities = array_slice(scandir(Yii::getAlias('@conclusionsDirectory')), 2);
+        $entities = array_slice(scandir(Info::CONC_FOLDER), 2);
         $conclusionsCount = 0;
         $pattern = '/^' . $username . '-\d.+\pdf$/';
         foreach ($entities as $entity) {
@@ -529,7 +541,7 @@ class ExecutionHandler extends Model
      */
     public static function isConclusion($name): bool
     {
-        $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $name . '.pdf';
+        $filename = Info::CONC_FOLDER . '\\' . $name . '.pdf';
         if (is_file($filename)) {
             return true;
         }

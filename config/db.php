@@ -1,6 +1,6 @@
 <?php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/../priv/Info.php';
+require_once dirname(__DIR__) . '/priv/Info.php';
 
 return [
     'class' => 'yii\db\Connection',
