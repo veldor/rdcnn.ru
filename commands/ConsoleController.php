@@ -29,6 +29,7 @@ class ConsoleController extends Controller
     /**
      * This command load data from Gdrive and handle changes
      * @return int Exit code
+     * @throws \Exception
      */
     public function actionIndex(): int
     {
