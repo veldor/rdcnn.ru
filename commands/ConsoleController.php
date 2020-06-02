@@ -43,6 +43,9 @@ class ConsoleController extends Controller
         } catch (Exception $e) {
             echo "error work with Gdrive: {$e->getMessage()}";
         }
+        catch (Google_Exception $ge){
+            echo "error work with google : {$ge->getMessage()}";
+        }
 
         // теперь обработаю изменения
         try {
