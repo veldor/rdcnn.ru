@@ -33,6 +33,12 @@ class ConsoleController extends Controller
      */
     public function actionIndex(): int
     {
+
+        $date = new DateTime();
+        $date = $date->format('Y-m-d H:i:s');
+        $logPath = dirname(__DIR__) . '\\logs\\update.log';
+        file_put_contents($logPath, 'start: ' . $date . "\n", FILE_APPEND);
+
         echo "Checking changes\n";
 
         // подключаю Gdrive, проверю заключения, загруженные из папок

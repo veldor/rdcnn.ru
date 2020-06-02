@@ -316,3 +316,33 @@ function closeAlert(alertDiv) {
         });
     });
 }
+
+
+// обработка активаторов AJAX-запросов =================================================================================
+function handleAjaxActivators() {
+    "use strict";
+    // найду активаторы AJAX-запросов
+    let activators = $('.activator');
+    activators.off('click.request');
+    activators.on('click.request', function () {
+        let action = $(this).attr('data-action');
+        if (action) {
+            // отправлю запрос на форму
+            sendAjax(
+                "get",
+                action,
+                simpleAnswerHandler
+            )
+        } else {
+            makeInformer(
+                "danger",
+                "Ошибка",
+                "Кнопке не назначено действие"
+            )
+        }
+    });
+}
+
+$(function () {
+    handleAjaxActivators();
+});
