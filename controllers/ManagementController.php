@@ -42,7 +42,7 @@ class ManagementController extends Controller
     {
         $file = dirname(__DIR__) . '\\updateFromGithub.bat';
         if(is_file($file)){
-            $command = "$file";
+            $command = $file . ' ' . dirname(__DIR__);
             $outFilePath =  dirname(__DIR__) . '/logs/file.log';
             $outErrPath =  dirname(__DIR__) . '/logs/err.log';
             $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
