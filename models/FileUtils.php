@@ -151,7 +151,7 @@ class FileUtils
     public static function isUpdateInProgress():bool
     {
         $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
-        if($file){
+        if(is_file($file)){
             $content = file_get_contents($file);
             return (bool) $content;
         }
