@@ -57,7 +57,7 @@ echo '<div class="col-xs-12 text-center margin">
             <input type="checkbox" class="custom-control-input" id="darkSwitch">
             <label class="custom-control-label" for="darkSwitch">Ночной режим</label>
           </div>
-          <div class="pull-right"><a href=""><span class="glyphicon-cog"></span></a></div>
+          <div class="pull-right"><a href="' . Url::toRoute('site/management') . '"><span class="glyphicon glyphicon-cog"></span></a></div>
         </div>';
 
 // добавлю кнопку для создания нового обследования

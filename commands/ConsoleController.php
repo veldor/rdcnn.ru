@@ -8,6 +8,7 @@
 namespace app\commands;
 
 use app\models\ExecutionHandler;
+use app\models\FileUtils;
 use app\models\utils\Gdrive;
 use DateTime;
 use Google_Exception;
@@ -33,39 +34,45 @@ class ConsoleController extends Controller
      */
     public function actionIndex(): int
     {
+            // проверю, не запущено ли уже обновление, если запущено- ничего не делаю
+            if (FileUtils::isUpdateInProgress()) {
+                return ExitCode::OK;
+            }
+            try {
+            FileUtils::setUpdateInProgress();
+            $date = new DateTime();
+            $date = $date->format('Y-m-d H:i:s');
+            $logPath = dirname(__DIR__) . '\\logs\\update.log';
+            file_put_contents($logPath, 'start: ' . $date . "\n", FILE_APPEND);
 
-        $date = new DateTime();
-        $date = $date->format('Y-m-d H:i:s');
-        $logPath = dirname(__DIR__) . '\\logs\\update.log';
-        file_put_contents($logPath, 'start: ' . $date . "\n", FILE_APPEND);
+            echo "Checking changes\n";
 
-        echo "Checking changes\n";
+            // подключаю Gdrive, проверю заключения, загруженные из папок
 
-        // подключаю Gdrive, проверю заключения, загруженные из папок
-
-        try {
-            Gdrive::check();
-        } catch (Google_Exception $e) {
-        } catch (Exception $e) {
-            echo "error work with Gdrive: {$e->getMessage()}";
+            try {
+                Gdrive::check();
+            } catch (Google_Exception $e) {
+            } catch (Exception $e) {
+                echo "error work with Gdrive: {$e->getMessage()}";
+            }
+            // теперь обработаю изменения
+            try {
+                ExecutionHandler::check();
+            } catch (\Exception $e) {
+                echo "error handling changes with message {$e->getMessage()}";
+                echo $e->getTraceAsString();
+            }
+            //
+            echo "Finish changes handle\n";
+            $date = new DateTime();
+            $date = $date->format('Y-m-d H:i:s');
+            $logPath = dirname(__DIR__) . '\\logs\\update.log';
+            file_put_contents($logPath, $date . "\n", FILE_APPEND);
+            FileUtils::setLastUpdateTime();
         }
-        catch (Google_Exception $ge){
-            echo "error work with google : {$ge->getMessage()}";
+        finally{
+            FileUtils::setUpdateFinished();
         }
-
-        // теперь обработаю изменения
-        try {
-            ExecutionHandler::check();
-        } catch (\Exception $e) {
-            echo "error handling changes with message {$e->getMessage()}";
-            echo $e->getTraceAsString();
-        }
-        //
-        echo "Finish changes handle\n";
-        $date = new DateTime();
-        $date = $date->format('Y-m-d H:i:s');
-        $logPath = dirname(__DIR__) . '\\logs\\update.log';
-        file_put_contents($logPath, $date . "\n", FILE_APPEND);
         return ExitCode::OK;
     }
 

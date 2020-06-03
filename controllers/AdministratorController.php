@@ -7,6 +7,7 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
+use app\models\utils\Management;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -145,6 +146,10 @@ class AdministratorController extends Controller
      */
     public function actionPatientsCheck(): array
     {
+        try{
+            Management::handleChanges();
+        }
+        catch (\Exception $e){}
         Yii::$app->response->format = Response::FORMAT_JSON;
         return AdministratorActions::checkPatients();
     }

@@ -4,10 +4,12 @@ namespace app\controllers;
 
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
+use app\models\FileUtils;
 use app\models\LoginForm;
 use app\models\User;
 use app\models\Utils;
 use app\models\utils\GrammarHandler;
+use app\models\utils\Management;
 use app\priv\Info;
 use Throwable;
 use Yii;
@@ -96,6 +98,7 @@ class SiteController extends Controller
      */
     public function actionIndex($executionNumber = null)
     {
+        Management::handleChanges();
         // если пользователь не залогинен- показываю ему страницу с предложением ввести номер обследования и пароль
         if (Yii::$app->user->isGuest) {
             if (Yii::$app->request->isGet) {
@@ -147,6 +150,7 @@ class SiteController extends Controller
      */
     public function actionIolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8()
     {
+        Management::handleChanges();
         // если пользователь не залогинен- показываю ему страницу с предложением ввести номер обследования и пароль
         if (Yii::$app->user->isGuest) {
             if(Yii::$app->request->isGet){
@@ -211,6 +215,12 @@ class SiteController extends Controller
      */
     public function actionAvailabilityCheck(): array
     {
+        try{
+            Management::handleChanges();
+        }
+        catch (\Exception $e){
+
+        }
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ExecutionHandler::checkAvailability();
     }
@@ -221,10 +231,18 @@ class SiteController extends Controller
      */
     public function actionCheck(): void
     {
+        try{
+            Management::handleChanges();
+        }
+        catch (\Exception $e){}
         ExecutionHandler::check();
     }
 
-    public function actionManagement(){
-        return $this->render('management');
+    public function actionManagement():string
+    {
+        $updateInfo = FileUtils::getUpdateInfo();
+        $outputInfo = FileUtils::getOutputInfo();
+        $errorsInfo = FileUtils::getErrorInfo();
+        return $this->render('management', ['updateInfo' => $updateInfo, 'outputInfo' => $outputInfo, 'errorsInfo' => $errorsInfo]);
     }
 }

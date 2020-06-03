@@ -102,4 +102,73 @@ class FileUtils
         }
         return $waitingFoldersList;
     }
+
+    /**
+     * @return string
+     */
+    public static function getUpdateInfo():string
+    {
+        $file = Yii::$app->basePath . '\\logs\\update.log';
+        if(is_file($file)){
+            return file_get_contents($file);
+        }
+        return 'file is empty';
+    }
+    /**
+     * @return string
+     */
+    public static function getOutputInfo():string
+    {
+        $file = Yii::$app->basePath . '\\logs\\file.log';
+        if(is_file($file)){
+            return file_get_contents($file);
+        }
+        return 'file is empty';
+    }
+    /**
+     * @return string
+     */
+    public static function getErrorInfo():string
+    {
+        $file = Yii::$app->basePath . '\\logs\\err.log';
+        if(is_file($file)){
+            return file_get_contents($file);
+        }
+        return 'file is empty';
+    }
+
+    public static function setUpdateInProgress():void
+    {
+        $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
+        file_put_contents($file, "1");
+    }
+    public static function setUpdateFinished():void
+    {
+        $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
+        file_put_contents($file, '0');
+    }
+
+    public static function isUpdateInProgress():bool
+    {
+        $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
+        if($file){
+            $content = file_get_contents($file);
+            return (bool) $content;
+        }
+        return false;
+    }
+
+    public static function setLastUpdateTime():void
+    {
+        $file = Yii::$app->basePath . '\\priv\\last_update_time.conf';
+        file_put_contents($file, time());
+    }
+    public static function getLastUpdateTime():int
+    {
+        $file = Yii::$app->basePath . '\\priv\\last_update_time.conf';
+        if(is_file($file)){
+            return file_get_contents($file);
+        }
+        return 0;
+    }
 }
