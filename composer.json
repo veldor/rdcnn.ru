@@ -23,6 +23,8 @@
 		"setasign/fpdf": "1.8.1",
 		"tecnickcom/tcpdf": "6.3.2",
 		"setasign/fpdi-protection": "^2.0",
+        "google/apiclient": "^2.2",
+        "aws/aws-sdk-php": "^3.54",
 	
       "ext-zip": "*",
         "telegram-bot/api": "^2.3",

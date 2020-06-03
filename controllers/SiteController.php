@@ -61,6 +61,17 @@ class SiteController extends Controller
                         ],
                         'roles' => ['@'],
                     ],
+
+                    [
+                        'allow' => true,
+                        'actions' => [
+                            'management',
+                        ],
+                        'roles' => [
+                            'manager'
+                        ],
+                        //'ips' => Info::ACCEPTED_IPS,
+                    ],
                 ],
             ],
         ];
@@ -211,5 +222,9 @@ class SiteController extends Controller
     public function actionCheck(): void
     {
         ExecutionHandler::check();
+    }
+
+    public function actionManagement(){
+        return $this->render('management');
     }
 }

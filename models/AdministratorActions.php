@@ -5,6 +5,7 @@ namespace app\models;
 
 
 use app\models\utils\GrammarHandler;
+use app\priv\Info;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -92,12 +93,12 @@ class AdministratorActions extends Model
     {
         $execution = User::findByUsername($id);
         if($execution !== null){
-            $conclusionFile = Yii::getAlias('@conclusionsDirectory') . '\\' . $id . '.pdf';
+            $conclusionFile = Info::CONC_FOLDER . '\\' . $id . '.pdf';
             if(is_file($conclusionFile)){
                 unlink($conclusionFile);
                 ExecutionHandler::deleteAddConcs($execution->username);
             }
-            $executionFile = Yii::getAlias('@executionsDirectory') . '\\' . $id . '.zip';
+            $executionFile = Info::CONC_FOLDER . '\\' . $id . '.zip';
             if(is_file($executionFile)){
                 unlink($executionFile);
             }
@@ -116,7 +117,7 @@ class AdministratorActions extends Model
             } catch (Throwable $e) {
             }
             // если пользователь залогинен и это не админ- выхожу из учётной записи
-            if(!Yii::$app->user->can('manage')){
+            if(!empty(Yii::$app->user) && !Yii::$app->user->can('manage')){
                 Yii::$app->user->logout(true);
             }
         }
