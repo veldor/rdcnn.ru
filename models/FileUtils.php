@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use DateTime;
 use Yii;
 
 class FileUtils
@@ -31,7 +32,7 @@ class FileUtils
                 $stat = stat($path);
                 $changeTime = $stat['mtime'];
                 $difference = time() - $changeTime;
-                if($difference > self::FOLDER_WAITING_TIME && !preg_match($pattern, $dir)){
+                if ($difference > self::FOLDER_WAITING_TIME && !preg_match($pattern, $dir)) {
                     $unhandledFoldersList[] = $dir;
                 }
             }
@@ -43,9 +44,9 @@ class FileUtils
     {
         // получу имя папки
         $folderName = Yii::$app->request->post('folderName');
-        if(!empty($folderName)){
+        if (!empty($folderName)) {
             $path = Yii::getAlias('@executionsDirectory') . '/' . $folderName;
-            if(is_dir($path)){
+            if (is_dir($path)) {
                 self::removeDir($path);
             }
         }
@@ -71,9 +72,9 @@ class FileUtils
     {
         $oldFolderName = Yii::$app->request->post('oldName');
         $newFolderName = Yii::$app->request->post('newName');
-        if(!empty($oldFolderName)){
+        if (!empty($oldFolderName)) {
             $path = Yii::getAlias('@executionsDirectory') . '/' . $oldFolderName;
-            if(is_dir($path)){
+            if (is_dir($path)) {
                 rename($path, Yii::getAlias('@executionsDirectory') . '\\' . $newFolderName);
             }
         }
@@ -106,69 +107,100 @@ class FileUtils
     /**
      * @return string
      */
-    public static function getUpdateInfo():string
+    public static function getUpdateInfo(): string
     {
         $file = Yii::$app->basePath . '\\logs\\update.log';
-        if(is_file($file)){
-            return file_get_contents($file);
-        }
-        return 'file is empty';
-    }
-    /**
-     * @return string
-     */
-    public static function getOutputInfo():string
-    {
-        $file = Yii::$app->basePath . '\\logs\\file.log';
-        if(is_file($file)){
-            return file_get_contents($file);
-        }
-        return 'file is empty';
-    }
-    /**
-     * @return string
-     */
-    public static function getErrorInfo():string
-    {
-        $file = Yii::$app->basePath . '\\logs\\err.log';
-        if(is_file($file)){
+        if (is_file($file)) {
             return file_get_contents($file);
         }
         return 'file is empty';
     }
 
-    public static function setUpdateInProgress():void
+    /**
+     * @return string
+     */
+    public static function getOutputInfo(): string
+    {
+        $file = Yii::$app->basePath . '\\logs\\file.log';
+        if (is_file($file)) {
+            return file_get_contents($file);
+        }
+        return 'file is empty';
+    }
+
+    /**
+     * @return string
+     */
+    public static function getErrorInfo(): string
+    {
+        $file = Yii::$app->basePath . '\\logs\\err.log';
+        if (is_file($file)) {
+            return file_get_contents($file);
+        }
+        return 'file is empty';
+    }
+
+    public static function setUpdateInProgress(): void
     {
         $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
         file_put_contents($file, "1");
     }
-    public static function setUpdateFinished():void
+
+    public static function setUpdateFinished(): void
     {
         $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
         file_put_contents($file, '0');
     }
 
-    public static function isUpdateInProgress():bool
+    public static function isUpdateInProgress(): bool
     {
         $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
-        if(is_file($file)){
+        if (is_file($file)) {
             $content = file_get_contents($file);
-            return (bool) $content;
+            return (bool)$content;
         }
         return false;
     }
 
-    public static function setLastUpdateTime():void
+    public static function setLastUpdateTime(): void
     {
         $file = Yii::$app->basePath . '\\priv\\last_update_time.conf';
         file_put_contents($file, time());
     }
-    public static function getLastUpdateTime():int
+
+    public static function getLastUpdateTime(): int
     {
         $file = Yii::$app->basePath . '\\priv\\last_update_time.conf';
-        if(is_file($file)){
+        if (is_file($file)) {
             return file_get_contents($file);
         }
         return 0;
+    }
+
+    /**
+     * @param $text
+     */
+    public static function writeUpdateLog($text): void
+    {
+        $logPath = Yii::$app->basePath . '\\logs\\update.log';
+        $newContent = $text . "\n";
+        if (is_file($logPath)) {
+            // проверю размер лога
+            $content = file_get_contents($logPath);
+            if (!empty($content) && strlen($content) > 0) {
+                $notes = mb_split("\n", $content);
+                if (!empty($notes) && count($notes) > 0) {
+                    $notesCounter = 0;
+                    foreach ($notes as $note) {
+                        if ($notesCounter > 30) {
+                            break;
+                        }
+                        $newContent .= $note . "\n";
+                        ++$notesCounter;
+                    }
+                }
+            }
+        }
+        file_put_contents($logPath, $newContent);
     }
 }

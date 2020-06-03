@@ -1,6 +1,7 @@
 <?php
 
 use app\assets\BaseAsset;
+use app\models\FileUtils;
 use nirvana\showloading\ShowLoadingAsset;
 use yii\web\View;
 
@@ -14,6 +15,7 @@ ShowLoadingAsset::register($this);
 ?>
 
 <div class="row">
+    <div class="col-sm-12">Статус проверки новых данных: <?= FileUtils::isUpdateInProgress() ? '<b class="text-danger">Проверяются</b>' : '<b class="text-success">Ожидание</b>'?><br/>Последняя проверка: <?=\app\models\utils\TimeHandler::timestampToDate(FileUtils::getLastUpdateTime())?></div>
     <div class="col-sm-12">
         <div class="btn-group-vertical">
             <button class="btn btn-default activator" data-action="/management/check-update"><span>Check update</span></button>

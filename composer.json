@@ -30,7 +30,8 @@
         "telegram-bot/api": "^2.3",
         "bogdaan/viber-bot-php": "^0.0.13",
         "ext-curl": "*",
-      "ext-json": "*"
+      "ext-json": "*",
+      "ext-mbstring": "*"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master"

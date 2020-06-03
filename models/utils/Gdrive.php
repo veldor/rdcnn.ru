@@ -42,7 +42,6 @@ class Gdrive
                 print "Files:\n";
                 /** @var Google_Service_Drive_DriveFile $file */
                 foreach ($results->getFiles() as $file) {
-                    echo "handle file {$file->getName()}\n";
                     // скачаю и удалю файл
                     self::getFile($service, $file);
                 }
@@ -119,6 +118,7 @@ class Gdrive
                     'alt' => 'media'));
                 $type = ($response->getHeader('Content-Type'));
                 if (!empty($type) && count($type) === 1 && $type[0] === 'application/pdf') {
+                    echo "handle file {$file->getName()}\n";
                     echo 'saving ' . $file->getName() . "\n";
                     $content = $response->getBody()->getContents();
                     file_put_contents(Info::CONC_FOLDER . '\\' . $file->getName(), $content);
@@ -126,10 +126,6 @@ class Gdrive
                     $service->files->delete($file->getId());
                 }
             }
-            else{
-                echo "skipped file {$fileName}\n";
-            }
-
         } catch (\Exception $e) {
             echo "skipped file {$file->getName()} with error {$e->getMessage()}";
         }
