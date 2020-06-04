@@ -6,6 +6,7 @@ namespace app\controllers;
 
 use app\models\utils\Management;
 use Exception;
+use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 
@@ -41,11 +42,11 @@ class ManagementController extends Controller
      */
     public function actionCheckUpdate(): void
     {
-        $file = dirname(__DIR__) . '\\updateFromGithub.bat';
+        $file = Yii::$app->basePath . '\\updateFromGithub.bat';
         if(is_file($file)){
-            $command = $file . ' ' . dirname(__DIR__);
-            $outFilePath =  dirname(__DIR__) . '/logs/file.log';
-            $outErrPath =  dirname(__DIR__) . '/logs/err.log';
+            $command = $file . ' ' . Yii::$app->basePath;
+            $outFilePath =  Yii::$app->basePath . '\\logs\\file.log';
+            $outErrPath =  Yii::$app->basePath . '\\logs\\err.log';
             $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
             echo $command;
             try{

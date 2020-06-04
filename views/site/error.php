@@ -8,7 +8,9 @@
 
 use yii\helpers\Html;
 
-$this->title = "Ошибка";
+Yii::$app->session->open();
+Yii::$app->session->destroy();
+$this->title = 'Ошибка';
 if(Yii::$app->user->can('manage')) {
     ?>
     <div class="site-error">
