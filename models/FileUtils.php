@@ -231,4 +231,19 @@ class FileUtils
         }
         return 'no errors';
     }
+
+    public static function setLastCheckUpdateTime()
+    {
+        $file = Yii::$app->basePath . '\\priv\\last_check_update_time.conf';
+        file_put_contents($file, time());
+    }
+
+    public static function getLastCheckUpdateTime(): int
+    {
+        $file = Yii::$app->basePath . '\\priv\\last_check_update_time.conf';
+        if (is_file($file)) {
+            return file_get_contents($file);
+        }
+        return 0;
+    }
 }

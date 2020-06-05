@@ -4,6 +4,7 @@
 namespace app\controllers;
 
 
+use app\models\FileUtils;
 use app\models\utils\Management;
 use Exception;
 use Yii;
@@ -42,6 +43,8 @@ class ManagementController extends Controller
      */
     public function actionCheckUpdate(): void
     {
+        // отмечу время проверки обновления
+        FileUtils::setLastCheckUpdateTime();
         $file = Yii::$app->basePath . '\\updateFromGithub.bat';
         if(is_file($file)){
             $command = $file . ' ' . Yii::$app->basePath;
