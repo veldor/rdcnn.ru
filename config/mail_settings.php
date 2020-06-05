@@ -1,6 +1,6 @@
 <?php
 // прочитаю настройки из файла
-$file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '\\priv\\mail_settings.conf';
+$file = __DIR__ . '\\..\\priv\\mail_settings.conf';
 if (!is_file($file)) {
     // создаю файл
     file_put_contents($file, "test\ntest\ntest");
