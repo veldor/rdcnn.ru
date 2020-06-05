@@ -1,7 +1,7 @@
 <?php
 
 // comment out the following two lines when deployed to production
-use yii\base\InvalidConfigException;
+use app\models\utils\MyErrorHandler;
 
 defined('YII_DEBUG') or define('YII_DEBUG', true);
 defined('YII_ENV') or define('YII_ENV', 'dev');
@@ -13,5 +13,8 @@ $config = require __DIR__ . '/../config/web.php';
 
 try {
     (new yii\web\Application($config))->run();
-} catch (InvalidConfigException $e) {
+} catch (Exception $e) {
+    // отправлю отчёт об ошибке
+    MyErrorHandler::sendError($e);
+    throw $e;
 }

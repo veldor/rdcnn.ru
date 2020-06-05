@@ -64,7 +64,7 @@ $this->title = 'РДЦ, обследование ' . $execution->username;
         <?php
         // если доступно заключение- дам ссылку на него
         if (ExecutionHandler::isExecution($execution->username)) {
-            echo "<a id='executionReadyBtn' href='" . Url::toRoute('/download/execution') . "' class='btn btn-primary  btn btn-block margin with-wrap' data-href='$conclusion'>Загрузить архив обследования</a>";
+            echo "<a id='executionReadyBtn' href='" . Url::toRoute('/download/execution') . "' class='btn btn-primary  btn btn-block margin with-wrap' data-href='/download/execution'>Загрузить архив обследования</a>";
         } else {
             echo "<a id='executionNotReadyBtn' class='btn btn-primary btn-block margin with-wrap disabled' role='button'>Архив обследования подготавливается</a>";
         }

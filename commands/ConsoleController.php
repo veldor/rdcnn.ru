@@ -10,8 +10,8 @@ namespace app\commands;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
 use app\models\utils\Gdrive;
+use app\models\utils\MyErrorHandler;
 use app\models\utils\TimeHandler;
-use Google_Exception;
 use yii\console\Controller;
 use yii\console\Exception;
 use yii\console\ExitCode;
@@ -67,4 +67,8 @@ class ConsoleController extends Controller
         return ExitCode::OK;
     }
 
+    public function actionSendErrors(): void
+    {
+        MyErrorHandler::sendErrors();
+    }
 }
