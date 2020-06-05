@@ -45,8 +45,8 @@ class ManagementController extends Controller
         $file = Yii::$app->basePath . '\\updateFromGithub.bat';
         if(is_file($file)){
             $command = $file . ' ' . Yii::$app->basePath;
-            $outFilePath =  Yii::$app->basePath . '\\logs\\file.log';
-            $outErrPath =  Yii::$app->basePath . '\\logs\\err.log';
+            $outFilePath =  Yii::$app->basePath . '\\logs\\update_file.log';
+            $outErrPath =  Yii::$app->basePath . '\\logs\\update_err.log';
             $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
             echo $command;
             try{

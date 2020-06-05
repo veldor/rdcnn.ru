@@ -212,4 +212,23 @@ class FileUtils
         }
         return 'no errors';
     }
+
+    public static function getUpdateOutputInfo()
+    {
+        $outFilePath =  Yii::$app->basePath . '\\logs\\update_file.log';
+        if (is_file($outFilePath)) {
+            return file_get_contents($outFilePath);
+        }
+        return 'no info';
+    }
+
+    public static function getUpdateErrorInfo()
+    {
+
+        $outFilePath =  Yii::$app->basePath . '\\logs\\update_err.log';
+        if (is_file($outFilePath)) {
+            return file_get_contents($outFilePath);
+        }
+        return 'no errors';
+    }
 }

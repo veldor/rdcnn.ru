@@ -13,6 +13,8 @@ ShowLoadingAsset::register($this);
 /* @var $outputInfo string */
 /* @var $errorsInfo string */
 /* @var $errors string */
+/* @var $updateOutputInfo string */
+/* @var $updateErrorsInfo string */
 ?>
 
 <div class="row">
@@ -35,6 +37,16 @@ ShowLoadingAsset::register($this);
         <div class="col-sm-4">
             <h3 class="text-center">Errors log</h3>
             <?=str_replace("\n", '<br/>', $errorsInfo)?>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <div class="col-sm-6">
+            <h3 class="text-center">Update process log</h3>
+            <?=str_replace("\n", '<br/>', $updateOutputInfo)?>
+        </div>
+        <div class="col-sm-6">
+            <h3 class="text-center">Update errors log</h3>
+            <?=str_replace("\n", '<br/>', $updateErrorsInfo)?>
         </div>
     </div>
     <div class="col-sm-12 text-center">
