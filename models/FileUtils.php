@@ -203,4 +203,13 @@ class FileUtils
         }
         file_put_contents($logPath, $newContent);
     }
+
+    public static function getServiceErrorsInfo()
+    {
+        $logPath = Yii::$app->basePath . '\\errors\\errors.txt';
+        if (is_file($logPath)) {
+            return file_get_contents($logPath);
+        }
+        return 'no errors';
+    }
 }

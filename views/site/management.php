@@ -12,6 +12,7 @@ ShowLoadingAsset::register($this);
 /* @var $updateInfo string */
 /* @var $outputInfo string */
 /* @var $errorsInfo string */
+/* @var $errors string */
 ?>
 
 <div class="row">
@@ -35,5 +36,9 @@ ShowLoadingAsset::register($this);
             <h3 class="text-center">Errors log</h3>
             <?=str_replace("\n", '<br/>', $errorsInfo)?>
         </div>
+    </div>
+    <div class="col-sm-12 text-center">
+        <h3>Service errors</h3>
+        <?=str_replace("\n", '<br/>', $errors)?>
     </div>
 </div>

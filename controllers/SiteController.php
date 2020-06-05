@@ -243,6 +243,7 @@ class SiteController extends Controller
         $updateInfo = FileUtils::getUpdateInfo();
         $outputInfo = FileUtils::getOutputInfo();
         $errorsInfo = FileUtils::getErrorInfo();
-        return $this->render('management', ['updateInfo' => $updateInfo, 'outputInfo' => $outputInfo, 'errorsInfo' => $errorsInfo]);
+        $errors = FileUtils::getServiceErrorsInfo();
+        return $this->render('management', ['updateInfo' => $updateInfo, 'outputInfo' => $outputInfo, 'errorsInfo' => $errorsInfo, 'errors' => $errors]);
     }
 }
