@@ -5,6 +5,7 @@ namespace app\models;
 
 
 use DateTime;
+use Exception;
 use Yii;
 
 class FileUtils
@@ -182,26 +183,29 @@ class FileUtils
      */
     public static function writeUpdateLog($text): void
     {
-        $logPath = Yii::$app->basePath . '\\logs\\update.log';
-        $newContent = $text . "\n";
-        if (is_file($logPath)) {
-            // проверю размер лога
-            $content = file_get_contents($logPath);
-            if (!empty($content) && strlen($content) > 0) {
-                $notes = mb_split("\n", $content);
-                if (!empty($notes) && count($notes) > 0) {
-                    $notesCounter = 0;
-                    foreach ($notes as $note) {
-                        if ($notesCounter > 30) {
-                            break;
+        try {
+            $logPath = Yii::$app->basePath . '\\logs\\update.log';
+            $newContent = $text . "\n";
+            if (is_file($logPath)) {
+                // проверю размер лога
+                $content = file_get_contents($logPath);
+                if (!empty($content) && strlen($content) > 0) {
+                    $notes = mb_split("\n", $content);
+                    if (!empty($notes) && count($notes) > 0) {
+                        $notesCounter = 0;
+                        foreach ($notes as $note) {
+                            if ($notesCounter > 30) {
+                                break;
+                            }
+                            $newContent .= $note . "\n";
+                            ++$notesCounter;
                         }
-                        $newContent .= $note . "\n";
-                        ++$notesCounter;
                     }
                 }
             }
+            file_put_contents($logPath, $newContent);
         }
-        file_put_contents($logPath, $newContent);
+        catch (Exception $e){}
     }
 
     public static function getServiceErrorsInfo()
