@@ -61,13 +61,13 @@ echo '<div class="col-xs-12 text-center margin">
         </div>';
 
 // добавлю кнопку для создания нового обследования
-echo "<div class='col-sm-12 text-center'>";
+echo "<div class='col-xs-12 text-center'>";
 
 $form = ActiveForm::begin(['id' => 'addPatientForm', 'options' => ['class' => 'form-horizontal bg-default', 'enctype' => 'multipart/form-data'], 'enableAjaxValidation' => false, 'validateOnSubmit'  => false, 'action' => ['/execution/add']]);
 
 try {
     echo $form->field($model, 'executionNumber', ['template' =>
-        '<div class="col-sm-offset-4 col-sm-4"><div class="input-group">{input}<span class="input-group-btn"><button type="submit" class="btn btn-success">Добавить пациента</button></span></div>{error}{hint}</div>','inputOptions' =>
+        '<div class="col-xs-offset-4 col-xs-4"><div class="input-group">{input}<span class="input-group-btn"><button type="submit" class="btn btn-success">Добавить пациента</button></span></div>{error}{hint}</div>','inputOptions' =>
         ['class' => 'form-control', 'tabindex' => '1']])
         ->textInput(['autocomplete' => 'off', 'focus' => true])
         ->hint('Номер обследования пациента')
@@ -81,11 +81,11 @@ echo "</div><div class='col-sm-12'>";
 
 echo Html::beginForm(['/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'], 'post');
 
-echo "<div class='col-sm-4'><label class='control-label' for='#centerSelect'>Центр</label><select id='centerSelect' name='center' onchange='this.form.submit();' class='form-control'><option value='all'>Все</option><option value='nv' {$centers['nv']}>Нижневолжская набережная</option><option value='aurora' {$centers['aurora']}>Аврора</option></select></div>";
+echo "<div class='col-xs-4'><label class='control-label' for='#centerSelect'>Центр</label><select id='centerSelect' name='center' onchange='this.form.submit();' class='form-control'><option value='all'>Все</option><option value='nv' {$centers['nv']}>Нижневолжская набережная</option><option value='aurora' {$centers['aurora']}>Аврора</option></select></div>";
 
-echo "<div class='col-sm-4'><label class='control-label' for='#centerSelect'>Время</label><select name='timeInterval' onchange='this.form.submit();' class='form-control'><option value='all'>Всё время</option><option value='today' {$days['today']}>Сегодня</option><option value='yesterday' {$days['yesterday']}>Вчера</option></select></div>";
+echo "<div class='col-xs-4'><label class='control-label' for='#centerSelect'>Время</label><select name='timeInterval' onchange='this.form.submit();' class='form-control'><option value='all'>Всё время</option><option value='today' {$days['today']}>Сегодня</option><option value='yesterday' {$days['yesterday']}>Вчера</option></select></div>";
 
-echo "<div class='col-sm-4'><label class='control-label' for='#sortBy'>Сортировать по</label><select name='sortBy' onchange='this.form.submit();' class='form-control'><option value='byTime' {$sort['byTime']}>Времени добавления</option><option value='byNumber' {$sort['byNumber']}>Номеру обследования</option><option value='byConclusion' {$sort['byConclusion']}>Наличию заключения</option><option value='byExecutions' {$sort['byExecutions']}>Наличию файлов</option></select></div>";
+echo "<div class='col-xs-4'><label class='control-label' for='#sortBy'>Сортировать по</label><select name='sortBy' onchange='this.form.submit();' class='form-control'><option value='byTime' {$sort['byTime']}>Времени добавления</option><option value='byNumber' {$sort['byNumber']}>Номеру обследования</option><option value='byConclusion' {$sort['byConclusion']}>Наличию заключения</option><option value='byExecutions' {$sort['byExecutions']}>Наличию файлов</option></select></div>";
 
 echo Html::endForm();
 
@@ -112,7 +112,7 @@ echo "
 ";
 
 echo "
-    <div class='col-sm-12 margin'><div class='col-sm-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-sm-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b><br/><a target='_blank' href='" . Url::toRoute('administrator/print-missed-conclusions-list') . "' class='btn btn-default'><span class='text-info'>Распечатать список</span></a></div><div class='col-sm-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
+    <div class='col-xs-12 margin'><div class='col-xs-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-xs-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b><br/><a target='_blank' href='" . Url::toRoute('administrator/print-missed-conclusions-list') . "' class='btn btn-default'><span class='text-info'>Распечатать список</span></a></div><div class='col-xs-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
 ";
 
 $executionsCounter = 0;
