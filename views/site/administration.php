@@ -112,7 +112,7 @@ echo "
 ";
 
 echo "
-    <div class='col-xs-12 margin'><div class='col-xs-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-xs-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b><br/><a target='_blank' href='" . Url::toRoute('administrator/print-missed-conclusions-list') . "' class='btn btn-default'><span class='text-info'>Распечатать список</span></a></div><div class='col-xs-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
+    <div class='col-xs-12 margin'> <div class='col-xs-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-xs-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b><br/><a target='_blank' href='" . Url::toRoute('administrator/print-missed-conclusions-list') . "' class='btn btn-default'><span class='text-info'>Распечатать список</span></a></div><div class='col-xs-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
 ";
 
 $executionsCounter = 0;
