@@ -256,7 +256,9 @@ class FileUtils
         // получу количество лог-файлов телеги
         $logDir = Yii::$app->basePath . '\\logs';
         if(is_dir($logDir)){
-            die('dir');
+            $logFiles = scandir($logDir);
+            var_dump($logFiles);
+            die;
         }
         /*$logFiles = scandir($logDir);
         $telegramLogsCount = 0;
