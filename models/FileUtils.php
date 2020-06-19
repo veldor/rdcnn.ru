@@ -255,7 +255,7 @@ class FileUtils
     {
         // получу количество лог-файлов телеги
         $logDir = Yii::$app->basePath . '\\logs';
-        $logFiles = scandir($logDir);
+        /*$logFiles = scandir($logDir);
         $telegramLogsCount = 0;
         $lastTelegramFile = null;
         $lastLogContent = '';
@@ -280,6 +280,7 @@ class FileUtils
             echo $e->getMessage();
             die;
         }
-        return ['logsCount' => $telegramLogsCount, 'lastLogContent' => $lastLogContent];
+        return ['logsCount' => $telegramLogsCount, 'lastLogContent' => $lastLogContent];*/
+        return [];
     }
 }
