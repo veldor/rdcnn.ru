@@ -246,7 +246,13 @@ class SiteController extends Controller
         $updateOutputInfo = FileUtils::getUpdateOutputInfo();
         $updateErrorsInfo = FileUtils::getUpdateErrorInfo();
         $errors = FileUtils::getServiceErrorsInfo();
-        $telegramLogsInfo = FileUtils::getTelegramLogsInfo();
+        try{
+            $telegramLogsInfo = FileUtils::getTelegramLogsInfo();
+        }
+        catch (\Exception $e){
+            echo $e->getMessage();
+            die;
+        }
         return $this->render('management', ['updateInfo' => $updateInfo, 'outputInfo' => $outputInfo, 'errorsInfo' => $errorsInfo, 'errors' => $errors, 'updateOutputInfo' => $updateOutputInfo, 'updateErrorsInfo' => $updateErrorsInfo]);
     }
 }
