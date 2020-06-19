@@ -55,13 +55,4 @@ ShowLoadingAsset::register($this);
         <h3>Service errors</h3>
         <?=str_replace("\n", '<br/>', $errors)?>
     </div>
-    <div class="col-sm-12 text-center">
-        <h3>TelegramLogsCount</h3>
-        <?=$telegramInfo['logsCount']?>
-    </div>
-    <div class="col-sm-12 text-center">
-        <h3>Last telegram log</h3>
-        <?=$telegramInfo['lastLogContent']?>
-    </div>
-
 </div>
