@@ -204,8 +204,8 @@ class FileUtils
                 }
             }
             file_put_contents($logPath, $newContent);
+        } catch (Exception $e) {
         }
-        catch (Exception $e){}
     }
 
     public static function getServiceErrorsInfo()
@@ -219,7 +219,7 @@ class FileUtils
 
     public static function getUpdateOutputInfo()
     {
-        $outFilePath =  Yii::$app->basePath . '\\logs\\update_file.log';
+        $outFilePath = Yii::$app->basePath . '\\logs\\update_file.log';
         if (is_file($outFilePath)) {
             return file_get_contents($outFilePath);
         }
@@ -229,7 +229,7 @@ class FileUtils
     public static function getUpdateErrorInfo()
     {
 
-        $outFilePath =  Yii::$app->basePath . '\\logs\\update_err.log';
+        $outFilePath = Yii::$app->basePath . '\\logs\\update_err.log';
         if (is_file($outFilePath)) {
             return file_get_contents($outFilePath);
         }
@@ -249,5 +249,31 @@ class FileUtils
             return file_get_contents($file);
         }
         return 0;
+    }
+
+    public static function getTelegramLogsInfo(): array
+    {
+        // получу количество лог-файлов телеги
+        $logDir = Yii::$app->basePath . '\\logs';
+        $logFiles = scandir($logDir);
+        $telegramLogsCount = 0;
+        $lastTelegramFile = null;
+        $lastLogContent = '';
+        if (!empty($logFiles)) {
+            foreach ($logFiles as $logFile) {
+                // проверю, что файл является логом телеграма
+                if (str_starts_with($logFile, 'telebot')) {
+                    ++$telegramLogsCount;
+                    $lastTelegramFile = $logFile;
+                }
+            }
+        }
+        if (!empty($lastTelegramFile)) {
+            $fullName = $logDir . '\\' . $lastTelegramFile;
+            if (is_file($fullName)) {
+                $lastLogContent = file_get_contents($fullName);
+            }
+        }
+        return ['logsCount' => $telegramLogsCount, 'lastLogContent' => $lastLogContent];
     }
 }
