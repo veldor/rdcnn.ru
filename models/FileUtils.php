@@ -250,42 +250,4 @@ class FileUtils
         }
         return 0;
     }
-
-    public static function getTelegramLogsInfo(): array
-    {
-        // получу количество лог-файлов телеги
-        $logDir = Yii::$app->basePath . '\\logs';
-        if(is_dir($logDir)){
-            $logFiles = scandir($logDir);
-            var_dump($logFiles);
-            die;
-        }
-        /*$logFiles = scandir($logDir);
-        $telegramLogsCount = 0;
-        $lastTelegramFile = null;
-        $lastLogContent = '';
-        try{
-            if (!empty($logFiles) && count($logFiles) > 0) {
-                foreach ($logFiles as $logFile) {
-                    // проверю, что файл является логом телеграма
-                    if (str_starts_with($logFile, 'telebot')) {
-                        ++$telegramLogsCount;
-                        $lastTelegramFile = $logFile;
-                    }
-                }
-            }
-            if (!empty($lastTelegramFile)) {
-                $fullName = $logDir . '\\' . $lastTelegramFile;
-                if (is_file($fullName)) {
-                    $lastLogContent = file_get_contents($fullName);
-                }
-            }
-        }
-        catch (Exception $e){
-            echo $e->getMessage();
-            die;
-        }
-        return ['logsCount' => $telegramLogsCount, 'lastLogContent' => $lastLogContent];*/
-        return [];
-    }
 }
