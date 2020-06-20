@@ -12,6 +12,7 @@ use app\models\FileUtils;
 use app\models\utils\Gdrive;
 use app\models\utils\MyErrorHandler;
 use app\models\utils\TimeHandler;
+use Yii;
 use yii\console\Controller;
 use yii\console\Exception;
 use yii\console\ExitCode;
@@ -47,7 +48,7 @@ class ConsoleController extends Controller
 
             try {
                 Gdrive::check();
-            }catch (Exception $e) {
+            } catch (Exception $e) {
                 echo "error work with Gdrive: {$e->getMessage()}";
             }
             // теперь обработаю изменения
@@ -70,5 +71,11 @@ class ConsoleController extends Controller
     public function actionSendErrors(): void
     {
         MyErrorHandler::sendErrors();
+    }
+
+    public function actionHandlePdf(): int
+    {
+        FileUtils::addBackgroundToPDF(Yii::$app->basePath . '\\conclusions\\test.pdf');
+        return ExitCode::OK;
     }
 }

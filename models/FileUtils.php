@@ -6,6 +6,9 @@ namespace app\models;
 
 use DateTime;
 use Exception;
+use setasign\Fpdi\Fpdi;
+use setasign\Fpdi\PdfParser\PdfParserException;
+use setasign\Fpdi\PdfReader\PdfReaderException;
 use Yii;
 
 class FileUtils
@@ -249,5 +252,51 @@ class FileUtils
             return file_get_contents($file);
         }
         return 0;
+    }
+
+    public static function addBackgroundToPDF($file): void
+    {
+        $pdfBackgoundImage = Yii::$app->basePath . '\\design\\back.jpg';
+        if (is_file($file) && is_file($pdfBackgoundImage)) {
+            $pdf = new Fpdi();
+
+            $pdf->AddPage();
+
+            $pdf->Image($pdfBackgoundImage, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight());
+            try {
+                $pdf->setSourceFile($file);
+                $tplIdx = $pdf->importPage(1);
+                //use the imported page and place it at point 0,0; calculate width and height
+//automaticallay and ajust the page size to the size of the imported page
+                $pdf->useTemplate($tplIdx, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight(), true);
+
+                $pageCounter = 2;
+                // попробую добавить оставшиеся страницы
+                while (true) {
+                    try {
+                        $tplIdx = $pdf->importPage($pageCounter);
+                        $pdf->AddPage();
+                        //use the imported page and place it at point 0,0; calculate width and height
+//automaticallay and ajust the page size to the size of the imported page
+                        $pdf->useTemplate($tplIdx, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight(), true);
+                        ++$pageCounter;
+                    } catch (\Exception $e) {
+                        break;
+                    }
+                }
+                $tempFileName = $file . '_tmp';
+                $pdf->Output($tempFileName, 'F');
+                unlink($file);
+                rename($tempFileName, $file);
+            } catch (PdfParserException $e) {
+            } catch (PdfReaderException $e) {
+            }
+
+            /*            // получу сведения о файле
+                        $fpdf = new FPDF();
+                        $fpdf->AddPage();
+                        $fpdf->Image($pdfBackgoundImage, 0, 0, $fpdf->GetPageWidth(), $fpdf->GetPageHeight());
+                        $fpdf->Output(Yii::$app->basePath . '\\test1.pdf', 'F');*/
+        }
     }
 }
