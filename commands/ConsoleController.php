@@ -12,7 +12,6 @@ use app\models\FileUtils;
 use app\models\utils\Gdrive;
 use app\models\utils\MyErrorHandler;
 use app\models\utils\TimeHandler;
-use Yii;
 use yii\console\Controller;
 use yii\console\Exception;
 use yii\console\ExitCode;
@@ -73,9 +72,9 @@ class ConsoleController extends Controller
         MyErrorHandler::sendErrors();
     }
 
-    public function actionHandlePdf(): int
+    public function actionHandlePdf($fileDestination): int
     {
-        FileUtils::addBackgroundToPDF(Yii::$app->basePath . '\\conclusions\\test.pdf');
+        FileUtils::addBackgroundToPDF($fileDestination);
         return ExitCode::OK;
     }
 }

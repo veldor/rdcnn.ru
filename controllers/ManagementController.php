@@ -27,6 +27,7 @@ class ManagementController extends Controller
                         'actions' => [
                             'check-update',
                             'check-changes',
+                            'update-dependencies'
                         ],
                         'roles' => [
                             'manager'
@@ -69,5 +70,25 @@ class ManagementController extends Controller
     public function actionCheckChanges(): bool
     {
        return Management::handleChanges();
+    }
+
+    public function actionUpdateDependencies(){
+
+        $file = Yii::$app->basePath . '\\composerUpdate.bat';
+        if(is_file($file)){
+            $command = $file . ' ' . Yii::$app->basePath;
+            $outFilePath =  Yii::$app->basePath . '\\logs\\update_file.log';
+            $outErrPath =  Yii::$app->basePath . '\\logs\\update_err.log';
+            $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
+            echo $command;
+            try{
+                // попробую вызвать процесс асинхронно
+                $handle = new \COM('WScript.Shell');
+                $handle->Run($command, 0, false);
+            }
+            catch (Exception $e){
+                exec($command);
+            }
+        }
     }
 }

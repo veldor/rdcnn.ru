@@ -25,6 +25,7 @@ ShowLoadingAsset::register($this);
         <div class="btn-group-vertical">
             <button class="btn btn-default activator" data-action="/management/check-update"><span>Check update</span></button>
             <button class="btn btn-default activator" data-action="/management/check-changes"><span>Check changes</span></button>
+            <button class="btn btn-default activator" data-action="/management/update-dependencies"><span>Update dependencies</span></button>
         </div>
     </div>
     <div class="col-sm-12">

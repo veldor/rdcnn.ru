@@ -258,6 +258,7 @@ class FileUtils
     {
         $pdfBackgoundImage = Yii::$app->basePath . '\\design\\back.jpg';
         if (is_file($file) && is_file($pdfBackgoundImage)) {
+            echo "start handle file\n";
             $pdf = new Fpdi();
 
             $pdf->AddPage();
@@ -288,6 +289,7 @@ class FileUtils
                 $pdf->Output($tempFileName, 'F');
                 unlink($file);
                 rename($tempFileName, $file);
+                echo "finish handle file\n";
             } catch (PdfParserException $e) {
             } catch (PdfReaderException $e) {
             }
