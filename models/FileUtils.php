@@ -309,7 +309,13 @@ class FileUtils
             if(!empty($files && count($files) > 0)){
                 foreach ($files as $file) {
                     if(str_ends_with($file, '.pdf')){
-                        self::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
+                        try{
+                            self::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
+                            echo "background added\n";
+                        }
+                        catch (Exception $e){
+                            echo $e->getMessage() . "\n";
+                        }
                     }
                 }
             }
