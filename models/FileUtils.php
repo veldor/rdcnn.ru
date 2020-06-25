@@ -258,7 +258,6 @@ class FileUtils
     {
         $pdfBackgoundImage = Yii::$app->basePath . '\\design\\back.jpg';
         if (is_file($file) && is_file($pdfBackgoundImage)) {
-            echo "start handle file\n";
             $pdf = new Fpdi();
 
             $pdf->AddPage();
@@ -289,7 +288,6 @@ class FileUtils
                 $pdf->Output($tempFileName, 'F');
                 unlink($file);
                 rename($tempFileName, $file);
-                echo "finish handle file\n";
             } catch (PdfParserException $e) {
             } catch (PdfReaderException $e) {
             }
@@ -299,6 +297,22 @@ class FileUtils
                         $fpdf->AddPage();
                         $fpdf->Image($pdfBackgoundImage, 0, 0, $fpdf->GetPageWidth(), $fpdf->GetPageHeight());
                         $fpdf->Output(Yii::$app->basePath . '\\test1.pdf', 'F');*/
+        }
+    }
+
+    public static function addBackgrounds(): void
+    {
+        // получу все файлы в папке с заключениями и добавлю им фон
+        $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
+        if(is_dir($conclusionsDir)){
+            $files = array_slice(scandir($conclusionsDir), 2);
+            if(!empty($files && count($files) > 0)){
+                foreach ($files as $file) {
+                    if(str_ends_with($file, '.pdf')){
+                        self::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
+                    }
+                }
+            }
         }
     }
 }

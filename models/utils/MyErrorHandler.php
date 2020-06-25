@@ -40,7 +40,7 @@ class MyErrorHandler
             throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
         // пишу ошибки в файл только если учётка не админская
-            file_put_contents($root . '/errors/' . 'errors.txt', $errorInfo . "\r\n\r\n\r\n", FILE_APPEND);
+            file_put_contents($root . '/errors/' . 'errors.txt', $errorInfo . "\r\n\r\n\r\n");
         // отправлю ошибки асинхронно
         self::asyncSendErrors();
     }

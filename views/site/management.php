@@ -26,6 +26,7 @@ ShowLoadingAsset::register($this);
             <button class="btn btn-default activator" data-action="/management/check-update"><span>Check update</span></button>
             <button class="btn btn-default activator" data-action="/management/check-changes"><span>Check changes</span></button>
             <button class="btn btn-default activator" data-action="/management/update-dependencies"><span>Updating dependencies</span></button>
+            <button class="btn btn-default activator" data-action="/management/add-backgrounds"><span>Add backgrounds</span></button>
         </div>
     </div>
     <div class="col-sm-12">

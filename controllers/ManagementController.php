@@ -10,6 +10,7 @@ use Exception;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\Response;
 
 class ManagementController extends Controller
 {
@@ -27,7 +28,8 @@ class ManagementController extends Controller
                         'actions' => [
                             'check-update',
                             'check-changes',
-                            'update-dependencies'
+                            'update-dependencies',
+                            'add-backgrounds'
                         ],
                         'roles' => [
                             'manager'
@@ -90,5 +92,11 @@ class ManagementController extends Controller
                 exec($command);
             }
         }
+    }
+    public function actionAddBackgrounds(): array
+    {
+        FileUtils::addBackgrounds();
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return ['status' => 1];
     }
 }
