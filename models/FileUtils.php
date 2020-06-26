@@ -308,7 +308,7 @@ class FileUtils
             $files = array_slice(scandir($conclusionsDir), 2);
             if(!empty($files && count($files) > 0)){
                 foreach ($files as $file) {
-                    if(str_ends_with($file, '.pdf')){
+                    if(substr($file, strlen($file) - 4) === '.pdf'){
                         try{
                             self::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
                             echo "background added\n";
