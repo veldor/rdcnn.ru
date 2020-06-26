@@ -170,7 +170,7 @@ class ExecutionHandler extends Model
             $pattern = '/^A?[0-9]+.zip$/';
             if (!empty($entities)) {
                 foreach ($entities as $entity) {
-                    $path =Info::EXEC_FOLDER . '/' . $entity;
+                    $path = Info::EXEC_FOLDER . '/' . $entity;
                     if (is_file($path) && preg_match($pattern, $entity)) {
                         // найден файл, обработаю информацию о нём
                         $existentFile = Table_availability::findOne(['is_execution' => true, 'file_name' => $entity]);
@@ -242,11 +242,10 @@ class ExecutionHandler extends Model
                             }
                             // если файл не соответствует строгому шаблону
                             if ($file !== $filePureName) {
-                                try{
+                                try {
                                     rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
                                     echo "file $file renamed to $filePureName \n";
-                                }
-                                catch (\Exception $e){
+                                } catch (\Exception $e) {
                                     echo "skipped file $file no renamed to $filePureName with error {$e->getMessage()}\n";
                                 }
                             }
@@ -259,45 +258,45 @@ class ExecutionHandler extends Model
                 }
             }
         }
-/*        // из облачной папки (неактуально, проверяется скриптом)
-        $cloudDir = Yii::getAlias('@cloudDirectory');
-        if (!empty($cloudDir) && is_dir($cloudDir)) {
-            $report .= "handle cloud dir \n";
-            $files = array_slice(scandir($cloudDir), 2);
-            if (!empty($files)) {
-                $report .= 'found ' . count($files) . " files in cloud dir \n";
-                foreach ($files as $file) {
-                    $path = Yii::getAlias('@cloudDirectory') . '\\' . $file;
-                    if (is_file($path)) {
-                        // проверю, подходит ли файл под регулярку
-                        if (preg_match($pattern, $file)) {
-                            // получу данные о файле
-                            $stat = stat($path);
-                            $changeTime = $stat['mtime'];
-                            $difference = time() - $changeTime;
-                            if ($difference > 30) {
-                                // переименую файл в нормальный вид
-                                $fileLatin = GrammarHandler::toLatin($file);
-                                // уберу пробелы
-                                $filePureName = preg_replace('/\s/', '', $fileLatin);
-                                // проверю наличие учётной записи
-                                // если это не дублирующее заключение
-                                if (stripos('-', $filePureName) < 0) {
-                                    self::checkUser($filePureName);
+        /*        // из облачной папки (неактуально, проверяется скриптом)
+                $cloudDir = Yii::getAlias('@cloudDirectory');
+                if (!empty($cloudDir) && is_dir($cloudDir)) {
+                    $report .= "handle cloud dir \n";
+                    $files = array_slice(scandir($cloudDir), 2);
+                    if (!empty($files)) {
+                        $report .= 'found ' . count($files) . " files in cloud dir \n";
+                        foreach ($files as $file) {
+                            $path = Yii::getAlias('@cloudDirectory') . '\\' . $file;
+                            if (is_file($path)) {
+                                // проверю, подходит ли файл под регулярку
+                                if (preg_match($pattern, $file)) {
+                                    // получу данные о файле
+                                    $stat = stat($path);
+                                    $changeTime = $stat['mtime'];
+                                    $difference = time() - $changeTime;
+                                    if ($difference > 30) {
+                                        // переименую файл в нормальный вид
+                                        $fileLatin = GrammarHandler::toLatin($file);
+                                        // уберу пробелы
+                                        $filePureName = preg_replace('/\s/', '', $fileLatin);
+                                        // проверю наличие учётной записи
+                                        // если это не дублирующее заключение
+                                        if (stripos('-', $filePureName) < 0) {
+                                            self::checkUser($filePureName);
+                                        }
+                                        // перемещу файл в папку с заключениями
+                                        rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
+                                        $report .= "file $file handled and moved by $filePureName \n";
+                                    } else {
+                                        $report .= "file $file wait for timeout \n";
+                                    }
+                                } else {
+                                    $report .= "file $file not handled \n";
                                 }
-                                // перемещу файл в папку с заключениями
-                                rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
-                                $report .= "file $file handled and moved by $filePureName \n";
-                            } else {
-                                $report .= "file $file wait for timeout \n";
                             }
-                        } else {
-                            $report .= "file $file not handled \n";
                         }
                     }
-                }
-            }
-        }*/
+                }*/
 
         // теперь проверю актуальность данных по доступности заключений
         $conclusionsDir = Info::CONC_FOLDER;
@@ -307,7 +306,6 @@ class ExecutionHandler extends Model
             foreach ($files as $file) {
                 $path = Info::CONC_FOLDER . '/' . $file;
                 if (is_file($path) && preg_match($strictPattern, $file)) {
-                    echo "handle file {$file}\n";
                     $existentFile = Table_availability::findOne(['is_conclusion' => true, 'file_name' => $file]);
                     if ($existentFile !== null) {
 // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
@@ -319,6 +317,7 @@ class ExecutionHandler extends Model
                             $existentFile->md5 = $md5;
                             $existentFile->file_create_time = $changeTime;
                             $existentFile->save();
+                            FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
                             Viber::notifyConclusionLoaded($file);
                         }
                     } else {
@@ -332,6 +331,7 @@ class ExecutionHandler extends Model
                             $stat = stat($path);
                             $changeTime = $stat['mtime'];
                             (new Table_availability(['file_name' => $file, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
+                            FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
                             // оповещу мессенджеры о наличии файла
                             Viber::notifyConclusionLoaded($file);
                         }
@@ -361,7 +361,7 @@ class ExecutionHandler extends Model
         $new->save();
         // выдам пользователю права на чтение
         $auth = Yii::$app->authManager;
-        if($auth !== null){
+        if ($auth !== null) {
             $readerRole = $auth->getRole('reader');
             $auth->assign($readerRole, $new->getId());
             return $password;

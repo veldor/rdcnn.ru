@@ -291,12 +291,6 @@ class FileUtils
             } catch (PdfParserException $e) {
             } catch (PdfReaderException $e) {
             }
-
-            /*            // получу сведения о файле
-                        $fpdf = new FPDF();
-                        $fpdf->AddPage();
-                        $fpdf->Image($pdfBackgoundImage, 0, 0, $fpdf->GetPageWidth(), $fpdf->GetPageHeight());
-                        $fpdf->Output(Yii::$app->basePath . '\\test1.pdf', 'F');*/
         }
     }
 
