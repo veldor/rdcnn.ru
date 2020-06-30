@@ -79,7 +79,7 @@ $(function () {
                 // если файлы загружены только что
                 if(!isExecutionLoaded){
                     // удалю кнопку отсутствия файлов и добавлю кнопку скачивания
-                   $('div#executionContainer').html("<a id='executionReadyBtn' href='/download/execution' class='btn btn-primary  btn btn-block margin with-wrap' data-href='$conclusion'>Загрузить архив обследования</a>");
+                   $('div#executionContainer').html("<a id='executionReadyBtn' href='/download/execution' class='btn btn-primary  btn btn-block margin with-wrap hinted'>Загрузить архив обследования</a>");
                    // оповещу о загрузке файлов
                     makeInformerModal(
                         'Новые данные',
@@ -114,7 +114,7 @@ $(function () {
                         if($('a.conclusion[data-href="' + this + '"]').length === 0){
                             ++endCounter;
                             counterEnd = '#' + endCounter;
-                            container.append("<a href='/conclusion/" + this + "' class='btn btn-primary btn-block margin with-wrap conclusion' data-href='" + this + "'>Загрузить заключение врача " + counterEnd + "</a><a target='_blank' href='/print-conclusion/" + this + "' class='btn btn-info btn-block margin with-wrap print-conclusion' data-href='" + this + "'>Распечатать заключение врача " + counterEnd + "</a>");
+                            container.append("<a href='/conclusion/" + this + "' class='btn btn-primary btn-block margin with-wrap conclusion' data-href='" + this + "'>Загрузить заключение врача " + counterEnd + "</a><a target='_blank' href='/print-conclusion/" + this + "' class='btn btn-info btn-block margin with-wrap print-conclusion hinted' data-href='" + this + "'>Распечатать заключение врача " + counterEnd + "</a>");
                         }
                     });
                 }
@@ -175,5 +175,9 @@ $(function () {
 
     downloadExecutionBtn.on('click.showTooltip', function () {
         makeInstruction();
+    });
+
+    $('.hinted').on('click.showRatingMessage', function () {
+        makeModal("<h2 class='text-center'>Предложение оставить отзыв</h2>", "Спасибо за то, что вы пользуетесь нашими услугами. Мы будем просто счастливы, если вы найдёте минутку и оставите нам отзыв\n <div class='text-center margin'><a target='_blank' href='https://prodoctorov.ru/new/rate/lpu/48447/'><img alt='Отзыв на prodoctorov' class='rating_image' src='https://prodoctorov.ru/static/logo_prodoctorov.svg'/></a></div><div class='text-center margin'><a target='_blank' href='https://search.google.com/local/writereview?placeid=ChIJHXcPvNHVUUER5IWxpxP1DfM'><img class='rating_image' alt='Отзыв на Google' src='https://www.google.ru/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png'/></a></div><div class='text-center margin'><a target='_blank' href='https://yandex.ru/maps/47/nizhny-novgorod/?add-review=true&ll=43.957299%2C56.325628&mode=search&oid=1122933423&ol=biz&z=14'><img class='rating_image' alt='Отзыв на Яндексе' src='https://yastatic.net/s3/home-static/_/x/Q/xk8YidkhGjIGOrFm_dL5781YA.svg'/></a></div>", false, true, 1000);
     });
 });

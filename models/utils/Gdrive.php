@@ -111,6 +111,7 @@ class Gdrive
     {
         try {
             $fileName = $file->getName();
+            echo "handle {$fileName}\n";
             // если это .pdf
             if (strlen($fileName) > 4 && substr($fileName, strlen($fileName) - 4) === '.pdf') {
                 /** @var Response $response */

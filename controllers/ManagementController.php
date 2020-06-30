@@ -99,7 +99,7 @@ class ManagementController extends Controller
             FileUtils::addBackgrounds();
         }
         catch (Exception $e){
-            echo "have exception";
+            echo 'have exception';
         }
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ['status' => 1];

@@ -209,3 +209,7 @@ body.background {
     white-space: normal;
     padding: 5px;
 }
+
+.rating_image{
+    width: 200px;
+}
