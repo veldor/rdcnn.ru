@@ -91,16 +91,21 @@ class Telegram
              */ static function ($Update) use ($bot) {
                 /** @var Update $Update */
                 /** @var Message $message */
-                $message = $Update->getMessage();
-                $document = $message->getDocument();
-                if($document !== null){
-                    $bot->sendMessage($message->getChat()->getId(), 'Получен файл');
+                try{
+                    $message = $Update->getMessage();
+                    $document = $message->getDocument();
+                    if($document !== null){
+                        $bot->sendMessage($message->getChat()->getId(), 'Получен файл ' . $document->getMimeType() . " {$document->getFileName()}");
+                    }
+                    else{
+                        $msg_text = $message->getText();
+                        // получен простой текст, обработаю его в зависимости от содержимого
+                        $answer = self::handleSimpleText($msg_text, $message);
+                        $bot->sendMessage($message->getChat()->getId(), $answer);
+                    }
                 }
-                else{
-                    $msg_text = $message->getText();
-                    // получен простой текст, обработаю его в зависимости от содержимого
-                    $answer = self::handleSimpleText($msg_text, $message);
-                    $bot->sendMessage($message->getChat()->getId(), $answer);
+                catch (Exception $e){
+                    $bot->sendMessage($message->getChat()->getId(), $e->getMessage());
                 }
             }, static function () { return true; });
 
