@@ -33,20 +33,25 @@ class Telegram
 
 // команда для помощи
             $bot->command('help', static function ($message) use ($bot) {
-                /** @var Message $message */
-                // проверю, зарегистрирован ли пользователь как работающий у нас
-                if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
-                    $answer = 'Команды:
+                try{
+                    /** @var Message $message */
+                    // проверю, зарегистрирован ли пользователь как работающий у нас
+                    if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                        $answer = 'Команды:
 /help - вывод справки
 /conc - список незагруженных заключений
 /exec - список незагруженных обследований';
-                }
-                else{
-                    $answer = 'Команды:
+                    }
+                    else{
+                        $answer = 'Команды:
 /help - вывод справки';
+                    }
+                    /** @var Message $message */
+                    $bot->sendMessage($message->getChat()->getId(), $answer);
                 }
-                /** @var Message $message */
-                $bot->sendMessage($message->getChat()->getId(), $answer);
+                catch (Exception $e){
+                    $bot->sendMessage($message->getChat()->getId(), $e->getMessage());
+                }
             });
 // команда для вывода незагруженных заключений
             $bot->command('conc', static function ($message) use ($bot) {
