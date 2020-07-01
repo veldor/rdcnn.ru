@@ -47,6 +47,13 @@ class TelegramController extends Controller
                 $bot->sendMessage($message->getChat()->getId(), $answer);
             });
 
+            $bot->on(function ($Update) use ($bot) {
+                $message = $Update->getMessage();
+                $msg_text = $message->getText();
+
+                $bot->sendMessage($message->getChat()->getId(), "You text: " . $msg_text);
+            }, function () { return true; });
+
             try {
                 $bot->run();
             } catch (InvalidJsonException $e) {
