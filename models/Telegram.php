@@ -104,7 +104,14 @@ class Telegram
                             $downloadedFile = $bot->downloadFile($file->getFileId());
                             if(!empty($downloadedFile) && $downloadedFile !== ''){
                                 // файл получен
-                                $bot->sendMessage($message->getChat()->getId(), 'PDF загружен');
+                                // файл получен
+                                // сохраню полученный файл во временную папку
+                                $path = FileUtils::saveTempFile($downloadedFile);
+                                if(is_file($path)){
+                                    $bot->sendMessage($message->getChat()->getId(), 'PDF загружен');
+                                    $bot->sendMessage($message->getChat()->getId(), FileUtils::handleFileUpload($path));
+                                    unlink($path);
+                                }
                             }
                         }
                         else if($mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
@@ -114,7 +121,13 @@ class Telegram
                             $downloadedFile = $bot->downloadFile($file->getFileId());
                             if(!empty($downloadedFile) && $downloadedFile !== ''){
                                 // файл получен
-                                $bot->sendMessage($message->getChat()->getId(), 'DOCX загружен');
+                                // сохраню полученный файл во временную папку
+                                $path = FileUtils::saveTempFile($downloadedFile);
+                                if(is_file($path)){
+                                    $bot->sendMessage($message->getChat()->getId(), 'DOCX загружен');
+                                    $bot->sendMessage($message->getChat()->getId(), FileUtils::handleFileUpload($path));
+                                    unlink($path);
+                                }
                             }
                         }
                         else{
@@ -147,7 +160,7 @@ class Telegram
         }
     }
 
-    private static function handleSimpleText(string $msg_text, \TelegramBot\Api\Types\Message $message):string
+    private static function handleSimpleText(string $msg_text, Message $message):string
     {
         switch ($msg_text){
             // если введён токен доступа- уведомлю пользователя об успешном входе в систему

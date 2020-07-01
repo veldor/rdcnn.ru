@@ -41,4 +41,8 @@ class GrammarHandler
         $fc = mb_strtoupper(mb_substr($str, 0, 1));
         return $fc.mb_substr($str, 1);
     }
+    public static function convertToUTF($text)
+    {
+        return iconv('windows-1251', 'utf-8', $text);
+    }
 }

@@ -4,8 +4,9 @@
 namespace app\models;
 
 
-use DateTime;
+use app\models\utils\GrammarHandler;
 use Exception;
+use RuntimeException;
 use setasign\Fpdi\Fpdi;
 use setasign\Fpdi\PdfParser\PdfParserException;
 use setasign\Fpdi\PdfReader\PdfReaderException;
@@ -147,7 +148,7 @@ class FileUtils
     public static function setUpdateInProgress(): void
     {
         $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
-        file_put_contents($file, "1");
+        file_put_contents($file, '1');
     }
 
     public static function setUpdateFinished(): void
@@ -192,7 +193,7 @@ class FileUtils
             if (is_file($logPath)) {
                 // проверю размер лога
                 $content = file_get_contents($logPath);
-                if (!empty($content) && strlen($content) > 0) {
+                if (!empty($content) && $content !== '') {
                     $notes = mb_split("\n", $content);
                     if (!empty($notes) && count($notes) > 0) {
                         $notesCounter = 0;
@@ -239,7 +240,7 @@ class FileUtils
         return 'no errors';
     }
 
-    public static function setLastCheckUpdateTime()
+    public static function setLastCheckUpdateTime(): void
     {
         $file = Yii::$app->basePath . '\\priv\\last_check_update_time.conf';
         file_put_contents($file, time());
@@ -280,7 +281,7 @@ class FileUtils
 //automaticallay and ajust the page size to the size of the imported page
                         $pdf->useTemplate($tplIdx, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight(), true);
                         ++$pageCounter;
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         break;
                     }
                 }
@@ -314,5 +315,82 @@ class FileUtils
                 }
             }
         }
+    }
+
+    public static function handleLoadedFile(string $loadedFile): ?array
+    {
+        // проверю наличие обработчика
+        $handler = Yii::$app->basePath . '\\java\\docx_to_pdf_converter.jar';
+        $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
+        if(is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)){
+            $command = "java -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
+            exec($command, $result);
+            if(!empty($result) && count($result) === 2){
+                // получу вторую строку результата
+                $fileName = $result[1];
+                if(substr($fileName, strlen($fileName) - 4) === '.pdf'){
+                    return ['filename' => $fileName, 'action_status' => GrammarHandler::convertToUTF($result[0])];
+                }
+            }
+            if(!empty($result) && count($result) === 1){
+                return ['action_status' => GrammarHandler::convertToUTF($result[0])];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param string $downloadedFile
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    public static function saveTempFile(string $downloadedFile):string
+    {
+        $root = Yii::$app->basePath;
+        // создам временную папку, если её ещё не существует
+        if(!is_dir($root . '/temp') && !mkdir($concurrentDirectory = $root . '/temp') && !is_dir($concurrentDirectory)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+        }
+        $fileName = Yii::$app->security->generateRandomString();
+        file_put_contents($root . "/temp/{$fileName}", $downloadedFile);
+        return $root . "/temp/{$fileName}";
+    }
+
+    /**
+     * @param $file
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    public static function handleFileUpload($file): string
+    {
+        // попробую обработать файл
+        $actionResult = self::handleLoadedFile($file);
+        if($actionResult === null){
+            return 'Ошибка обработки файла, попробуйте позднее';
+        }
+        if(count($actionResult) === 1){
+            return 'Ошибка: ' . $actionResult['action_status'];
+        }
+        if(count($actionResult) === 2){
+            // добавлю фон заключению
+            $conclusionFile = $actionResult['filename'];
+            $path = Yii::getAlias('@conclusionsDirectory') . '\\' . $conclusionFile;
+            if(is_file($path)){
+                self::addBackgroundToPDF($path);
+                // если создан новый файл- зарегистрирую его доступность
+                if($actionResult['action_status'] === 'Добавлено дополнительное заключение' || $actionResult['action_status'] === 'Заключение добавлено'){
+                    $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
+                    if($user === null){
+                        // создам учётную запись
+                        ExecutionHandler::createUser(GrammarHandler::getBaseFileName($conclusionFile));
+                    }
+                    $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
+                    $md5 = md5_file($path);
+                    (new Table_availability(['file_name' => $conclusionFile, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]))->save();
+                }
+                return $actionResult['action_status'];
+            }
+        }
+        return 'Не удалось обработать файл';
     }
 }

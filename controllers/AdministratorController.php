@@ -7,6 +7,9 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
+use app\models\Table_availability;
+use app\models\User;
+use app\models\utils\GrammarHandler;
 use app\models\utils\Management;
 use Throwable;
 use Yii;
@@ -179,6 +182,7 @@ class AdministratorController extends Controller
     }
 
     /**
+     * @throws Exception
      */
     public function actionTest(): void
     {
