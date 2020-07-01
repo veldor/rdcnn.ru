@@ -139,7 +139,7 @@ class ExecutionHandler extends Model
                     $stat = stat($path);
                     $changeTime = $stat['mtime'];
                     $difference = time() - $changeTime;
-                    if ($difference > 300) {
+                    if ($difference > 60) {
                         // проверю, соответствует ли название папки шаблону
                         if (preg_match($pattern, $entity)) {
                             $dirLatin = GrammarHandler::toLatin($entity);

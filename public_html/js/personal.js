@@ -177,7 +177,13 @@ $(function () {
         makeInstruction();
     });
 
-    $('.hinted').on('click.showRatingMessage', function () {
-        makeModal("<h2 class='text-center'>Предложение оставить отзыв</h2>", "Спасибо за то, что вы пользуетесь нашими услугами. Мы будем просто счастливы, если вы найдёте минутку и оставите нам отзыв\n <div class='text-center margin'><a target='_blank' href='https://prodoctorov.ru/new/rate/lpu/48447/'><img alt='Отзыв на prodoctorov' class='rating_image' src='https://prodoctorov.ru/static/logo_prodoctorov.svg'/></a></div><div class='text-center margin'><a target='_blank' href='https://search.google.com/local/writereview?placeid=ChIJHXcPvNHVUUER5IWxpxP1DfM'><img class='rating_image' alt='Отзыв на Google' src='https://www.google.ru/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png'/></a></div><div class='text-center margin'><a target='_blank' href='https://yandex.ru/maps/47/nizhny-novgorod/?add-review=true&ll=43.957299%2C56.325628&mode=search&oid=1122933423&ol=biz&z=14'><img class='rating_image' alt='Отзыв на Яндексе' src='https://yastatic.net/s3/home-static/_/x/Q/xk8YidkhGjIGOrFm_dL5781YA.svg'/></a></div>", false, true, 1000);
-    });
+    if(!getCookie("rated")){
+        $('.hinted').on('click.showRatingMessage', function () {
+            makeModal("<h2 class='text-center'>Оцените нашу работу</h2>", "<p>Спасибо за то, что вы пользуетесь нашими услугами.<br/>Мы будем счастливы, если вы найдёте минутку и оставите нам отзыв.<br/>Кликните по названию сайта ниже, чтобы перейти на сайт и заполнить форму отзыва</p> <div class='text-center margin'><a target='_blank' href='https://prodoctorov.ru/new/rate/lpu/48447/'><img alt='Отзыв на prodoctorov' class='rating_image' src='/images/pd.png'/></a></div><div class='text-center margin'><a target='_blank' href='https://search.google.com/local/writereview?placeid=ChIJHXcPvNHVUUER5IWxpxP1DfM'><img class='rating_image' alt='Отзыв на Google' src='/images/goo.png'/></a></div><div class='text-center margin'><a target='_blank' href='https://yandex.ru/maps/47/nizhny-novgorod/?add-review=true&ll=43.957299%2C56.325628&mode=search&oid=1122933423&ol=biz&z=14'><img class='rating_image' alt='Отзыв на Яндексе' src='/images/ya.png'/></a></div>", false, true, 1000);
+            setCookie("rated", 1, 365);
+        });
+    }
+    else{
+        console.log('rated yet');
+    }
 });

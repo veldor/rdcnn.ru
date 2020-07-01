@@ -192,14 +192,26 @@ class AdministratorActions extends Model
                 return ['status' => 4, 'message' => 'Файл не загрузился, попробуйте ещё раз'];
             }
             $counter = 0;
+
             foreach ($this->conclusion as $file) {
                 if($counter > 0){
                     $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $execution->username . "-{$counter}.pdf";
+                    $file_name = $execution->username . "-{$counter}.pdf";
                 }
                 else{
                     $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $execution->username . '.pdf';
+                    $file_name = $execution->username . '.pdf';
                 }
                 $file->saveAs($filename);
+                $md5 = md5_file($filename);
+                // добавлю заключение в список доступных для скачивания
+                (new Table_availability(['file_name' => $file_name, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $execution->username]))->save();
+                FileUtils::addBackgroundToPDF($filename);
+                // оповещу мессенджеры о наличии файла
+                try {
+                    Viber::notifyConclusionLoaded($file);
+                } catch (Exception $e) {
+                }
                 ++$counter;
             }
             return ['status' => 1, 'message' => 'Заключение добавлено'];
