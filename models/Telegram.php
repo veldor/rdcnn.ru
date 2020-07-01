@@ -95,10 +95,18 @@ class Telegram
                     $message = $Update->getMessage();
                     $document = $message->getDocument();
                     if($document !== null){
-                        $file = $bot->getFile($document->getFileId());
-                        $downloadedFile = $bot->downloadFile($file->getFileId());
-                        $bot->sendMessage($message->getChat()->getId(), 'loaded ' . strlen($downloadedFile));
-
+                        $mime = $document->getMimeType();
+                        $bot->sendMessage($message->getChat()->getId(), 'handle ' . $mime);
+                        if($mime === 'application/pdf'){
+                            $bot->sendMessage($message->getChat()->getId(), 'обрабатываю PDF');
+                            $file = $bot->getFile($document->getFileId());
+                            // в строке- содержимое файла
+                            $downloadedFile = $bot->downloadFile($file->getFileId());
+                            if(!empty($downloadedFile) && $downloadedFile !== ''){
+                                // файл получен
+                                $bot->sendMessage($message->getChat()->getId(), 'PDF загружен');
+                            }
+                        }
                     }
                     else{
                         $msg_text = $message->getText();
