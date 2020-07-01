@@ -94,7 +94,7 @@ class Telegram
                 try{
                     $message = $Update->getMessage();
                     $document = $message->getDocument();
-                    if($document !== null){
+                    if($document !== null && ViberPersonalList::iWorkHere($message->getChat()->getId())){
                         $mime = $document->getMimeType();
                         $bot->sendMessage($message->getChat()->getId(), 'handle ' . $mime);
                         if($mime === 'application/pdf'){
@@ -106,6 +106,19 @@ class Telegram
                                 // файл получен
                                 $bot->sendMessage($message->getChat()->getId(), 'PDF загружен');
                             }
+                        }
+                        else if($mime === ' application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
+                            $bot->sendMessage($message->getChat()->getId(), 'обрабатываю DOCX');
+                            $file = $bot->getFile($document->getFileId());
+                            // в строке- содержимое файла
+                            $downloadedFile = $bot->downloadFile($file->getFileId());
+                            if(!empty($downloadedFile) && $downloadedFile !== ''){
+                                // файл получен
+                                $bot->sendMessage($message->getChat()->getId(), 'DOCX загружен');
+                            }
+                        }
+                        else{
+                            $bot->sendMessage($message->getChat()->getId(), 'Я понимаю только файлы в формате PDF и DOCX');
                         }
                     }
                     else{
