@@ -95,7 +95,10 @@ class Telegram
                     $message = $Update->getMessage();
                     $document = $message->getDocument();
                     if($document !== null){
-                        $bot->sendMessage($message->getChat()->getId(), 'Получен файл ' . $document->getMimeType() . " {$document->getFileName()}");
+                        $file = $bot->getFile($document->getFileId());
+                        $downloadedFile = $bot->downloadFile($file->getFileId());
+                        echo 'loaded ' . strlen($downloadedFile);
+
                     }
                     else{
                         $msg_text = $message->getText();
