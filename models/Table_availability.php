@@ -27,14 +27,21 @@ class Table_availability extends ActiveRecord
      */
     public static function getWithoutConclusions(): string
     {
+        $answerArray = [];
         $answer = '';
         $persons = User::findAllRegistered();
         if(!empty($persons)){
             foreach ($persons as $person) {
                 // если не найдено заключений по данному пациенту- верну его
                 if(!self::find()->where(['userId' => $person->username, 'is_conclusion' => 1])->count()){
-                    $answer .= "{$person->username}\n";
+                    $answerArray[] = $person->username;
                 }
+            }
+        }
+        if(!empty($answerArray)){
+            sort($answerArray, SORT_NATURAL);
+            foreach ($answerArray as $item) {
+                $answer .= $item. "\n";
             }
         }
         return $answer;
@@ -45,14 +52,21 @@ class Table_availability extends ActiveRecord
      */
     public static function getWithoutExecutions(): string
     {
+        $answerArray = [];
         $answer = '';
         $persons = User::findAllRegistered();
         if(!empty($persons)){
             foreach ($persons as $person) {
                 // если не найдено заключений по данному пациенту- верну его
                 if(!self::find()->where(['userId' => $person->username, 'is_execution' => 1])->count()){
-                    $answer .= "{$person->username}\n";
+                    $answerArray[] = $person->username;
                 }
+            }
+        }
+        if(!empty($answerArray)){
+            sort($answerArray, SORT_NATURAL);
+            foreach ($answerArray as $item) {
+                $answer .= $item. "\n";
             }
         }
         return $answer;
@@ -60,8 +74,9 @@ class Table_availability extends ActiveRecord
 
     /**
      * @param $id
+     * @return array
      */
-    public static function getConclusions($id)
+    public static function getConclusions($id): array
     {
         $answer = [];
         $existentConclusions = self::findAll(['userId' => $id, 'is_conclusion' => true]);

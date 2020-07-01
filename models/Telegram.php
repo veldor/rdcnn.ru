@@ -74,7 +74,6 @@ class Telegram
                 /** @var Message $message */
                 // проверю, зарегистрирован ли пользователь как работающий у нас
                 if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
-                    $withoutConclusions = Table_availability::getWithoutConclusions();
                     $withoutExecutions = Table_availability::getWithoutExecutions();
                     if (!empty($withoutExecutions)) {
                         $answer = "Не загружены файлы:\n " . $withoutExecutions;
@@ -93,10 +92,16 @@ class Telegram
                 /** @var Update $Update */
                 /** @var Message $message */
                 $message = $Update->getMessage();
-                $msg_text = $message->getText();
-                // получен простой текст, обработаю его в зависимости от содержимого
-                $answer = self::handleSimpleText($msg_text, $message);
-                $bot->sendMessage($message->getChat()->getId(), 'You text: ' . $answer);
+                $document = $message->getDocument();
+                if($document !== null){
+                    $bot->sendMessage($message->getChat()->getId(), 'Получен файл');
+                }
+                else{
+                    $msg_text = $message->getText();
+                    // получен простой текст, обработаю его в зависимости от содержимого
+                    $answer = self::handleSimpleText($msg_text, $message);
+                    $bot->sendMessage($message->getChat()->getId(), $answer);
+                }
             }, static function () { return true; });
 
             try {
