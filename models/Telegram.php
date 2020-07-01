@@ -107,7 +107,7 @@ class Telegram
                                 $bot->sendMessage($message->getChat()->getId(), 'PDF загружен');
                             }
                         }
-                        else if($mime === ' application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
+                        else if($mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
                             $bot->sendMessage($message->getChat()->getId(), 'обрабатываю DOCX');
                             $file = $bot->getFile($document->getFileId());
                             // в строке- содержимое файла
