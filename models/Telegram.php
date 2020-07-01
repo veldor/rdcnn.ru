@@ -97,7 +97,7 @@ class Telegram
                     if($document !== null){
                         $file = $bot->getFile($document->getFileId());
                         $downloadedFile = $bot->downloadFile($file->getFileId());
-                        echo 'loaded ' . strlen($downloadedFile);
+                        $bot->sendMessage($message->getChat()->getId(), 'loaded ' . strlen($downloadedFile));
 
                     }
                     else{
