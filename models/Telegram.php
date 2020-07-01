@@ -26,17 +26,60 @@ class Telegram
             $bot->command(/**
              * @param $message Message
              */ 'start', static function ($message) use ($bot) {
-                $answer = 'Добро пожаловать!';
+                $answer = 'Добро пожаловать! /help для вывода команд';
                 /** @var Message $message */
                 $bot->sendMessage($message->getChat()->getId(), $answer);
             });
 
 // команда для помощи
             $bot->command('help', static function ($message) use ($bot) {
-                $answer = 'Команды:
+                /** @var Message $message */
+                // проверю, зарегистрирован ли пользователь как работающий у нас
+                if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                    $answer = 'Команды:
+/help - вывод справки
+/conc - список незагруженных заключений
+/exec - список незагруженных обследований';
+                }
+                else{
+                    $answer = 'Команды:
 /help - вывод справки';
+                }
                 /** @var Message $message */
                 $bot->sendMessage($message->getChat()->getId(), $answer);
+            });
+// команда для вывода незагруженных заключений
+            $bot->command('conc', static function ($message) use ($bot) {
+                /** @var Message $message */
+                // проверю, зарегистрирован ли пользователь как работающий у нас
+                if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                    $withoutConclusions = Table_availability::getWithoutConclusions();
+                    if (!empty($withoutConclusions)) {
+                        $answer = "Не загружены заключения:\n " . $withoutConclusions;
+                    }
+                    else{
+                        $answer = 'Вау, все заключения загружены!';
+                    }
+                    /** @var Message $message */
+                    $bot->sendMessage($message->getChat()->getId(), $answer);
+                }
+            });
+// команда для вывода незагруженных обследований
+            $bot->command('exec', static function ($message) use ($bot) {
+                /** @var Message $message */
+                // проверю, зарегистрирован ли пользователь как работающий у нас
+                if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                    $withoutConclusions = Table_availability::getWithoutConclusions();
+                    $withoutExecutions = Table_availability::getWithoutExecutions();
+                    if (!empty($withoutExecutions)) {
+                        $answer = "Не загружены файлы:\n " . $withoutExecutions;
+                    }
+                    else{
+                        $answer = 'Вау, все файлы загружены!';
+                    }
+                    /** @var Message $message */
+                    $bot->sendMessage($message->getChat()->getId(), $answer);
+                }
             });
 
             $bot->on(/**
@@ -71,8 +114,8 @@ class Telegram
             // если введён токен доступа- уведомлю пользователя об успешном входе в систему
             case Info::VIBER_SECRET:
                 // регистрирую получателя
-                //ViberPersonalList::register($message->getChat()->getId());
-                return 'Ага, вы работаете на нас :)';
+                ViberPersonalList::register($message->getChat()->getId());
+                return 'Ага, вы работаете на нас :) /help для списка команд';
         }
         return 'Не понимаю, о чём вы :(';
     }
