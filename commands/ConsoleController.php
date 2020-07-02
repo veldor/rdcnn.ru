@@ -34,8 +34,9 @@ class ConsoleController extends Controller
      */
     public function actionIndex()
     {
+        echo "start work he-he\n";
         FileUtils::writeUpdateLog('start update check : ' . TimeHandler::timestampToDate(time()));
-        /*// проверю, не запущено ли уже обновление, если запущено- ничего не делаю
+        // проверю, не запущено ли уже обновление, если запущено- ничего не делаю
         if (FileUtils::isUpdateInProgress()) {
             return ExitCode::OK;
         }
@@ -64,7 +65,7 @@ class ConsoleController extends Controller
             FileUtils::setLastUpdateTime();
         } finally {
             FileUtils::setUpdateFinished();
-        }*/
+        }
         return ExitCode::OK;
     }
 

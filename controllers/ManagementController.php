@@ -31,6 +31,7 @@ class ManagementController extends Controller
                             'check-changes',
                             'update-dependencies',
                             'reset-change-check-counter',
+                            'check-changes-sync',
                             'add-backgrounds'
                         ],
                         'roles' => [
@@ -99,5 +100,13 @@ class ManagementController extends Controller
     public function actionResetChangeCheckCounter()
     {
         FileUtils::setUpdateFinished();
+    }
+
+    public function actionCheckChangesSync(){
+        echo 'here';
+        $file = Yii::$app->basePath . '\\yii.bat';
+        $command = "$file console";
+        exec($command, $output);
+        var_dump($output);
     }
 }
