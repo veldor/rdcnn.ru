@@ -115,6 +115,7 @@ class ExecutionHandler extends Model
      */
     public static function check(): void
     {
+        FileUtils::writeUpdateLog('error delete dir ');
         echo TimeHandler::timestampToDate(time()) . "start report \n";
         // проверю устаревшие данные
         // получу всех пользователей
@@ -156,13 +157,12 @@ class ExecutionHandler extends Model
                                 // удалю папку
                                 try{
                                     self::rmRec($path);
+                                    echo TimeHandler::timestampToDate(time()) . "dir $entity is empty and deleted \n";
                                 }
                                 catch (\Exception $e){
                                     FileUtils::writeUpdateLog('error delete dir ' . $path);
                                 }
-                                echo TimeHandler::timestampToDate(time()) . "dir $entity is empty and deleted \n";
                             }
-
                         } else {
                             echo TimeHandler::timestampToDate(time()) . "dir $entity not handled \n";
                         }
@@ -176,6 +176,7 @@ class ExecutionHandler extends Model
             $pattern = '/^A?[0-9]+.zip$/';
             if (!empty($entities)) {
                 foreach ($entities as $entity) {
+                    echo TimeHandler::timestampToDate(time()) . " check zip $entity\n";
                     $path = Info::EXEC_FOLDER . '/' . $entity;
                     if (is_file($path) && preg_match($pattern, $entity)) {
                         // найден файл, обработаю информацию о нём
