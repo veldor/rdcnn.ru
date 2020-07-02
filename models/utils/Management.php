@@ -35,7 +35,7 @@ class Management extends Model
         }
         else{
                 // запишу в файл отчётов, что ещё не пришло время для проверки
-                return 'timeout ' . (300 - (time() - FileUtils::getLastUpdateTime()));
+                return 'timeout ' . (60 - (time() - FileUtils::getLastUpdateTime()));
         }
         return false;
     }
