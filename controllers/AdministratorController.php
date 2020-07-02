@@ -185,5 +185,7 @@ class AdministratorController extends Controller
      */
     public function actionTest(): void
     {
+        $file = Yii::$app->basePath . '\test.docx';
+        echo FileUtils::handleLoadedFile($file);
     }
 }
