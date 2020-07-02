@@ -32,7 +32,7 @@ class ConsoleController extends Controller
      * @return int Exit code
      * @throws \Exception
      */
-    public function actionIndex(): int
+    public function actionIndex()
     {
         FileUtils::writeUpdateLog('start update check : ' . TimeHandler::timestampToDate(time()));
         // проверю, не запущено ли уже обновление, если запущено- ничего не делаю
