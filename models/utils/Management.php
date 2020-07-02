@@ -18,8 +18,8 @@ class Management extends Model
             $file = Yii::$app->basePath . '\\yii.bat';
             if(is_file($file)){
                 $command = "$file console";
-                $outFilePath =  Yii::$app->basePath . '/logs/file.log';
-                $outErrPath = Yii::$app->basePath . '/logs/err.log';
+                $outFilePath =  Yii::$app->basePath . '/logs/content_change.log';
+                $outErrPath = Yii::$app->basePath . '/logs/content_change_err.log';
                 $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
                 try{
                     // попробую вызвать процесс асинхронно
@@ -36,9 +36,9 @@ class Management extends Model
         else{
             try{
                 // запишу в файл отчётов, что ещё не пришло время для проверки
-                $outFilePath =  Yii::$app->basePath . '/logs/file.log';
+                $outFilePath =  Yii::$app->basePath . '/logs/content_change.log';
                 file_put_contents($outFilePath, 'Проверка недавно проведена, нужно подождать');
-                $outErrPath = Yii::$app->basePath . '/logs/err.log';
+                $outErrPath = Yii::$app->basePath . '/logs/content_change_err.log';
                 file_put_contents($outErrPath, '');
             }
             catch (Exception $e){}

@@ -125,7 +125,7 @@ class FileUtils
      */
     public static function getOutputInfo(): string
     {
-        $file = Yii::$app->basePath . '\\logs\\file.log';
+        $file = Yii::$app->basePath . '\\logs\\content_change.log';
         if (is_file($file)) {
             return file_get_contents($file);
         }
@@ -137,7 +137,7 @@ class FileUtils
      */
     public static function getErrorInfo(): string
     {
-        $file = Yii::$app->basePath . '\\logs\\err.log';
+        $file = Yii::$app->basePath . '\\logs\\content_change_err.log';
         if (is_file($file)) {
             return file_get_contents($file);
         }
