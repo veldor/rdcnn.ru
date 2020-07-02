@@ -15,7 +15,7 @@ use yii\web\Response;
 
 class ManagementController extends Controller
 {
-    public function behaviors():array
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -51,18 +51,17 @@ class ManagementController extends Controller
         // отмечу время проверки обновления
         FileUtils::setLastCheckUpdateTime();
         $file = Yii::$app->basePath . '\\updateFromGithub.bat';
-        if(is_file($file)){
+        if (is_file($file)) {
             $command = $file . ' ' . Yii::$app->basePath;
-            $outFilePath =  Yii::$app->basePath . '\\logs\\update_file.log';
-            $outErrPath =  Yii::$app->basePath . '\\logs\\update_err.log';
+            $outFilePath = Yii::$app->basePath . '\\logs\\update_file.log';
+            $outErrPath = Yii::$app->basePath . '\\logs\\update_err.log';
             $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
             echo $command;
-            try{
+            try {
                 // попробую вызвать процесс асинхронно
                 $handle = new \COM('WScript.Shell');
                 $handle->Run($command, 0, false);
-            }
-            catch (Exception $e){
+            } catch (Exception $e) {
                 exec($command);
             }
         }
@@ -74,30 +73,31 @@ class ManagementController extends Controller
     public function actionCheckChanges()
     {
         FileUtils::writeUpdateLog('try to start : ' . TimeHandler::timestampToDate(time()));
-       return Management::handleChanges();
+        FileUtils::writeUpdateLog('result is  : ' .  Management::handleChanges());
     }
 
-    public function actionUpdateDependencies(){
+    public function actionUpdateDependencies()
+    {
 
         $file = Yii::$app->basePath . '\\composerUpdate.bat';
-        if(is_file($file)){
+        if (is_file($file)) {
             $command = $file . ' ' . Yii::$app->basePath;
-            $outFilePath =  Yii::$app->basePath . '\\logs\\update_file.log';
-            $outErrPath =  Yii::$app->basePath . '\\logs\\update_err.log';
+            $outFilePath = Yii::$app->basePath . '\\logs\\update_file.log';
+            $outErrPath = Yii::$app->basePath . '\\logs\\update_err.log';
             $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
             echo $command;
-            try{
+            try {
                 // попробую вызвать процесс асинхронно
                 $handle = new \COM('WScript.Shell');
                 $handle->Run($command, 0, false);
-            }
-            catch (Exception $e){
+            } catch (Exception $e) {
                 exec($command);
             }
         }
     }
 
-    public function actionResetChangeCheckCounter(){
+    public function actionResetChangeCheckCounter()
+    {
         FileUtils::setUpdateFinished();
     }
 }
