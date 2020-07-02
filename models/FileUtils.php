@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\utils\GrammarHandler;
 use Exception;
 use RuntimeException;
 use setasign\Fpdi\Fpdi;
@@ -126,7 +127,7 @@ class FileUtils
     {
         $file = Yii::$app->basePath . '\\logs\\java_info_error.log';
         if (is_file($file)) {
-            return file_get_contents($file);
+            return GrammarHandler::convertToUTF(file_get_contents($file));
         }
         return 'file is empty';
     }
