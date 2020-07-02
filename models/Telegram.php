@@ -96,7 +96,6 @@ class Telegram
                     $document = $message->getDocument();
                     if($document !== null && ViberPersonalList::iWorkHere($message->getChat()->getId())){
                         $mime = $document->getMimeType();
-                        $bot->sendMessage($message->getChat()->getId(), 'handle ' . $mime);
                         if($mime === 'application/pdf'){
                             $bot->sendMessage($message->getChat()->getId(), 'обрабатываю PDF');
                             $file = $bot->getFile($document->getFileId());
@@ -108,9 +107,7 @@ class Telegram
                                 // сохраню полученный файл во временную папку
                                 $path = FileUtils::saveTempFile($downloadedFile, '.pdf');
                                 if(is_file($path)){
-                                    $bot->sendMessage($message->getChat()->getId(), 'PDF загружен в ' .$path);
                                     $bot->sendMessage($message->getChat()->getId(), FileUtils::handleFileUpload($path));
-                                    unlink($path);
                                 }
                             }
                         }
@@ -124,7 +121,6 @@ class Telegram
                                 // сохраню полученный файл во временную папку
                                 $path = FileUtils::saveTempFile($downloadedFile, '.docx');
                                 if(is_file($path)){
-                                    $bot->sendMessage($message->getChat()->getId(), 'DOCX загружен в ' .$path);
                                     $bot->sendMessage($message->getChat()->getId(), FileUtils::handleFileUpload($path));
                                     unlink($path);
                                 }
