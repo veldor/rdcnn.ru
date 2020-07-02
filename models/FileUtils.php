@@ -120,6 +120,7 @@ class FileUtils
         }
         return 'file is empty';
     }
+
     /**
      * @return string
      */
@@ -173,7 +174,7 @@ class FileUtils
         $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
         if (is_file($file)) {
             $content = file_get_contents($file);
-            if((bool) $content){
+            if ((bool)$content) {
                 // проверю, что с момента последнего обновления прошло не больше 15 минут. Если больше- сброшу флаг
                 $lastTime = self::getLastUpdateTime();
                 return !(time() - $lastTime > 900);
@@ -310,59 +311,46 @@ class FileUtils
             }
         }
     }
-    public static function handleLoadedFile(string $loadedFile): ?string
+
+    public static function handleLoadedFile(string $loadedFile): ?array
     {
         $existentJavaPath = null;
         $javaPath = 'C:\Program Files (x86)\Java\jre1.8.0_241\bin\java.exe';
-        if(is_file($javaPath)){
+        if (is_file($javaPath)) {
             echo 'founded java path ' . $javaPath . "\n";
             $existentJavaPath = $javaPath;
-        }
-        else{
+        } else {
             $javaPath = 'C:\Program Files (x86)\Java\jre1.8.0_251\bin\java.exe';
-            if(is_file($javaPath)){
+            if (is_file($javaPath)) {
                 echo 'founded java path ' . $javaPath . "\n";
                 $existentJavaPath = $javaPath;
-            }
-            else{
+            } else {
                 $javaPath = 'C:\Program Files\Java\jre1.8.0_241\bin\java.exe';
-                if(is_file($javaPath)){
+                if (is_file($javaPath)) {
                     echo 'founded java path ' . $javaPath . "\n";
                     $existentJavaPath = $javaPath;
                 }
             }
         }
 
-        if($existentJavaPath !== null){
+        if ($existentJavaPath !== null) {
             // проверю наличие обработчика
             $handler = Yii::$app->basePath . '\\java\\docx_to_pdf_converter.jar';
             $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
-            if(is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)){
+            if (is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)) {
                 $command = "\"$existentJavaPath\" -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
-                echo $command;
                 exec($command, $result);
-                if($result === null){
-                    return 'null result';
+                if (!empty($result) && count($result) === 2) {
+                    // получу вторую строку результата
+                    $fileName = $result[1];
+                    if (substr($fileName, strlen($fileName) - 4) === '.pdf') {
+                        return ['filename' => $fileName, 'action_status' => GrammarHandler::convertToUTF($result[0])];
+                    }
                 }
-                if(empty($result)){
-                    return 'empty answer';
-                }
-                return implode(' ', $result);
-        }
-
-           /* if(!empty($result) && count($result) === 2){
-                // получу вторую строку результата
-                $fileName = $result[1];
-                if(substr($fileName, strlen($fileName) - 4) === '.pdf'){
-                    return ['filename' => $fileName, 'action_status' => GrammarHandler::convertToUTF($result[0])];
+                if (!empty($result) && count($result) === 1) {
+                    return ['action_status' => GrammarHandler::convertToUTF($result[0])];
                 }
             }
-            if(!empty($result) && count($result) === 1){
-                return ['action_status' => GrammarHandler::convertToUTF($result[0])];
-            }*/
-        }
-        else{
-            echo 'not found handler';
         }
         return null;
     }
@@ -373,11 +361,11 @@ class FileUtils
      * @return string
      * @throws \yii\base\Exception
      */
-    public static function saveTempFile(string $downloadedFile, $extension):string
+    public static function saveTempFile(string $downloadedFile, $extension): string
     {
         $root = Yii::$app->basePath;
         // создам временную папку, если её ещё не существует
-        if(!is_dir($root . '/temp') && !mkdir($concurrentDirectory = $root . '/temp') && !is_dir($concurrentDirectory)) {
+        if (!is_dir($root . '/temp') && !mkdir($concurrentDirectory = $root . '/temp') && !is_dir($concurrentDirectory)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
         $fileName = Yii::$app->security->generateRandomString() . $extension;
@@ -394,24 +382,22 @@ class FileUtils
     {
         // попробую обработать файл
         $actionResult = self::handleLoadedFile($file);
-        if($actionResult === null){
+        if ($actionResult === null) {
             return 'Ошибка обработки файла, попробуйте позднее';
         }
-
-        return $actionResult;
-        /*if(count($actionResult) === 1){
+        if (count($actionResult) === 1) {
             return 'Ошибка: ' . $actionResult['action_status'];
         }
-        if(count($actionResult) === 2){
+        if (count($actionResult) === 2) {
             // добавлю фон заключению
             $conclusionFile = $actionResult['filename'];
             $path = Yii::getAlias('@conclusionsDirectory') . '\\' . $conclusionFile;
-            if(is_file($path)){
+            if (is_file($path)) {
                 self::addBackgroundToPDF($path);
                 // если создан новый файл- зарегистрирую его доступность
-                if($actionResult['action_status'] === 'Добавлено дополнительное заключение' || $actionResult['action_status'] === 'Заключение добавлено'){
+                if ($actionResult['action_status'] === 'Добавлено дополнительное заключение' || $actionResult['action_status'] === 'Заключение добавлено') {
                     $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
-                    if($user === null){
+                    if ($user === null) {
                         // создам учётную запись
                         ExecutionHandler::createUser(GrammarHandler::getBaseFileName($conclusionFile));
                     }
@@ -421,7 +407,7 @@ class FileUtils
                 }
                 return $actionResult['action_status'];
             }
-        }*/
+        }
         return 'Не удалось обработать файл';
     }
 }
