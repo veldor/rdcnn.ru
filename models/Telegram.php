@@ -106,9 +106,9 @@ class Telegram
                                 // файл получен
                                 // файл получен
                                 // сохраню полученный файл во временную папку
-                                $path = FileUtils::saveTempFile($downloadedFile);
+                                $path = FileUtils::saveTempFile($downloadedFile, '.pdf');
                                 if(is_file($path)){
-                                    $bot->sendMessage($message->getChat()->getId(), 'PDF загружен');
+                                    $bot->sendMessage($message->getChat()->getId(), 'PDF загружен в ' .$path);
                                     $bot->sendMessage($message->getChat()->getId(), FileUtils::handleFileUpload($path));
                                     unlink($path);
                                 }
@@ -122,9 +122,9 @@ class Telegram
                             if(!empty($downloadedFile) && $downloadedFile !== ''){
                                 // файл получен
                                 // сохраню полученный файл во временную папку
-                                $path = FileUtils::saveTempFile($downloadedFile);
+                                $path = FileUtils::saveTempFile($downloadedFile, '.docx');
                                 if(is_file($path)){
-                                    $bot->sendMessage($message->getChat()->getId(), 'DOCX загружен');
+                                    $bot->sendMessage($message->getChat()->getId(), 'DOCX загружен в ' .$path);
                                     $bot->sendMessage($message->getChat()->getId(), FileUtils::handleFileUpload($path));
                                     unlink($path);
                                 }

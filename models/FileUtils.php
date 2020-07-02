@@ -325,17 +325,18 @@ class FileUtils
 
     /**
      * @param string $downloadedFile
+     * @param $extension
      * @return string
      * @throws \yii\base\Exception
      */
-    public static function saveTempFile(string $downloadedFile):string
+    public static function saveTempFile(string $downloadedFile, $extension):string
     {
         $root = Yii::$app->basePath;
         // создам временную папку, если её ещё не существует
         if(!is_dir($root . '/temp') && !mkdir($concurrentDirectory = $root . '/temp') && !is_dir($concurrentDirectory)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
-        $fileName = Yii::$app->security->generateRandomString();
+        $fileName = Yii::$app->security->generateRandomString() . $extension;
         file_put_contents($root . "/temp/{$fileName}", $downloadedFile);
         return $root . "/temp/{$fileName}";
     }
