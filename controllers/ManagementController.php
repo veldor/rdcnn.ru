@@ -29,6 +29,7 @@ class ManagementController extends Controller
                             'check-update',
                             'check-changes',
                             'update-dependencies',
+                            'reset-change-check-counter',
                             'add-backgrounds'
                         ],
                         'roles' => [
@@ -92,5 +93,9 @@ class ManagementController extends Controller
                 exec($command);
             }
         }
+    }
+
+    public function actionResetChangeCheckCounter(){
+        FileUtils::setUpdateFinished();
     }
 }

@@ -4,7 +4,6 @@
 namespace app\models;
 
 
-use app\models\utils\GrammarHandler;
 use Exception;
 use RuntimeException;
 use setasign\Fpdi\Fpdi;
@@ -162,7 +161,12 @@ class FileUtils
         $file = Yii::$app->basePath . '\\priv\\update_progress.conf';
         if (is_file($file)) {
             $content = file_get_contents($file);
-            return (bool)$content;
+            if((bool) $content){
+                // проверю, что с момента последнего обновления прошло не больше 15 минут. Если больше- сброшу флаг
+                $lastTime = self::getLastUpdateTime();
+                return !(time() - $lastTime > 900);
+            }
+            return false;
         }
         return false;
     }
