@@ -213,9 +213,9 @@ class ExecutionHandler extends Model
         }
         $entity = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
         if (!is_dir($entity) && !is_dir($entity) && !mkdir($entity) && !is_dir($entity)) {
-            throw new RuntimeException(sprintf('Directory "%s" was not created', $entity));
+            echo (sprintf('Directory "%s" was not created', $entity));
         }
-/*        // теперь обработаю заключения
+        // теперь обработаю заключения
         $pattern = '/^[aа]?\W?\d+-?\.?\d*\.pdf$/ui';
         $dotPattern = '/^([aа]?\W?\d+)\.(\d+\.pdf)$/ui';
         // проверю папку с заключениями
@@ -275,11 +275,11 @@ class ExecutionHandler extends Model
                     echo 'ERROR CHECKING FILE' . $e->getMessage();
                 }
             }
-        }*/
+        }
 
         echo 'check conclusions actuality';
 
-        /*// теперь проверю актуальность данных по доступности заключений
+        // теперь проверю актуальность данных по доступности заключений
         $conclusionsDir = Info::CONC_FOLDER;
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
             $files = array_slice(scandir($conclusionsDir), 2);
@@ -322,7 +322,7 @@ class ExecutionHandler extends Model
                     }
                 }
             }
-        }*/
+        }
     }
 
     /**
