@@ -223,52 +223,56 @@ class ExecutionHandler extends Model
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
             $files = array_slice(scandir($conclusionsDir), 2);
             foreach ($files as $file) {
-                $path = Info::CONC_FOLDER . '\\' . $file;
-                if (is_file($path)) {
-                    // проверю, подходит ли файл под регулярку
-                    if (preg_match($pattern, $file)) {
-                        // получу данные о файле
-                        $stat = stat($path);
-                        $changeTime = $stat['mtime'];
-                        $difference = time() - $changeTime;
-                        if ($difference > 30) {
-                            // переименую файл в нормальный вид
-                            $fileLatin = GrammarHandler::toLatin($file);
-                            // уберу пробелы
-                            $filePureName = preg_replace('/\s/', '', $fileLatin);
-                            // заменю разделитель-точку на тире
-                            if (preg_match($dotPattern, $file, $arr)) {
-                                // переименую файл
-                                $filePureName = $arr[1] . '-' . $arr[2];
-                                rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
-                                echo TimeHandler::timestampToDate(time()) . "file $file renamed from dot to $filePureName \n";
-                            }
-                            // проверю наличие учётной записи
-                            // если это не дублирующее заключение
-                            if (empty(strpos($filePureName, '-'))) {
-                                echo TimeHandler::timestampToDate(time()) . "check user $filePureName\n";
-                                try{
-                                    self::checkUser(GrammarHandler::getBaseFileName($filePureName));
-                                }
-                                catch (\Exception $e){
-                                    echo 'ERROR WHEN CHECK USER ' . $e->getMessage();
-                                }
-                            }
-                            // если файл не соответствует строгому шаблону
-                            if ($file !== $filePureName) {
-                                try {
+                try {
+                    $path = Info::CONC_FOLDER . '\\' . $file;
+                    if (is_file($path)) {
+                        // проверю, подходит ли файл под регулярку
+                        if (preg_match($pattern, $file)) {
+                            // получу данные о файле
+                            $stat = stat($path);
+                            $changeTime = $stat['mtime'];
+                            $difference = time() - $changeTime;
+                            if ($difference > 30) {
+                                // переименую файл в нормальный вид
+                                $fileLatin = GrammarHandler::toLatin($file);
+                                // уберу пробелы
+                                $filePureName = preg_replace('/\s/', '', $fileLatin);
+                                // заменю разделитель-точку на тире
+                                if (preg_match($dotPattern, $file, $arr)) {
+                                    // переименую файл
+                                    $filePureName = $arr[1] . '-' . $arr[2];
                                     rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
-                                    echo TimeHandler::timestampToDate(time()) . "file $file renamed to $filePureName \n";
-                                } catch (\Exception $e) {
-                                    echo "skipped file $file no renamed to $filePureName with error {$e->getMessage()}\n";
+                                    echo TimeHandler::timestampToDate(time()) . "file $file renamed from dot to $filePureName \n";
                                 }
+                                // проверю наличие учётной записи
+                                // если это не дублирующее заключение
+                                if (empty(strpos($filePureName, '-'))) {
+                                    echo TimeHandler::timestampToDate(time()) . "check user $filePureName\n";
+                                    try {
+                                        self::checkUser(GrammarHandler::getBaseFileName($filePureName));
+                                    } catch (\Exception $e) {
+                                        echo 'ERROR WHEN CHECK USER ' . $e->getMessage();
+                                    }
+                                }
+                                // если файл не соответствует строгому шаблону
+                                if ($file !== $filePureName) {
+                                    try {
+                                        rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
+                                        echo TimeHandler::timestampToDate(time()) . "file $file renamed to $filePureName \n";
+                                    } catch (\Exception $e) {
+                                        echo "skipped file $file no renamed to $filePureName with error {$e->getMessage()}\n";
+                                    }
+                                }
+                            } else {
+                                echo TimeHandler::timestampToDate(time()) . "file $file in conclusions waiting for timeout \n";
                             }
                         } else {
-                            echo TimeHandler::timestampToDate(time()) . "file $file in conclusions waiting for timeout \n";
+                            echo TimeHandler::timestampToDate(time()) . "file $file not handled \n";
                         }
-                    } else {
-                        echo TimeHandler::timestampToDate(time()) . "file $file not handled \n";
                     }
+                }
+                catch (\Exception $e){
+                    echo 'ERROR CHECKING FILE' . $e->getMessage();
                 }
             }
         }
