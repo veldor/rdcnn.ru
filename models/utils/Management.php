@@ -25,7 +25,6 @@ class Management extends Model
                     // попробую вызвать процесс асинхронно
                     $handle = new \COM('WScript.Shell');
                     $handle->Run($command, 0, false);
-                    FileUtils::writeUpdateLog('running bat : ' . TimeHandler::timestampToDate(time()));
                     return true;
                 }
                 catch (Exception $e){

@@ -158,7 +158,7 @@ class ExecutionHandler extends Model
                                     self::rmRec($path);
                                 }
                                 catch (\Exception $e){
-
+                                    FileUtils::writeUpdateLog('error delete dir ' . $path);
                                 }
                                 echo TimeHandler::timestampToDate(time()) . "dir $entity is empty and deleted \n";
                             }
