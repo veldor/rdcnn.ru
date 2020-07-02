@@ -215,7 +215,7 @@ class ExecutionHandler extends Model
         if (!is_dir($entity) && !is_dir($entity) && !mkdir($entity) && !is_dir($entity)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $entity));
         }
-        // теперь обработаю заключения
+/*        // теперь обработаю заключения
         $pattern = '/^[aа]?\W?\d+-?\.?\d*\.pdf$/ui';
         $dotPattern = '/^([aа]?\W?\d+)\.(\d+\.pdf)$/ui';
         // проверю папку с заключениями
@@ -275,7 +275,7 @@ class ExecutionHandler extends Model
                     echo 'ERROR CHECKING FILE' . $e->getMessage();
                 }
             }
-        }
+        }*/
 
         echo 'check conclusions actuality';
 
