@@ -25,7 +25,7 @@ class Gdrive
     {
         $client = self::getClient();
         if ($client !== null) {
-            echo "Having client\n";
+            echo TimeHandler::timestampToDate(time()) . "Having client\n";
 
             // получу список файлов с диска
             $service = new Google_Service_Drive($client);
@@ -39,7 +39,7 @@ class Gdrive
             if (count($results->getFiles()) === 0) {
                 print "No files found.\n";
             } else {
-                print "Files:\n";
+                print "TimeHandler::timestampToDate(time()) . Files:\n";
                 /** @var Google_Service_Drive_DriveFile $file */
                 foreach ($results->getFiles() as $file) {
                     // скачаю и удалю файл
@@ -119,7 +119,7 @@ class Gdrive
                     'alt' => 'media'));
                 $type = ($response->getHeader('Content-Type'));
                 if (!empty($type) && count($type) === 1 && $type[0] === 'application/pdf') {
-                    echo "handle file {$file->getName()}\n";
+                    echo TimeHandler::timestampToDate(time()) . "handle file {$file->getName()}\n";
                     echo 'saving ' . $file->getName() . "\n";
                     $content = $response->getBody()->getContents();
                     file_put_contents(Info::CONC_FOLDER . '\\' . $file->getName(), $content);

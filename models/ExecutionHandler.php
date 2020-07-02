@@ -8,6 +8,7 @@ use app\models\database\AuthAssignment;
 use app\models\database\TempDownloadLinks;
 use app\models\database\ViberSubscriptions;
 use app\models\utils\GrammarHandler;
+use app\models\utils\TimeHandler;
 use app\priv\Info;
 use RuntimeException;
 use Throwable;
@@ -114,7 +115,7 @@ class ExecutionHandler extends Model
      */
     public static function check(): void
     {
-        echo "start report \n";
+        echo TimeHandler::timestampToDate(time()) . "start report \n";
         // проверю устаревшие данные
         // получу всех пользователей
         $users = User::findAllRegistered();
@@ -123,7 +124,7 @@ class ExecutionHandler extends Model
                 // ищу данные по доступности обследований.
                 if (($user->created_at + Info::DATA_SAVING_TIME) < time()) {
                     AdministratorActions::simpleDeleteItem($user->username);
-                    echo "user {$user->username} expired and deleted\n";
+                    echo TimeHandler::timestampToDate(time()) . "user {$user->username} expired and deleted\n";
                 }
             }
         }
@@ -150,18 +151,18 @@ class ExecutionHandler extends Model
                                 self::checkUser($dirLatin);
                                 // сохраню содержимое папки в архив
                                 self::PackFiles($dirLatin, $path);
-                                echo "dir $entity handled and load to $path \n";
+                                echo TimeHandler::timestampToDate(time()) . "dir $entity handled and load to $path \n";
                             } else {
                                 // удалю папку
                                 self::rmRec($path);
-                                echo "dir $entity is empty and deleted \n";
+                                echo TimeHandler::timestampToDate(time()) . "dir $entity is empty and deleted \n";
                             }
 
                         } else {
-                            echo "dir $entity not handled \n";
+                            echo TimeHandler::timestampToDate(time()) . "dir $entity not handled \n";
                         }
                     } else {
-                        echo "dir $entity waiting for timeout \n";
+                        echo TimeHandler::timestampToDate(time()) . "dir $entity waiting for timeout \n";
                     }
                 }
             }
@@ -232,28 +233,28 @@ class ExecutionHandler extends Model
                                 // переименую файл
                                 $filePureName = $arr[1] . '-' . $arr[2];
                                 rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
-                                echo "file $file renamed from dot to $filePureName \n";
+                                echo TimeHandler::timestampToDate(time()) . "file $file renamed from dot to $filePureName \n";
                             }
                             // проверю наличие учётной записи
                             // если это не дублирующее заключение
                             if (empty(strpos($filePureName, '-'))) {
-                                echo "check user $filePureName\n";
+                                echo TimeHandler::timestampToDate(time()) . "check user $filePureName\n";
                                 self::checkUser(GrammarHandler::getBaseFileName($filePureName));
                             }
                             // если файл не соответствует строгому шаблону
                             if ($file !== $filePureName) {
                                 try {
                                     rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
-                                    echo "file $file renamed to $filePureName \n";
+                                    echo TimeHandler::timestampToDate(time()) . "file $file renamed to $filePureName \n";
                                 } catch (\Exception $e) {
                                     echo "skipped file $file no renamed to $filePureName with error {$e->getMessage()}\n";
                                 }
                             }
                         } else {
-                            echo "file $file in conclusions waiting for timeout \n";
+                            echo TimeHandler::timestampToDate(time()) . "file $file in conclusions waiting for timeout \n";
                         }
                     } else {
-                        echo "file $file not handled \n";
+                        echo TimeHandler::timestampToDate(time()) . "file $file not handled \n";
                     }
                 }
             }
@@ -319,12 +320,12 @@ class ExecutionHandler extends Model
                             $existentFile->md5 = $md5;
                             $existentFile->file_create_time = $changeTime;
                             $existentFile->save();
-                            echo "add background to existent {$file}\n";
+                            echo TimeHandler::timestampToDate(time()) . "add background to existent {$file}\n";
                             Viber::notifyConclusionLoaded($file);
                         }
                     } else {
                         $name = GrammarHandler::getBaseFileName($file);
-                        echo "check file owner {$file} by name " . $name . "\n";
+                        echo TimeHandler::timestampToDate(time()) . "check file owner {$file} by name " . $name . "\n";
                         // найду пользователя
                         $user = User::findByUsername($name);
                         if ($user !== null) {
@@ -334,7 +335,7 @@ class ExecutionHandler extends Model
                             $stat = stat($path);
                             $changeTime = $stat['mtime'];
                             (new Table_availability(['file_name' => $file, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
-                            echo "add background to new {$file}\n";
+                            echo TimeHandler::timestampToDate(time()) . "add background to new {$file}\n";
                             // оповещу мессенджеры о наличии файла
                             Viber::notifyConclusionLoaded($file);
                         }

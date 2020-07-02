@@ -41,7 +41,7 @@ class ConsoleController extends Controller
         try {
             FileUtils::setUpdateInProgress();
             FileUtils::writeUpdateLog('start : ' . TimeHandler::timestampToDate(time()));
-            echo "Checking changes\n";
+            echo TimeHandler::timestampToDate(time()) . "Checking changes\n";
 
             // подключаю Gdrive, проверю заключения, загруженные из папок
 
@@ -58,7 +58,7 @@ class ConsoleController extends Controller
                 echo $e->getTraceAsString();
             }
             //
-            echo "Finish changes handle\n";
+            echo TimeHandler::timestampToDate(time()) . "Finish changes handle\n";
             FileUtils::writeUpdateLog('finish : ' . TimeHandler::timestampToDate(time()));
             FileUtils::setLastUpdateTime();
         } finally {
