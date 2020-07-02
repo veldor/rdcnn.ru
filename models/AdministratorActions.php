@@ -34,7 +34,7 @@ class AdministratorActions extends Model
      * @return array
      * @throws Exception
      */
-    public static function checkPatients(): array
+    public static function checkPatients($startCheckStatus): array
     {
         $response = [];
         // тут придётся проверять наличие неопознанных папок
@@ -57,6 +57,7 @@ class AdministratorActions extends Model
                     $patientInfo['conclusionsCount'] = ExecutionHandler::countConclusions($item->username);
                     $response['patientList'][] = $patientInfo;
             }
+            $response['startCheckStatus'] = $startCheckStatus;
         }
         return $response;
     }

@@ -34,14 +34,8 @@ class Management extends Model
             }
         }
         else{
-            try{
                 // запишу в файл отчётов, что ещё не пришло время для проверки
-                $outFilePath =  Yii::$app->basePath . '/logs/content_change.log';
-                file_put_contents($outFilePath, 'Проверка недавно проведена, нужно подождать');
-                $outErrPath = Yii::$app->basePath . '/logs/content_change_err.log';
-                file_put_contents($outErrPath, '');
-            }
-            catch (Exception $e){}
+                return 'timeout';
         }
         return false;
     }

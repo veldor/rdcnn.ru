@@ -7,9 +7,6 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
-use app\models\Table_availability;
-use app\models\User;
-use app\models\utils\GrammarHandler;
 use app\models\utils\Management;
 use Throwable;
 use Yii;
@@ -149,12 +146,15 @@ class AdministratorController extends Controller
      */
     public function actionPatientsCheck(): array
     {
+        $isCheckStarted = 0;
         try{
-            Management::handleChanges();
+            $isCheckStarted = Management::handleChanges();
         }
-        catch (\Exception $e){}
+        catch (\Exception $e){
+            $isCheckStarted = $e->getMessage();
+        }
         Yii::$app->response->format = Response::FORMAT_JSON;
-        return AdministratorActions::checkPatients();
+        return AdministratorActions::checkPatients($isCheckStarted);
     }
 
     public function actionFilesCheck($executionNumber): array
