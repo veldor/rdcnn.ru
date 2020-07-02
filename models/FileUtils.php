@@ -338,7 +338,7 @@ class FileUtils
             $handler = Yii::$app->basePath . '\\java\\docx_to_pdf_converter.jar';
             $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
             if(is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)){
-                $command = "\"$existentJavaPath\" -jar $handler \"$loadedFile \" \"$conclusionsDir\"";
+                $command = "\"$existentJavaPath\" -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
                 echo $command;
                 exec($command, $result);
                 if($result === null){
