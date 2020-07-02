@@ -34,7 +34,7 @@ class ConsoleController extends Controller
      */
     public function actionIndex(): int
     {
-        FileUtils::writeUpdateLog('try to start : ' . TimeHandler::timestampToDate(time()));
+        FileUtils::writeUpdateLog('start update check : ' . TimeHandler::timestampToDate(time()));
         // проверю, не запущено ли уже обновление, если запущено- ничего не делаю
         if (FileUtils::isUpdateInProgress()) {
             return ExitCode::OK;
