@@ -26,6 +26,7 @@ class Management extends Model
                     // попробую вызвать процесс асинхронно
                     $handle = new \COM('WScript.Shell');
                     $handle->Run($command, 0, false);
+                    echo 'check initialized';
                     return true;
                 }
                 catch (Exception $e){
