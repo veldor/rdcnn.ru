@@ -272,45 +272,8 @@ class ExecutionHandler extends Model
                 }
             }
         }
-        /*        // из облачной папки (неактуально, проверяется скриптом)
-                $cloudDir = Yii::getAlias('@cloudDirectory');
-                if (!empty($cloudDir) && is_dir($cloudDir)) {
-                    $report .= "handle cloud dir \n";
-                    $files = array_slice(scandir($cloudDir), 2);
-                    if (!empty($files)) {
-                        $report .= 'found ' . count($files) . " files in cloud dir \n";
-                        foreach ($files as $file) {
-                            $path = Yii::getAlias('@cloudDirectory') . '\\' . $file;
-                            if (is_file($path)) {
-                                // проверю, подходит ли файл под регулярку
-                                if (preg_match($pattern, $file)) {
-                                    // получу данные о файле
-                                    $stat = stat($path);
-                                    $changeTime = $stat['mtime'];
-                                    $difference = time() - $changeTime;
-                                    if ($difference > 30) {
-                                        // переименую файл в нормальный вид
-                                        $fileLatin = GrammarHandler::toLatin($file);
-                                        // уберу пробелы
-                                        $filePureName = preg_replace('/\s/', '', $fileLatin);
-                                        // проверю наличие учётной записи
-                                        // если это не дублирующее заключение
-                                        if (stripos('-', $filePureName) < 0) {
-                                            self::checkUser($filePureName);
-                                        }
-                                        // перемещу файл в папку с заключениями
-                                        rename($path, Yii::getAlias('@conclusionsDirectory') . '\\' . $filePureName);
-                                        $report .= "file $file handled and moved by $filePureName \n";
-                                    } else {
-                                        $report .= "file $file wait for timeout \n";
-                                    }
-                                } else {
-                                    $report .= "file $file not handled \n";
-                                }
-                            }
-                        }
-                    }
-                }*/
+
+        echo 'check conclusions actuality';
 
         // теперь проверю актуальность данных по доступности заключений
         $conclusionsDir = Info::CONC_FOLDER;
