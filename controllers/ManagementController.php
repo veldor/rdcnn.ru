@@ -32,6 +32,8 @@ class ManagementController extends Controller
                             'update-dependencies',
                             'reset-change-check-counter',
                             'check-changes-sync',
+                            'check-java',
+                            'restart-server',
                             'add-backgrounds'
                         ],
                         'roles' => [
@@ -103,11 +105,34 @@ class ManagementController extends Controller
     }
 
     public function actionCheckChangesSync(){
-        defined('YII_DEBUG') or define('YII_DEBUG', true);
-        defined('YII_ENV') or define('YII_ENV', 'dev');
         $file = Yii::$app->basePath . '\\yii.bat';
         $command = "$file console";
         exec($command, $output);
         var_dump($output);
+    }
+
+    public function actionRestartServer(){
+        $file = Yii::$app->basePath . '\\restartServer.bat';
+        // попробую вызвать процесс асинхронно
+        $handle = new \COM('WScript.Shell');
+        $handle->Run($file, 0, false);
+    }
+
+    public function actionCheckJava(){
+        $file = Yii::$app->basePath . '\\checkJava.bat';
+        if (is_file($file)) {
+            $command = $file . ' ' . Yii::$app->basePath;
+            $outFilePath = Yii::$app->basePath . '\\logs\\java_info.log';
+            $outErrPath = Yii::$app->basePath . '\\logs\\java_info_error.log';
+            $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
+            echo $command;
+            try {
+                // попробую вызвать процесс асинхронно
+                $handle = new \COM('WScript.Shell');
+                $handle->Run($command, 0, false);
+            } catch (Exception $e) {
+                exec($command);
+            }
+        }
     }
 }

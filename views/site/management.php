@@ -29,6 +29,8 @@ ShowLoadingAsset::register($this);
             <button class="btn btn-default activator" data-action="/management/add-backgrounds"><span>Add backgrounds</span></button>
             <button class="btn btn-default activator" data-action="/management/reset-change-check-counter"><span>Reset check counter</span></button>
             <button class="btn btn-default activator" data-action="/management/check-changes-sync"><span>Sync check changes</span></button>
+            <button class="btn btn-default activator" data-action="/management/restart-server"><span>Restart server</span></button>
+            <button class="btn btn-default activator" data-action="/management/check-java"><span>Check Java</span></button>
         </div>
     </div>
     <div class="col-sm-12">
@@ -46,13 +48,17 @@ ShowLoadingAsset::register($this);
         </div>
     </div>
     <div class="col-sm-12">
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <h3 class="text-center">Update process log</h3>
             <?=str_replace("\n", '<br/>', $updateOutputInfo)?>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <h3 class="text-center">Update errors log</h3>
             <?=str_replace("\n", '<br/>', $updateErrorsInfo)?>
+        </div>
+        <div class="col-sm-4">
+            <h3 class="text-center">Java info</h3>
+            <?=str_replace("\n", '<br/>', FileUtils::getJavaInfo())?>
         </div>
     </div>
     <div class="col-sm-12 text-center">

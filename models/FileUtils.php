@@ -119,6 +119,17 @@ class FileUtils
         }
         return 'file is empty';
     }
+    /**
+     * @return string
+     */
+    public static function getJavaInfo(): string
+    {
+        $file = Yii::$app->basePath . '\\logs\\java_info_error.log';
+        if (is_file($file)) {
+            return file_get_contents($file);
+        }
+        return 'file is empty';
+    }
 
     /**
      * @return string
