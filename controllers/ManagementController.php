@@ -6,6 +6,7 @@ namespace app\controllers;
 
 use app\models\FileUtils;
 use app\models\utils\Management;
+use app\models\utils\TimeHandler;
 use Exception;
 use Yii;
 use yii\filters\AccessControl;
@@ -72,6 +73,7 @@ class ManagementController extends Controller
      */
     public function actionCheckChanges()
     {
+        FileUtils::writeUpdateLog('try to start : ' . TimeHandler::timestampToDate(time()));
        return Management::handleChanges();
     }
 
