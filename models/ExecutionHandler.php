@@ -247,7 +247,12 @@ class ExecutionHandler extends Model
                             // если это не дублирующее заключение
                             if (empty(strpos($filePureName, '-'))) {
                                 echo TimeHandler::timestampToDate(time()) . "check user $filePureName\n";
-                                self::checkUser(GrammarHandler::getBaseFileName($filePureName));
+                                try{
+                                    self::checkUser(GrammarHandler::getBaseFileName($filePureName));
+                                }
+                                catch (\Exception $e){
+                                    echo 'ERROR WHEN CHECK USER ' . $e->getMessage();
+                                }
                             }
                             // если файл не соответствует строгому шаблону
                             if ($file !== $filePureName) {
