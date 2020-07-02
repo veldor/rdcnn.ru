@@ -279,7 +279,7 @@ class ExecutionHandler extends Model
 
         echo 'check conclusions actuality';
 
-        // теперь проверю актуальность данных по доступности заключений
+        /*// теперь проверю актуальность данных по доступности заключений
         $conclusionsDir = Info::CONC_FOLDER;
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
             $files = array_slice(scandir($conclusionsDir), 2);
@@ -322,7 +322,7 @@ class ExecutionHandler extends Model
                     }
                 }
             }
-        }
+        }*/
     }
 
     /**
