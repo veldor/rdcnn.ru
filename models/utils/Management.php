@@ -11,10 +11,11 @@ use yii\base\Model;
 
 class Management extends Model
 {
-    public static function handleChanges():bool
+    public static function handleChanges()
     {
         // если обновление не в ходу и с последнего обновления прошло больше 10 минут- запущу его
         if(!FileUtils::isUpdateInProgress() && FileUtils::getLastUpdateTime() < (time() - 300)){
+            echo 'start check changes';
             $file = Yii::$app->basePath . '\\yii.bat';
             if(is_file($file)){
                 $command = "$file console";
@@ -34,6 +35,7 @@ class Management extends Model
             }
         }
         else{
+            echo 'timeout';
             try{
                 // запишу в файл отчётов, что ещё не пришло время для проверки
                 $outFilePath =  Yii::$app->basePath . '/logs/file.log';

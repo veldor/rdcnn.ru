@@ -70,7 +70,7 @@ class ManagementController extends Controller
     /**
      * принудительная проверка содержимого папок
      */
-    public function actionCheckChanges(): bool
+    public function actionCheckChanges()
     {
        return Management::handleChanges();
     }
