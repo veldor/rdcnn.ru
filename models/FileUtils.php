@@ -294,29 +294,6 @@ class FileUtils
             }
         }
     }
-
-    public static function addBackgrounds(): void
-    {
-        // получу все файлы в папке с заключениями и добавлю им фон
-        $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
-        if(is_dir($conclusionsDir)){
-            $files = array_slice(scandir($conclusionsDir), 2);
-            if(!empty($files && count($files) > 0)){
-                foreach ($files as $file) {
-                    if(substr($file, strlen($file) - 4) === '.pdf'){
-                        try{
-                            self::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
-                            echo "background added\n";
-                        }
-                        catch (Exception $e){
-                            echo $e->getMessage() . "\n";
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     public static function handleLoadedFile(string $loadedFile): ?array
     {
         // проверю наличие обработчика

@@ -313,11 +313,13 @@ class ExecutionHandler extends Model
                         $stat = stat($path);
                         $changeTime = $stat['mtime'];
                         if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
+                            FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
+                            $md5 = md5_file($path);
                             // отправлю новую версию файла пользователю
                             $existentFile->md5 = $md5;
                             $existentFile->file_create_time = $changeTime;
                             $existentFile->save();
-                            FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
+                            echo "add background to existent {$file}\n";
                             Viber::notifyConclusionLoaded($file);
                         }
                     } else {
@@ -327,11 +329,12 @@ class ExecutionHandler extends Model
                         $user = User::findByUsername($name);
                         if ($user !== null) {
                             // внесу информацию о файле в базу
+                            FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
                             $md5 = md5_file($path);
                             $stat = stat($path);
                             $changeTime = $stat['mtime'];
                             (new Table_availability(['file_name' => $file, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
-                            FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
+                            echo "add background to new {$file}\n";
                             // оповещу мессенджеры о наличии файла
                             Viber::notifyConclusionLoaded($file);
                         }

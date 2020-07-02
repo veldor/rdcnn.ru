@@ -93,15 +93,4 @@ class ManagementController extends Controller
             }
         }
     }
-    public function actionAddBackgrounds(): array
-    {
-        try{
-            FileUtils::addBackgrounds();
-        }
-        catch (Exception $e){
-            echo 'have exception';
-        }
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        return ['status' => 1];
-    }
 }
