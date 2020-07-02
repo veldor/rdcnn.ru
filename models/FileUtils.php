@@ -312,20 +312,44 @@ class FileUtils
     }
     public static function handleLoadedFile(string $loadedFile): ?string
     {
-        // проверю наличие обработчика
-        $handler = Yii::$app->basePath . '\\java\\docx_to_pdf_converter.jar';
-        $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
-        if(is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)){
-            $command = "\"C:\Program Files (x86)\Java\jre1.8.0_241\bin\java\" -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
-            echo $command;
-            exec($command, $result);
-            if($result === null){
-                return 'null result';
+        $existentJavaPath = null;
+        $javaPath = 'C:\Program Files (x86)\Java\jre1.8.0_241\bin\java.exe';
+        if(is_file($javaPath)){
+            echo 'founded java path ' . $javaPath;
+            $existentJavaPath = $javaPath;
+        }
+        else{
+            $javaPath = 'C:\Program Files (x86)\Java\jre1.8.0_251\bin\java.exe';
+            if(is_file($javaPath)){
+                echo 'founded java path ' . $javaPath;
+                $existentJavaPath = $javaPath;
             }
-            if(empty($result)){
-                return 'empty answer';
+            else{
+                $javaPath = 'C:\Program Files\Java\jre1.8.0_241\bin\java.exe';
+                if(is_file($javaPath)){
+                    echo 'founded java path ' . $javaPath;
+                    $existentJavaPath = $javaPath;
+                }
             }
-            return implode(' ', $result);
+        }
+
+        if($existentJavaPath !== null){
+            // проверю наличие обработчика
+            $handler = Yii::$app->basePath . '\\java\\docx_to_pdf_converter.jar';
+            $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
+            if(is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)){
+                $command = "\"$existentJavaPath\" -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
+                echo $command;
+                exec($command, $result);
+                if($result === null){
+                    return 'null result';
+                }
+                if(empty($result)){
+                    return 'empty answer';
+                }
+                return implode(' ', $result);
+        }
+
            /* if(!empty($result) && count($result) === 2){
                 // получу вторую строку результата
                 $fileName = $result[1];
@@ -336,6 +360,9 @@ class FileUtils
             if(!empty($result) && count($result) === 1){
                 return ['action_status' => GrammarHandler::convertToUTF($result[0])];
             }*/
+        }
+        else{
+            echo 'not found handler';
         }
         return null;
     }
