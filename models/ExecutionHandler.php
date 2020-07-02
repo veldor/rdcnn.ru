@@ -154,7 +154,12 @@ class ExecutionHandler extends Model
                                 echo TimeHandler::timestampToDate(time()) . "dir $entity handled and load to $path \n";
                             } else {
                                 // удалю папку
-                                self::rmRec($path);
+                                try{
+                                    self::rmRec($path);
+                                }
+                                catch (\Exception $e){
+
+                                }
                                 echo TimeHandler::timestampToDate(time()) . "dir $entity is empty and deleted \n";
                             }
 
