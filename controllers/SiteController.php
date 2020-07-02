@@ -25,7 +25,7 @@ class SiteController extends Controller
     /**
      * {@inheritdoc}
      */
-    public function behaviors():array
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -121,7 +121,7 @@ class SiteController extends Controller
         }
         // если пользователь залогинен как администратор- показываю ему страницу для скачивания
         if (Yii::$app->user->can('manage')) {
-            if($executionNumber !== null){
+            if ($executionNumber !== null) {
                 // получу информацию о обследовании
                 $execution = User::findByUsername($executionNumber);
                 if ($execution !== null) {
@@ -153,15 +153,15 @@ class SiteController extends Controller
         Management::handleChanges();
         // если пользователь не залогинен- показываю ему страницу с предложением ввести номер обследования и пароль
         if (Yii::$app->user->isGuest) {
-            if(Yii::$app->request->isGet){
+            if (Yii::$app->request->isGet) {
                 $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
                 return $this->render('administrationLogin', ['model' => $model]);
             }
-            if(Yii::$app->request->isPost){
+            if (Yii::$app->request->isPost) {
                 // попробую залогинить
                 $model = new LoginForm(['scenario' => LoginForm::SCENARIO_ADMIN_LOGIN]);
                 $model->load(Yii::$app->request->post());
-                if($model->loginAdmin()){
+                if ($model->loginAdmin()) {
                     // загружаю страницу управления
                     return $this->redirect('iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
                 }
@@ -175,7 +175,7 @@ class SiteController extends Controller
             // очищу неиспользуемые данные
             //AdministratorActions::clearGarbage();
             $this->layout = 'administrate';
-            if(Yii::$app->request->isPost){
+            if (Yii::$app->request->isPost) {
                 // выбор центра, обследования которого нужно отображать
                 AdministratorActions::selectCenter();
                 AdministratorActions::selectTime();
@@ -215,10 +215,9 @@ class SiteController extends Controller
      */
     public function actionAvailabilityCheck(): array
     {
-        try{
+        try {
             Management::handleChanges();
-        }
-        catch (\Exception $e){
+        } catch (\Exception $e) {
 
         }
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -231,14 +230,14 @@ class SiteController extends Controller
      */
     public function actionCheck(): void
     {
-        try{
+        try {
             Management::handleChanges();
+            ExecutionHandler::check();
+        } catch (\Exception $e) {
         }
-        catch (\Exception $e){}
-        ExecutionHandler::check();
     }
 
-    public function actionManagement():string
+    public function actionManagement(): string
     {
         $updateInfo = FileUtils::getUpdateInfo();
         $outputInfo = FileUtils::getOutputInfo();

@@ -26,6 +26,11 @@ use yii\console\ExitCode;
  */
 class ConsoleController extends Controller
 {
+    public function init()
+    {
+        defined('YII_DEBUG') or define('YII_DEBUG', true);
+        defined('YII_ENV') or define('YII_ENV', 'dev');
+    }
 
     /**
      * This command load data from Gdrive and handle changes
