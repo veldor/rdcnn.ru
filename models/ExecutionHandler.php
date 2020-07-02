@@ -185,11 +185,13 @@ class ExecutionHandler extends Model
                         if ($user !== null) {
                             if ($existentFile !== null) {
                                 // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
-                                $md5 = md5_file($path);
+                                //$md5 = md5_file($path);
                                 $stat = stat($path);
                                 $changeTime = $stat['mtime'];
-                                if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
+                                if ($changeTime !== $existentFile->file_create_time) {
+                                //if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
                                     // отправлю новую версию файла пользователю
+                                    $md5 = md5_file($path);
                                     $existentFile->md5 = $md5;
                                     $existentFile->file_create_time = $changeTime;
                                     $existentFile->save();
