@@ -58,7 +58,7 @@ class ConsoleController extends Controller
             }
             // теперь обработаю изменения
             try {
-                //ExecutionHandler::check();
+                ExecutionHandler::check();
             } catch (\Exception $e) {
                 echo "error handling changes with message {$e->getMessage()}";
                 echo $e->getTraceAsString();

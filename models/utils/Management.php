@@ -14,7 +14,7 @@ class Management extends Model
     public static function handleChanges()
     {
         // если обновление не в ходу и с последнего обновления прошло больше 10 минут- запущу его
-        if(!FileUtils::isUpdateInProgress() && FileUtils::getLastUpdateTime() < (time() - 300)){
+        if(!FileUtils::isUpdateInProgress() && FileUtils::getLastUpdateTime() < (time() - 60)){
             $file = Yii::$app->basePath . '\\yii.bat';
             if(is_file($file)){
                 $command = "$file console";
