@@ -294,7 +294,7 @@ class FileUtils
             }
         }
     }
-    public static function handleLoadedFile(string $loadedFile): ?array
+    public static function handleLoadedFile(string $loadedFile): ?string
     {
         // проверю наличие обработчика
         $handler = Yii::$app->basePath . '\\java\\docx_to_pdf_converter.jar';
@@ -302,7 +302,14 @@ class FileUtils
         if(is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)){
             $command = "java -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
             exec($command, $result);
-            if(!empty($result) && count($result) === 2){
+            if($result === null){
+                return 'null result';
+            }
+            if(empty($result)){
+                return 'empty answer';
+            }
+            return implode(' ', $result);
+           /* if(!empty($result) && count($result) === 2){
                 // получу вторую строку результата
                 $fileName = $result[1];
                 if(substr($fileName, strlen($fileName) - 4) === '.pdf'){
@@ -311,7 +318,7 @@ class FileUtils
             }
             if(!empty($result) && count($result) === 1){
                 return ['action_status' => GrammarHandler::convertToUTF($result[0])];
-            }
+            }*/
         }
         return null;
     }
@@ -345,7 +352,9 @@ class FileUtils
         if($actionResult === null){
             return 'Ошибка обработки файла, попробуйте позднее';
         }
-        if(count($actionResult) === 1){
+
+        return $actionResult;
+        /*if(count($actionResult) === 1){
             return 'Ошибка: ' . $actionResult['action_status'];
         }
         if(count($actionResult) === 2){
@@ -367,7 +376,7 @@ class FileUtils
                 }
                 return $actionResult['action_status'];
             }
-        }
+        }*/
         return 'Не удалось обработать файл';
     }
 }
