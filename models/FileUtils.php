@@ -315,19 +315,19 @@ class FileUtils
         $existentJavaPath = null;
         $javaPath = 'C:\Program Files (x86)\Java\jre1.8.0_241\bin\java.exe';
         if(is_file($javaPath)){
-            echo 'founded java path ' . $javaPath;
+            echo 'founded java path ' . $javaPath . "\n";
             $existentJavaPath = $javaPath;
         }
         else{
             $javaPath = 'C:\Program Files (x86)\Java\jre1.8.0_251\bin\java.exe';
             if(is_file($javaPath)){
-                echo 'founded java path ' . $javaPath;
+                echo 'founded java path ' . $javaPath . "\n";
                 $existentJavaPath = $javaPath;
             }
             else{
                 $javaPath = 'C:\Program Files\Java\jre1.8.0_241\bin\java.exe';
                 if(is_file($javaPath)){
-                    echo 'founded java path ' . $javaPath;
+                    echo 'founded java path ' . $javaPath . "\n";
                     $existentJavaPath = $javaPath;
                 }
             }
