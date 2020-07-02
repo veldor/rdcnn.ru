@@ -146,7 +146,6 @@ class AdministratorController extends Controller
      */
     public function actionPatientsCheck(): array
     {
-        $isCheckStarted = 0;
         try{
             $isCheckStarted = Management::handleChanges();
         }
