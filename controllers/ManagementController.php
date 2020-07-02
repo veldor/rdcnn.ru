@@ -103,7 +103,8 @@ class ManagementController extends Controller
     }
 
     public function actionCheckChangesSync(){
-        echo 'here';
+        defined('YII_DEBUG') or define('YII_DEBUG', true);
+        defined('YII_ENV') or define('YII_ENV', 'dev');
         $file = Yii::$app->basePath . '\\yii.bat';
         $command = "$file console";
         exec($command, $output);
