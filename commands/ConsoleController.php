@@ -67,7 +67,11 @@ class ConsoleController extends Controller
             echo TimeHandler::timestampToDate(time()) . "Finish changes handle\n";
             FileUtils::writeUpdateLog('finish : ' . TimeHandler::timestampToDate(time()));
             FileUtils::setLastUpdateTime();
-        } finally {
+        }
+        catch (\Exception $e){
+            FileUtils::writeUpdateLog('error when handle changes : ' . $e->getMessage());
+        }
+        finally {
             FileUtils::setUpdateFinished();
         }
         return ExitCode::OK;
