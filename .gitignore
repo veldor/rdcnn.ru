@@ -39,3 +39,6 @@ public_html/logs/
 /vagrant/
 /runtime/
 /errors/errors.txt
+/public_html/
+temp/
+!/public_html/index.php

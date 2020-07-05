@@ -143,24 +143,29 @@ class ManagementController extends Controller
 
     public function actionSendMail()
     {
-        $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
-        // получу данные
-        $content = file_get_contents($settingsFile);
-        $settingsArray = mb_split("\n", $content);
-        if (count($settingsArray) === 3) {
-            // получу текст письма
-            $text = 'test';
-            // отправлю письмо
-            $mail = Yii::$app->mailer->compose()
-                ->setFrom([MailSettings::getInstance()->address => 'Ошибки сервера РДЦ'])
-                ->setSubject('Найдены новые ошибки')
-                ->setHtmlBody($text)
-                ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
-            // попробую отправить письмо, в случае ошибки- вызову исключение
-            echo $mail->send();
+        try{
+            $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
+            // получу данные
+            $content = file_get_contents($settingsFile);
+            $settingsArray = mb_split("\n", $content);
+            if (count($settingsArray) === 3) {
+                // получу текст письма
+                $text = 'test';
+                // отправлю письмо
+                $mail = Yii::$app->mailer->compose()
+                    ->setFrom([MailSettings::getInstance()->address => 'Ошибки сервера РДЦ'])
+                    ->setSubject('Найдены новые ошибки')
+                    ->setHtmlBody($text)
+                    ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
+                // попробую отправить письмо, в случае ошибки- вызову исключение
+                echo $mail->send();
+            }
+            else{
+                echo 'no mail settings';
+            }
         }
-        else{
-            echo 'no mail settings';
+        catch (Exception $e){
+            echo $e->getMessage();
         }
     }
 }
