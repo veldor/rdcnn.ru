@@ -5,6 +5,7 @@ namespace app\controllers;
 
 
 use app\models\FileUtils;
+use app\models\utils\MailSettings;
 use app\models\utils\Management;
 use app\models\utils\TimeHandler;
 use Exception;
@@ -34,6 +35,7 @@ class ManagementController extends Controller
                             'check-changes-sync',
                             'check-java',
                             'restart-server',
+                            'send-mail',
                             'add-backgrounds'
                         ],
                         'roles' => [
@@ -76,7 +78,7 @@ class ManagementController extends Controller
     public function actionCheckChanges()
     {
         FileUtils::writeUpdateLog('try to start : ' . TimeHandler::timestampToDate(time()));
-        FileUtils::writeUpdateLog('result is  : ' .  Management::handleChanges());
+        FileUtils::writeUpdateLog('result is  : ' . Management::handleChanges());
     }
 
     public function actionUpdateDependencies()
@@ -104,21 +106,24 @@ class ManagementController extends Controller
         FileUtils::setUpdateFinished();
     }
 
-    public function actionCheckChangesSync(){
+    public function actionCheckChangesSync()
+    {
         $file = Yii::$app->basePath . '\\yii.bat';
         $command = "$file console";
         exec($command, $output);
         var_dump($output);
     }
 
-    public function actionRestartServer(){
+    public function actionRestartServer()
+    {
         $file = Yii::$app->basePath . '\\restartServer.bat';
         // попробую вызвать процесс асинхронно
         $handle = new \COM('WScript.Shell');
         $handle->Run($file, 0, false);
     }
 
-    public function actionCheckJava(){
+    public function actionCheckJava()
+    {
         $file = Yii::$app->basePath . '\\checkJava.bat';
         if (is_file($file)) {
             $command = $file . ' ' . Yii::$app->basePath;
@@ -133,6 +138,29 @@ class ManagementController extends Controller
             } catch (Exception $e) {
                 exec($command);
             }
+        }
+    }
+
+    public function actionSendMail()
+    {
+        $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
+        // получу данные
+        $content = file_get_contents($settingsFile);
+        $settingsArray = mb_split("\n", $content);
+        if (count($settingsArray) === 3) {
+            // получу текст письма
+            $text = 'test';
+            // отправлю письмо
+            $mail = Yii::$app->mailer->compose()
+                ->setFrom([MailSettings::getInstance()->address => 'Ошибки сервера РДЦ'])
+                ->setSubject('Найдены новые ошибки')
+                ->setHtmlBody($text)
+                ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
+            // попробую отправить письмо, в случае ошибки- вызову исключение
+            echo $mail->send();
+        }
+        else{
+            echo 'no mail settings';
         }
     }
 }

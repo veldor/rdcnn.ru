@@ -31,6 +31,7 @@ ShowLoadingAsset::register($this);
             <button class="btn btn-default activator" data-action="/management/check-changes-sync"><span>Sync check changes</span></button>
             <button class="btn btn-default activator" data-action="/management/restart-server"><span>Restart server</span></button>
             <button class="btn btn-default activator" data-action="/management/check-java"><span>Check Java</span></button>
+            <button class="btn btn-default activator" data-action="/management/send-mail"><span>Send test mail</span></button>
         </div>
     </div>
     <div class="col-sm-12">
