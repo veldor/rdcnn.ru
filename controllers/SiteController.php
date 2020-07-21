@@ -225,8 +225,6 @@ class SiteController extends Controller
     }
 
     /**
-     * @throws Exception
-     * @throws \yii\db\Exception
      */
     public function actionCheck(): void
     {

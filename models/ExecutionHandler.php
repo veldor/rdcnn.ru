@@ -207,6 +207,12 @@ class ExecutionHandler extends Model
                                 Viber::notifyExecutionLoaded($user->username);
                             }
                         }
+                        else{
+                            // если нет связанной учётной записи- удалю файл
+                            echo TimeHandler::timestampToDate(time()) . " delete zip $entity with no account bind\n";
+                            // удалю файл
+                            self::rmRec($path);
+                        }
                     }
                 }
             }

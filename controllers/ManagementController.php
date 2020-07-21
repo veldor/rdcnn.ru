@@ -141,7 +141,7 @@ class ManagementController extends Controller
         }
     }
 
-    public function actionSendMail()
+    public function actionSendMail(): void
     {
         try{
             $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
