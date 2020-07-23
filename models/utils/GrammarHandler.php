@@ -45,4 +45,9 @@ class GrammarHandler
     {
         return iconv('windows-1251', 'utf-8', $text);
     }
+
+    public static function getFileName(string $answer)
+    {
+        return substr($answer, strripos($answer, '\\'));
+    }
 }

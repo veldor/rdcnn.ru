@@ -5,6 +5,7 @@ namespace app\models;
 
 
 use app\models\database\ViberPersonalList;
+use app\models\utils\GrammarHandler;
 use app\priv\Info;
 use Exception;
 use TelegramBot\Api\BotApi;
@@ -110,11 +111,10 @@ class Telegram
                                     $answer = FileUtils::handleFileUpload($path);
                                     $file = new \CURLFile($answer, 'application/pdf', 'conclusion.pdf');
                                     if(is_file($answer)){
-                                        $bot->sendMessage($message->getChat()->getId(), $answer);
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
                                             $file,
-                                            'conclusion.pdf'
+                                            GrammarHandler::getFileName($answer)
                                         );
                                     }
                                     else{
@@ -136,11 +136,10 @@ class Telegram
                                     $answer = FileUtils::handleFileUpload($path);
                                     $file = new \CURLFile($answer, 'application/pdf', 'conclusion.pdf');
                                     if(is_file($answer)){
-                                        $bot->sendMessage($message->getChat()->getId(), $answer);
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
                                             $file,
-                                            'conclusion.pdf'
+                                            GrammarHandler::getFileName($answer)
                                         );
                                     }
                                     else{
