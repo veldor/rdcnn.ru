@@ -109,7 +109,7 @@ class Telegram
                                 $path = FileUtils::saveTempFile($downloadedFile, '.pdf');
                                 if(is_file($path)){
                                     $answer = FileUtils::handleFileUpload($path);
-                                    $file = new \CURLFile($answer, 'application/pdf', 'conclusion.pdf');
+                                    $file = new \CURLFile($answer, 'application/pdf', GrammarHandler::getFileName($answer));
                                     if(is_file($answer)){
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
@@ -134,7 +134,7 @@ class Telegram
                                 $path = FileUtils::saveTempFile($downloadedFile, '.docx');
                                 if(is_file($path)){
                                     $answer = FileUtils::handleFileUpload($path);
-                                    $file = new \CURLFile($answer, 'application/pdf', 'conclusion.pdf');
+                                    $file = new \CURLFile($answer, 'application/pdf', GrammarHandler::getFileName($answer));
                                     if(is_file($answer)){
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
