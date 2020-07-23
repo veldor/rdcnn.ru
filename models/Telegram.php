@@ -113,7 +113,7 @@ class Telegram
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
                                             $answer,
-                                            'заключение.pdf'
+                                            'conclusion.pdf'
                                         );
                                     }
                                     else{
@@ -138,7 +138,7 @@ class Telegram
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
                                             $answer,
-                                            'заключение.pdf'
+                                            'conclusion.pdf'
                                         );
                                     }
                                     else{
