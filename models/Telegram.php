@@ -108,11 +108,12 @@ class Telegram
                                 $path = FileUtils::saveTempFile($downloadedFile, '.pdf');
                                 if(is_file($path)){
                                     $answer = FileUtils::handleFileUpload($path);
+                                    $file = new \CURLFile($answer, 'application/pdf', 'conclusion.pdf');
                                     if(is_file($answer)){
                                         $bot->sendMessage($message->getChat()->getId(), $answer);
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
-                                            $answer,
+                                            $file,
                                             'conclusion.pdf'
                                         );
                                     }
