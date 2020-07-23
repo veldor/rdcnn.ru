@@ -48,6 +48,6 @@ class GrammarHandler
 
     public static function getFileName(string $answer)
     {
-        return substr($answer, strripos($answer, '\\'));
+        return substr($answer, strripos($answer, '\\') + 1);
     }
 }
