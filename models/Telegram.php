@@ -109,9 +109,10 @@ class Telegram
                                 if(is_file($path)){
                                     $answer = FileUtils::handleFileUpload($path);
                                     if(is_file($answer)){
+                                        $bot->sendMessage($message->getChat()->getId(), $answer);
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
-                                            file_get_contents($answer),
+                                            $answer,
                                             'заключение.pdf'
                                         );
                                     }
@@ -133,9 +134,10 @@ class Telegram
                                 if(is_file($path)){
                                     $answer = FileUtils::handleFileUpload($path);
                                     if(is_file($answer)){
+                                        $bot->sendMessage($message->getChat()->getId(), $answer);
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
-                                            file_get_contents($answer),
+                                            $answer,
                                             'заключение.pdf'
                                         );
                                     }
