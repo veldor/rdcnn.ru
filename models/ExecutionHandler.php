@@ -208,10 +208,14 @@ class ExecutionHandler extends Model
                             }
                         }
                         else{
-                            // если нет связанной учётной записи- удалю файл
-                            echo TimeHandler::timestampToDate(time()) . " delete zip $entity with no account bind\n";
-                            // удалю файл
-                            self::rmRec($path);
+                            $stat = stat($path);
+                            $changeTime = $stat['mtime'];
+                            if(time() > $changeTime + Info::DATA_SAVING_TIME){
+                                // если нет связанной учётной записи- удалю файл
+                                echo TimeHandler::timestampToDate(time()) . " delete zip $entity with no account bind\n";
+                                // удалю файл
+                                self::rmRec($path);
+                            }
                         }
                     }
                 }
