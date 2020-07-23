@@ -111,7 +111,8 @@ class Telegram
                                     if(is_file($answer)){
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
-                                            $answer
+                                            file_get_contents($answer),
+                                            'заключение.pdf'
                                         );
                                     }
                                     else{
@@ -134,7 +135,8 @@ class Telegram
                                     if(is_file($answer)){
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
-                                            $answer
+                                            file_get_contents($answer),
+                                            'заключение.pdf'
                                         );
                                     }
                                     else{
