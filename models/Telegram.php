@@ -107,7 +107,16 @@ class Telegram
                                 // сохраню полученный файл во временную папку
                                 $path = FileUtils::saveTempFile($downloadedFile, '.pdf');
                                 if(is_file($path)){
-                                    $bot->sendMessage($message->getChat()->getId(), FileUtils::handleFileUpload($path));
+                                    $answer = FileUtils::handleFileUpload($path);
+                                    if(is_file($answer)){
+                                        $bot->sendDocument(
+                                            $message->getChat()->getId(),
+                                            $answer
+                                        );
+                                    }
+                                    else{
+                                        $bot->sendMessage($message->getChat()->getId(), $answer);
+                                    }
                                 }
                             }
                         }
@@ -121,7 +130,16 @@ class Telegram
                                 // сохраню полученный файл во временную папку
                                 $path = FileUtils::saveTempFile($downloadedFile, '.docx');
                                 if(is_file($path)){
-                                    $bot->sendMessage($message->getChat()->getId(), FileUtils::handleFileUpload($path));
+                                    $answer = FileUtils::handleFileUpload($path);
+                                    if(is_file($answer)){
+                                        $bot->sendDocument(
+                                            $message->getChat()->getId(),
+                                            $answer
+                                        );
+                                    }
+                                    else{
+                                        $bot->sendMessage($message->getChat()->getId(), $answer);
+                                    }
                                     unlink($path);
                                 }
                             }

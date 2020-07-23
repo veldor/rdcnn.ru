@@ -405,7 +405,7 @@ class FileUtils
                     $md5 = md5_file($path);
                     (new Table_availability(['file_name' => $conclusionFile, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]))->save();
                 }
-                return $actionResult['action_status'] . ' ' . $actionResult['filename'];
+                return $path;
             }
         }
         return 'Не удалось обработать файл';
