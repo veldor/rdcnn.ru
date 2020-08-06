@@ -113,8 +113,7 @@ class Telegram
                                     if(is_file($answer)){
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
-                                            $file,
-                                            GrammarHandler::getFileName($answer)
+                                            $file
                                         );
                                     }
                                     else{
@@ -138,8 +137,7 @@ class Telegram
                                     if(is_file($answer)){
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
-                                            $file,
-                                            GrammarHandler::getFileName($answer)
+                                            $file
                                         );
                                     }
                                     else{

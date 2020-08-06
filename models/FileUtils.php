@@ -5,6 +5,7 @@ namespace app\models;
 
 
 use app\models\utils\GrammarHandler;
+use app\priv\Info;
 use Exception;
 use RuntimeException;
 use setasign\Fpdi\Fpdi;
@@ -330,15 +331,23 @@ class FileUtils
                     echo 'founded java path ' . $javaPath . "\n";
                     $existentJavaPath = $javaPath;
                 }
+                else{
+                    $javaPath = 'C:\Program Files\Java\jre1.8.0_261\bin\java.exe';
+                    if (is_file($javaPath)) {
+                        echo 'founded java path ' . $javaPath . "\n";
+                        $existentJavaPath = $javaPath;
+                    }
+                }
             }
         }
 
         if ($existentJavaPath !== null) {
             // проверю наличие обработчика
             $handler = Yii::$app->basePath . '\\java\\docx_to_pdf_converter.jar';
-            $conclusionsDir = Yii::getAlias('@conclusionsDirectory');
+            $conclusionsDir = Info::CONC_FOLDER;
             if (is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)) {
                 $command = "\"$existentJavaPath\" -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
+                echo $command . "\n";
                 exec($command, $result);
                 if (!empty($result) && count($result) === 2) {
                     // получу вторую строку результата
@@ -391,7 +400,7 @@ class FileUtils
         if (count($actionResult) === 2) {
             // добавлю фон заключению
             $conclusionFile = $actionResult['filename'];
-            $path = Yii::getAlias('@conclusionsDirectory') . '\\' . $conclusionFile;
+            $path = Info::CONC_FOLDER . '\\' . $conclusionFile;
             if (is_file($path)) {
                 self::addBackgroundToPDF($path);
                 // если создан новый файл- зарегистрирую его доступность

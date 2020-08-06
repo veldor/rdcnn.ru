@@ -4,6 +4,7 @@
 namespace app\models\utils;
 
 
+use app\models\FileUtils;
 use app\priv\Info;
 use Google_Client;
 use Google_Exception;
@@ -11,8 +12,8 @@ use Google_Service_Drive;
 use Google_Service_Drive_DriveFile;
 use GuzzleHttp\Psr7\Response;
 use RuntimeException;
+use Yii;
 use yii\console\Exception;
-use function GuzzleHttp\Psr7\str;
 
 class Gdrive
 {
@@ -23,6 +24,11 @@ class Gdrive
      */
     public static function check(): void
     {
+        // проверю существование временной папки для заключений
+        $tempCloudFolder = Yii::$app->basePath . '\\cloud_tmp';
+        if (!is_dir($tempCloudFolder)) {
+            mkdir($tempCloudFolder);
+        }
         $client = self::getClient();
         if ($client !== null) {
             echo TimeHandler::timestampToDate(time()) . "Having client\n";
@@ -50,6 +56,9 @@ class Gdrive
             }
             echo "All files load from Gdrive\n";
         }
+        else{
+            echo "No client\n";
+        }
     }
 
     /**
@@ -68,7 +77,7 @@ class Gdrive
         $client->setPrompt('select_account consent');
 
         // Load previously authorized token from a file, if it exists.
-        // The file token.json.bk stores the user's access and refresh tokens, and is
+        // The file token.json stores the user's access and refresh tokens, and is
         // created automatically when the authorization flow completes for the first
         // time.
         $tokenPath = dirname(__DIR__) . '\\..\\priv\\token.json';
@@ -122,8 +131,29 @@ class Gdrive
                     echo TimeHandler::timestampToDate(time()) . "handle file {$file->getName()}\n";
                     echo 'saving ' . $file->getName() . "\n";
                     $content = $response->getBody()->getContents();
-                    file_put_contents(Info::CONC_FOLDER . '\\' . $file->getName(), $content);
-                    // удалю файл с диска
+                    $path = Yii::$app->basePath . '\\cloud_tmp' . '\\' . $file->getName();
+                    file_put_contents(Yii::$app->basePath . '/cloud_tmp' . '/' . $file->getName(), $content);
+                    // обработаю файл
+                    if (is_file($path)) {
+                        echo "$path \n";
+                        try {
+                            $answer = FileUtils::handleFileUpload($path);
+                            echo $answer . "\n";
+                            if (!is_file($answer)) {
+                                echo "not converted {$fileName}\n";
+                                rename($path, Info::CONC_FOLDER . '/' . $file->getName());
+                            } else {
+                                echo "converted {$fileName}\n";
+                                if(is_file($path)){
+                                    unlink($path);
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            echo "Исключение: " . $e->getMessage() . "\n";
+                            echo $e->getTraceAsString();
+                        }
+                    }
+                    // удалю файл с облачного диска
                     $service->files->delete($file->getId());
                 }
             }
