@@ -147,6 +147,31 @@ class Telegram
                                 }
                             }
                         }
+                        else if($mime === 'application/msword'){
+                            $bot->sendMessage($message->getChat()->getId(), 'обрабатываю DOC');
+                            $file = $bot->getFile($document->getFileId());
+                            // в строке- содержимое файла
+                            $downloadedFile = $bot->downloadFile($file->getFileId());
+                            if(!empty($downloadedFile) && $downloadedFile !== ''){
+                                // файл получен
+                                // сохраню полученный файл во временную папку
+                                $path = FileUtils::saveTempFile($downloadedFile, '.doc');
+                                if(is_file($path)){
+                                    $answer = FileUtils::handleFileUpload($path);
+                                    $file = new \CURLFile($answer, 'application/pdf', GrammarHandler::getFileName($answer));
+                                    if(is_file($answer)){
+                                        $bot->sendDocument(
+                                            $message->getChat()->getId(),
+                                            $file
+                                        );
+                                    }
+                                    else{
+                                        $bot->sendMessage($message->getChat()->getId(), $answer);
+                                    }
+                                    unlink($path);
+                                }
+                            }
+                        }
                         else{
                             $bot->sendMessage($message->getChat()->getId(), 'Я понимаю только файлы в формате PDF и DOCX');
                         }
