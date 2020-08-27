@@ -68,6 +68,7 @@ class SiteController extends Controller
                         'allow' => true,
                         'actions' => [
                             'management',
+                            'test'
                         ],
                         'roles' => [
                             'manager'
@@ -192,6 +193,10 @@ class SiteController extends Controller
 
 // редирект на главную
         return $this->redirect('site/index', 301);
+    }
+
+    public function actionTest(){
+        FileUtils::handleFileUpload('C:\test\test.docx');
     }
 
 
