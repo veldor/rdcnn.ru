@@ -360,7 +360,7 @@ class FileUtils
                 if (!empty($result) && count($result) === 1) {
                     return ['action_status' => GrammarHandler::convertToUTF($result[0])];
                 }
-                return ['action_status' => GrammarHandler::convertToUTF($result)];
+                return ['action_status' => GrammarHandler::convertToUTF(serialize($result))];
             }
         }
         return $result;
