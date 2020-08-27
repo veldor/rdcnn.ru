@@ -361,7 +361,7 @@ class FileUtils
                 }
             }
         }
-        return null;
+        return $result;
     }
 
     /**
