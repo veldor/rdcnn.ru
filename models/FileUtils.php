@@ -328,8 +328,7 @@ class FileUtils
                 $javaPath = 'C:\Program Files\Java\jre1.8.0_241\bin\java.exe';
                 if (is_file($javaPath)) {
                     $existentJavaPath = $javaPath;
-                }
-                else{
+                } else {
                     $javaPath = 'C:\Program Files\Java\jre1.8.0_261\bin\java.exe';
                     if (is_file($javaPath)) {
                         $existentJavaPath = $javaPath;
@@ -402,16 +401,14 @@ class FileUtils
             if (is_file($path)) {
                 self::addBackgroundToPDF($path);
                 // если создан новый файл- зарегистрирую его доступность
-                if ($actionResult['action_status'] === 'Добавлено дополнительное заключение' || $actionResult['action_status'] === 'Заключение добавлено') {
-                    $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
-                    if ($user === null) {
-                        // создам учётную запись
-                        ExecutionHandler::createUser(GrammarHandler::getBaseFileName($conclusionFile));
-                    }
-                    $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
-                    $md5 = md5_file($path);
-                    (new Table_availability(['file_name' => $conclusionFile, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]))->save();
+                $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
+                if ($user === null) {
+                    // создам учётную запись
+                    ExecutionHandler::createUser(GrammarHandler::getBaseFileName($conclusionFile));
                 }
+                $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
+                $md5 = md5_file($path);
+                (new Table_availability(['file_name' => $conclusionFile, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]))->save();
                 return $path;
             }
         }

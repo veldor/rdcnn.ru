@@ -83,6 +83,21 @@ AppAsset::register($this);
     </div>
 </footer>
 
+
+<div id="dragContainer" style="display: none;">
+    <div class="col-sm-8 col-sm-offset-2">
+        <h1 class="text-center drag-hint">Бросьте файл сюда</h1>
+        <div class="col-sm-12 text-center arrow-container">
+            <div class="arrow">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <div id="dragContainerDropArea"></div>
+</div>
+
 <?php $this->endBody() ?>
 </body>
 </html>

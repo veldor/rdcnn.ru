@@ -184,7 +184,7 @@ function normalReload() {
 }
 
 function showWaiter() {
-    let shader = $('<div class="shader"></div>');
+    let shader = $('<div class="shader"><div class="col-sm-12 text-center shader-status"></div></div>');
     $('body').append(shader).css({'overflow': 'hidden'});
 
     $('div.wrap, div.flyingSumm, div.modal').addClass('blured');

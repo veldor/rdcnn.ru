@@ -8,6 +8,7 @@ use app\models\FileUtils;
 use app\models\LoginForm;
 use app\models\User;
 use app\models\Utils;
+use app\models\utils\DicomHandler;
 use app\models\utils\GrammarHandler;
 use app\models\utils\Management;
 use app\priv\Info;
@@ -196,7 +197,8 @@ class SiteController extends Controller
     }
 
     public function actionTest(){
-        FileUtils::handleFileUpload('C:\test\test.docx');
+        // попробую получить информацию о DICOM
+        DicomHandler::readInfoFromDicomdir();
     }
 
 

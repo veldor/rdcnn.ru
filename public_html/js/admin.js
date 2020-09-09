@@ -14,10 +14,9 @@ function handleLoader(element) {
         if ($(this).val()) {
             let form = element.parents('form');
             // отправлю файл на сервер
-            if($(this).hasClass('addConclusion')){
+            if ($(this).hasClass('addConclusion')) {
                 sendAjaxWithFile('/administrator/add-conclusion', simpleAnswerHandler, form);
-            }
-            else if($(this).hasClass('addExecution')){
+            } else if ($(this).hasClass('addExecution')) {
                 sendAjaxWithFile('/administrator/add-execution-data', simpleAnswerHandler, form);
             }
         }
@@ -76,6 +75,162 @@ function handleActivator(element) {
 }
 
 
+function sendFiles(location, files, totalLength) {
+    function msToTime(s) {
+        var ms = s % 1000;
+        s = (s - ms) / 1000;
+        var secs = s % 60;
+        s = (s - secs) / 60;
+        var mins = s % 60;
+        var hrs = (s - mins) / 60;
+
+        return hrs + 'ч ' + mins + 'м ' + secs + 'с';
+    }
+
+    let startTime = new Date().getTime();
+    let totalLoaded = 0;
+    let lastFileSize = 0;
+    showWaiter();
+    dangerReload();
+    let shaderStatus = $('div.shader-status');
+    shaderStatus.html("Отправка файла 1 из " + files.length + "<br/> Завершено 0%<br/> Не перезагружайте страницу до завершения процесса");
+    let counter = 0;
+    let file = files[counter];
+    lastFileSize = file.size;
+    ++counter;
+    // буду по очереди отправлять файлы
+    let xhr = new XMLHttpRequest();
+    xhr.upload.addEventListener('progress', uploadProgress, false);
+    xhr.onreadystatechange = stateChange;
+    xhr.open('POST', location);
+    var fd = new FormData
+    fd.append("file", file)
+    xhr.send(fd)
+
+    function uploadProgress(event) {
+        let percent = parseInt((event.loaded + totalLoaded) / totalLength * 100);
+        // подсчитаю примерное оставшееся время для загрузки
+        // определю, за какое время загружается 1%
+        let now = new Date().getTime();
+        let timeDifference = now - startTime;
+        let perPercent = timeDifference / percent;
+        let spendedPercents = 100 - percent;
+        let spendMillis = spendedPercents * perPercent;
+        let time = msToTime(parseInt(spendMillis));
+        shaderStatus.html("Отправка файла " + counter + " из " + files.length + "<br/> Завершено " + percent + "%<br/>Приблизительное время до завершения " + time + "<br/>Не перезагружайте страницу до завершения процесса");
+    }
+
+    function stateChange(event) {
+        if (event.target.readyState == 4) {
+            if (event.target.status == 200) {
+                console.log(event);
+                // проверю, если загружены все файлы- покажу уведомление об успешной загрузке, иначе- гружу следующий файл
+                if(counter === files.length){
+                    deleteWaiter();
+                    normalReload();
+                    makeInformer(
+                        "success",
+                        "Добавление файлов",
+                        "Все файлы загружены!"
+                    );
+                }
+                else{
+                    totalLoaded += lastFileSize;
+                    // гружу следующий файл
+                    file = files[counter];
+                    lastFileSize = file.size;
+                    ++counter;
+                    let xhr = new XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', uploadProgress, false);
+                    xhr.onreadystatechange = stateChange;
+                    xhr.open('POST', location);
+                    var fd = new FormData
+                    fd.append("file", file)
+                    xhr.send(fd)
+                }
+            } else {
+                // ошибка загрузки
+                deleteWaiter();
+                normalReload();
+                makeInformer(
+                    "danger",
+                    "Добавление файлов",
+                    "Не удалось загрузить файл, попробуйте позднее"
+                );
+            }
+        }
+    }
+}
+
+function handleDragDrop() {
+    $("html").on("dragover", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(this).addClass('dragging');
+    }).on("dragleave", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(this).removeClass('dragging');
+    });
+    let dragContainer = $('div#dragContainer');
+    let dragContainerDropArea = $('div#dragContainerDropArea');
+    dragContainerDropArea
+        .on('dragleave', function () {
+            $('div#mainWrap').removeClass("blured");
+            dragContainer.hide();
+            return false;
+        })
+        .on('drop', function (e) {
+            $('div#mainWrap').removeClass("blured");
+            dragContainer.hide();
+            e.preventDefault();
+            if (e.originalEvent.dataTransfer.files.length > 0) {
+                let totalFilesLength = 0;
+                // проверю файлы
+                for (let counter = 0; counter < e.originalEvent.dataTransfer.files.length; counter++) {
+                    let file = e.originalEvent.dataTransfer.files[counter];
+                    // проверю, файл должен быть расширения .pdf, .zip, .doc или .docx
+                    let extensionArray = file.name.split('.');
+                    let extension = extensionArray[extensionArray.length - 1];
+                    if (extension !== "pdf" && extension !== "zip" && extension !== "doc" && extension !== "docx") {
+                        makeInformer(
+                            "danger",
+                            "Добавление файлов",
+                            "К отправке принимаются только файлы .doc .docx .pdf и .zip"
+                        );
+                        return;
+                    } else {
+                        if(extension === 'zip'){
+                            // проверю, что название файла соответствует шаблону правильных названий
+                            if(!file.name.match(new RegExp("^[aAаА]?\\d+\.zip$", "gui"))){
+                                makeInformer(
+                                    "danger",
+                                    "Добавление файлов",
+                                    "Название архива должно соответствовать номеру обследования!"
+                                );
+                                return;
+                            }
+                        }
+                        totalFilesLength += file.size;
+                    }
+
+                }
+                // начну отправку файлов
+                sendFiles('/drop', e.originalEvent.dataTransfer.files, totalFilesLength);
+
+            } else {
+                console.log("empty");
+            }
+        });
+    $('body')
+        .on('dragenter', function () {
+            $('div#mainWrap').addClass("blured");
+            console.log("show container");
+            dragContainer.show();
+            return false;
+        });
+}
+
 $(function () {
     copyPassTextarea = $('textarea#forPasswordCopy');
     unhandledFoldersContainer = $('div#unhandledFoldersContainer');
@@ -116,12 +271,14 @@ $(function () {
     });
 
     handleForm();
+
+    handleDragDrop();
 });
 
 function checkPatientDataFilling() {
     sendSilentAjax('get', '/patients/check', function (answer) {
         for (let i in answer) {
-            if(i === "waitingFolders"){
+            if (i === "waitingFolders") {
                 if (answer.hasOwnProperty(i) && answer[i].length > 0) {
                     waitingFoldersContainer.removeClass('hidden');
                     // очищу список
@@ -269,19 +426,19 @@ function checkPatientDataFilling() {
                     // теперь нужно убрать удалённые обследования
                     let existent = $('tr.patient');
                     // если число существующих обследований не равно числу подгруженных- удаляю несуществующие
-                    if(existent.length !== answer[i].length){
+                    if (existent.length !== answer[i].length) {
                         existent.each(function () {
                             // тут большой цикл- возьму id обследования. Если его нет в списке подгруженных- удалю его из очереди
                             let id = $(this).attr('data-id');
                             let found = false;
                             for (let loadedPatientsCounter = 0; loadedPatientsCounter < answer[i].length; loadedPatientsCounter++) {
-                                if(id === answer[i][loadedPatientsCounter]['id']){
+                                if (id === answer[i][loadedPatientsCounter]['id']) {
                                     // элемент найден
                                     found = true;
                                     break;
                                 }
                             }
-                            if(!found){
+                            if (!found) {
                                 $(this).remove();
                             }
                         })

@@ -5,11 +5,13 @@ namespace app\controllers;
 
 
 use app\models\utils\DownloadHandler;
+use app\models\utils\FilesHandler;
 use app\models\Viber;
 use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 
 class DownloadController extends Controller
 {
@@ -25,13 +27,27 @@ class DownloadController extends Controller
 
                     [
                         'allow' => true,
-                        'actions' => ['execution', 'conclusion', 'print-conclusion'],
+                        'actions' => [
+                            'execution',
+                            'conclusion',
+                            'print-conclusion'
+                        ],
                         'roles' => ['@'],
                     ],
                     [
                         'allow' => true,
                         'actions' => ['download-temp'],
                         'roles' => ['@', '?'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => [
+                            'drop',
+                        ],
+                        'roles' => [
+                            'manager'
+                        ],
+                        //'ips' => Info::ACCEPTED_IPS,
                     ],
                 ],
             ],
@@ -44,7 +60,7 @@ class DownloadController extends Controller
      */
     public function beforeAction($action):bool
     {
-        if ($action->id === 'download-temp') {
+        if ($action->id === 'download-temp' || $action->id === 'drop') {
             // отключу csrf для возможности запроса
             $this->enableCsrfValidation = false;
         }
@@ -88,5 +104,10 @@ class DownloadController extends Controller
     public function actionDownloadTemp($link): void
     {
         Viber::downloadTempFile($link);
+    }
+
+    public function actionDrop(): void
+    {
+        FilesHandler::handleDroppedFile(UploadedFile::getInstanceByName('file'));
     }
 }

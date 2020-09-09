@@ -24,6 +24,7 @@
         "setasign/fpdi": "^2.0",
         "google/apiclient": "^2.2",
         "aws/aws-sdk-php": "^3.54",
+        "nanodocumet/nanodicom": "dev-master",
 	
       "ext-zip": "*",
         "telegram-bot/api": "^2.3",
@@ -31,7 +32,9 @@
         "ext-curl": "*",
       "ext-json": "*",
       "ext-mbstring": "*",
-      "ext-iconv": "*"
+      "ext-iconv": "*",
+      "ext-apache": "*",
+        "ext-http": "*"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master"
@@ -79,6 +82,27 @@
         {
             "type": "composer",
             "url": "https://asset-packagist.org"
+        },
+        {
+            "type": "package",
+            "package":
+            {
+                "name": "nanodocumet/nanodicom",
+                "version": "master",
+                "source":
+                {
+                    "type": "git",
+                    "url": "https://github.com/nanodocumet/Nanodicom.git",
+                    "reference": "master"
+                }
+            }
         }
-    ]
+    ],
+    "autoload":
+    {
+        "classmap":
+        [
+            "vendor/nanodocumet/nanodicom"
+        ]
+    }
 }
