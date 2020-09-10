@@ -15,5 +15,9 @@ return [
     'rename-unhandled-folder' => 'administrator/rename-unhandled-folder',
     'print-missed-conclusions-list' => 'administrator/print-missed-conclusions-list',
     'download/temp/<link:.+>' => 'download/download-temp',
-    'drop' => 'download/drop'
+    'drop' => 'download/drop',
+    'mail/add/<id:\d+>' => 'management/handle-mail',
+    'mail/add' => 'management/add-mail',
+    'mail/change' => 'management/change-mail',
+    'mail/delete' => 'management/delete-mail',
 ];

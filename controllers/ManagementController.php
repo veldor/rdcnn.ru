@@ -4,12 +4,16 @@
 namespace app\controllers;
 
 
+use app\models\database\Emails;
 use app\models\FileUtils;
+use app\models\User;
 use app\models\utils\MailSettings;
 use app\models\utils\Management;
 use app\models\utils\TimeHandler;
 use Exception;
+use Throwable;
 use Yii;
+use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -22,6 +26,7 @@ class ManagementController extends Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function () {
+                    /** @noinspection SpellCheckingInspection */
                     return $this->redirect('/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
                 },
                 'rules' => [
@@ -36,7 +41,12 @@ class ManagementController extends Controller
                             'check-java',
                             'restart-server',
                             'send-mail',
-                            'add-backgrounds'
+                            'add-backgrounds',
+                            'create-mail-table',
+                            'handle-mail',
+                            'add-mail',
+                            'change-mail',
+                            'delete-mail',
                         ],
                         'roles' => [
                             'manager'
@@ -75,7 +85,7 @@ class ManagementController extends Controller
     /**
      * принудительная проверка содержимого папок
      */
-    public function actionCheckChanges()
+    public function actionCheckChanges(): void
     {
         FileUtils::writeUpdateLog('try to start : ' . TimeHandler::timestampToDate(time()));
         FileUtils::writeUpdateLog('result is  : ' . Management::handleChanges());
@@ -106,7 +116,7 @@ class ManagementController extends Controller
         FileUtils::setUpdateFinished();
     }
 
-    public function actionCheckChangesSync()
+    public function actionCheckChangesSync(): void
     {
         $file = Yii::$app->basePath . '\\yii.bat';
         $command = "$file console";
@@ -114,7 +124,7 @@ class ManagementController extends Controller
         var_dump($output);
     }
 
-    public function actionRestartServer()
+    public function actionRestartServer(): void
     {
         $file = Yii::$app->basePath . '\\restartServer.bat';
         // попробую вызвать процесс асинхронно
@@ -122,7 +132,7 @@ class ManagementController extends Controller
         $handle->Run($file, 0, false);
     }
 
-    public function actionCheckJava()
+    public function actionCheckJava(): void
     {
         $file = Yii::$app->basePath . '\\checkJava.bat';
         if (is_file($file)) {
@@ -143,7 +153,7 @@ class ManagementController extends Controller
 
     public function actionSendMail(): void
     {
-        try{
+        try {
             $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
             // получу данные
             $content = file_get_contents($settingsFile);
@@ -159,13 +169,73 @@ class ManagementController extends Controller
                     ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
                 // попробую отправить письмо, в случае ошибки- вызову исключение
                 echo $mail->send();
-            }
-            else{
+            } else {
                 echo 'no mail settings';
             }
-        }
-        catch (Exception $e){
+        } catch (Exception $e) {
             echo $e->getMessage();
         }
+    }
+
+    public function actionCreateMailTable(): void
+    {
+        Management::createMailTable();
+    }
+
+    public function actionHandleMail($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        // получу пациента с данным id. Если адрес почты ещё не назначен- отправлю форму для назначения адреса
+        $patient = User::findIdentity($id);
+        if ($patient !== null) {
+            $existentMail = Emails::findOne(['patient_id' => $patient->id]);
+            if ($existentMail === null) {
+                $model = new Emails();
+                $model->patient_id = $patient->id;
+                return ['status' => 1, 'header' => 'Добавление адреса электронной почты', 'view' => $this->renderAjax('add-mail-form', ['model' => $model])];
+            }
+            // предложу заменить адрес или удалить почту
+            return ['status' => 1, 'header' => 'Изменение адреса электронной почты', 'view' => $this->renderAjax('change-mail-form', ['model' => $existentMail])];
+        }
+        return null;
+    }
+
+    public function actionAddMail()
+    {
+        // добавлю адрес электронной почты, если он валидный и ещё не зарегистрирован
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $form = new Emails();
+        $form->load(Yii::$app->request->post());
+        // проверю, что данному обследованию ещё не назначен адрес
+        if (!Emails::checkExistent($form->patient_id) && $form->save()) {
+            return ['status' => 1];
+        }
+        return ['status' => 2, 'message' => 'Не удалось сохранить адрес'];
+    }
+    public function actionChangeMail()
+    {
+        // добавлю адрес электронной почты, если он валидный и ещё не зарегистрирован
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $form = Emails::findOne(Yii::$app->request->post()['Emails']['id']);
+        if($form !== null){
+            $form->load(Yii::$app->request->post());
+            // проверю, что данному обследованию ещё не назначен адрес
+            if ($form->save()) {
+                return ['status' => 1];
+            }
+        }
+        return ['status' => 2, 'message' => 'Не удалось сохранить адрес'];
+    }
+
+    public function actionDeleteMail(){
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $existentMail = Emails::findOne(['patient_id' => Yii::$app->request->post()['id']]);
+        if($existentMail !== null){
+            try {
+                $existentMail->delete();
+                return ['status' => 1];
+            } catch (Throwable $e) {}
+        }
+        return ['status' => 2, 'message' => 'Не удалось удалить адрес электронной почты'];
     }
 }

@@ -364,6 +364,10 @@ function getCookie(name) {
     return null;
 }
 
+function enableTooltips(){
+    $('.tooltip-enabled').tooltip();
+}
+
 $(function () {
     handleAjaxActivators();
 });

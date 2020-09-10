@@ -246,6 +246,11 @@ $(function () {
     addBtn.on('click.add', function () {
         sendAjax('get', '/execution/add', simpleModalHandler);
     });
+    // обработаю добавление адреса электронной почты
+    let addMailBtn = $('.add-mail');
+    addMailBtn.on('click.add', function () {
+        sendAjax('get', $(this).attr('data-action'), simpleModalHandler);
+    });
 
 
     let activators = $('.activator');
@@ -273,6 +278,8 @@ $(function () {
     handleForm();
 
     handleDragDrop();
+
+    enableTooltips();
 });
 
 function checkPatientDataFilling() {

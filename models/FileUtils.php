@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\Emails;
 use app\models\utils\GrammarHandler;
 use app\priv\Info;
 use Exception;
@@ -408,7 +409,12 @@ class FileUtils
                 }
                 $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
                 $md5 = md5_file($path);
-                (new Table_availability(['file_name' => $conclusionFile, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]))->save();
+                $item = new Table_availability(['file_name' => $conclusionFile, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]);
+                $item->save();
+                // отправлю оповещение о добавленном контенте, если указан адрес почты
+                if(Emails::checkExistent($user->id)){
+                    Emails::sendEmail($item);
+                }
                 return $path;
             }
         }

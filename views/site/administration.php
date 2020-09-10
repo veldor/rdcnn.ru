@@ -1,6 +1,7 @@
 <?php
 
 use app\assets\AdminAsset;
+use app\models\database\Emails;
 use app\models\ExecutionHandler;
 use app\models\User;
 use app\models\Utils;
@@ -133,21 +134,7 @@ if (!empty($executions)) {
                 <span class="pull-right"><?= Utils::showDate($execution->created_at) ?></span>
             </td>
             <td>
-
-                <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]"
-                                                   value="<?= $execution->username ?>"></label><label
-                            class='btn btn-default' data-toggle='tooltip' data-placement='auto'
-                            title='Добавить заключение'><span class='text-info glyphicon glyphicon-file'></span><input
-                                data-id='<?= $execution->username ?>' multiple="multiple"
-                                class='hidden loader addConclusion' type='file' accept='application/pdf'
-                                name='AdministratorActions[conclusion][]'></label></form>
-                <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]"
-                                                   value="<?= $execution->username ?>"></label><label
-                            class='btn btn-default' data-toggle='tooltip' data-placement='auto'
-                            title='Добавить обследование'><span
-                                class='text-info glyphicon glyphicon-folder-close'></span><input
-                                data-id='<?= $execution->username ?>' class='hidden loader addExecution' type='file'
-                                accept='application/zip' name='AdministratorActions[execution]'></label></form>
+                <?= Emails::checkExistent($execution->id) ? "<button class='btn btn-default tooltip-enabled' data-toggle='tooltip' data-placement='auto' title='Отправить сообщение с файлами'><span class='glyphicon glyphicon-circle-arrow-right text-info'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/change/<?= $execution->id ?>' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button>" : "<button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/<?= $execution->id ?>' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button>"?>
             </td>
             <?= ExecutionHandler::isConclusion($execution->username) ? "<td data-conclusion='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-conclusion='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>" ?>
             <?= ExecutionHandler::isExecution($execution->username) ? "<td data-execution='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-execution='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>" ?>
