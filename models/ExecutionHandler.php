@@ -115,7 +115,13 @@ class ExecutionHandler extends Model
      */
     public static function check(): void
     {
-        FileUtils::writeUpdateLog('error delete dir ');
+        // проверю наличие папок
+        if(!is_dir(Info::EXEC_FOLDER)){
+            if (!mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
+                FileUtils::writeUpdateLog('execution folder can\'t exists and cat\'t be created');
+                echo TimeHandler::timestampToDate(time()) . "execution folder can\'t exists and cat\'t be created";
+            }
+        }
         echo TimeHandler::timestampToDate(time()) . "start report \n";
         // проверю устаревшие данные
         // получу всех пользователей
