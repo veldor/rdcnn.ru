@@ -98,6 +98,7 @@ class Telegram
                     $document = $message->getDocument();
                     if($document !== null && ViberPersonalList::iWorkHere($message->getChat()->getId())){
                         $mime = $document->getMimeType();
+                        $bot->sendMessage($message->getChat()->getId(), 'Mime is ' . $mime);
                         if($mime === 'application/pdf'){
                             $bot->sendMessage($message->getChat()->getId(), 'обрабатываю PDF');
                             $file = $bot->getFile($document->getFileId());
