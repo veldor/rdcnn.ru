@@ -7,6 +7,7 @@ namespace app\models;
 use app\models\database\AuthAssignment;
 use app\models\database\TempDownloadLinks;
 use app\models\database\ViberSubscriptions;
+use app\models\utils\FilesHandler;
 use app\models\utils\GrammarHandler;
 use app\models\utils\TimeHandler;
 use app\priv\Info;
@@ -60,7 +61,7 @@ class ExecutionHandler extends Model
     {
         $executionDir = Yii::getAlias('@executionsDirectory') . '\\' . $executionNumber;
         if (is_dir($executionDir)) {
-            self::PackFiles($executionNumber, $executionDir);
+            self::packFiles($executionNumber, $executionDir);
             return ['status' => 1, 'header' => '<h2 class="text-center text-success">Успех</h2>', 'message' => '<p class="text-success text-center">Папка найдена и успешно обработана</p>'];
         }
         return ['status' => 1, 'header' => '<h2 class="text-center text-danger">Неудача</h2>', 'message' => '<p class="text-center text-danger">Папка не найдена</p>'];
@@ -148,17 +149,12 @@ class ExecutionHandler extends Model
                     $changeTime = $stat['mtime'];
                     $difference = time() - $changeTime;
                     if ($difference > 60) {
-                        // проверю, соответствует ли название папки шаблону
-                        if (preg_match($pattern, $entity)) {
                             $dirLatin = GrammarHandler::toLatin($entity);
                             // вероятно, папка содержит файлы обследования
                             // проверю, что папка не пуста
                             if (count(scandir($path)) > 2) {
                                 // папка не пуста
-                                self::checkUser($dirLatin);
-                                // сохраню содержимое папки в архив
-                                self::PackFiles($dirLatin, $path);
-                                echo TimeHandler::timestampToDate(time()) . "dir $entity handled and load to $path \n";
+                                FilesHandler::handleDicomDir($path);
                             } else {
                                 // удалю папку
                                 try{
@@ -169,9 +165,7 @@ class ExecutionHandler extends Model
                                     FileUtils::writeUpdateLog('error delete dir ' . $path);
                                 }
                             }
-                        } else {
-                            echo TimeHandler::timestampToDate(time()) . "dir $entity not handled \n";
-                        }
+
                     } else {
                         echo TimeHandler::timestampToDate(time()) . "dir $entity waiting for timeout \n";
                     }
@@ -375,7 +369,7 @@ class ExecutionHandler extends Model
      * @param $executionNumber
      * @param string $executionDir
      */
-    public static function PackFiles($executionNumber, string $executionDir): void
+    public static function packFiles($executionNumber, string $executionDir): void
     {
 // скопирую в папку содержимое dicom-просмотровщика
         $viewer_dir = Info::DICOM_VIEWER_FOLDER;
@@ -388,6 +382,21 @@ class ExecutionHandler extends Model
         // переименую файл
         rename($fileWay, $trueFileWay);
         rmdir($executionDir);
+        // проверю, зарегистрирован ли пациент
+        $user = User::findByUsername($executionNumber);
+        if($user === null){
+            // регистрирую
+            self::checkUser($executionNumber);
+            $user = User::findByUsername($executionNumber);
+        }
+        // теперь проверю, зарегистрирован ли файл
+        $registeredFile = Table_availability::findOne(['is_execution' => 1, 'userId' => $executionNumber]);
+        if($registeredFile === null){
+            // регистрирую файл
+            $md5 = md5_file($trueFileWay);
+            $item = new Table_availability(['file_name' => GrammarHandler::toLatin($executionNumber) . '.zip', 'is_execution' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]);
+            $item->save();
+        }
     }
 
     /**

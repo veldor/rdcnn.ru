@@ -200,17 +200,6 @@ function handleDragDrop() {
                         );
                         return;
                     } else {
-                        if(extension === 'zip'){
-                            // проверю, что название файла соответствует шаблону правильных названий
-                            if(!file.name.match(new RegExp("^[aAаА]?\\d+\.zip$", "gui"))){
-                                makeInformer(
-                                    "danger",
-                                    "Добавление файлов",
-                                    "Название архива должно соответствовать номеру обследования!"
-                                );
-                                return;
-                            }
-                        }
                         totalFilesLength += file.size;
                     }
 

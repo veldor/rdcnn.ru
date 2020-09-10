@@ -7,6 +7,7 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
+use app\models\utils\FilesHandler;
 use app\models\utils\Management;
 use Throwable;
 use Yii;
@@ -185,7 +186,9 @@ class AdministratorController extends Controller
      */
     public function actionTest(): void
     {
-        $file = Yii::$app->basePath . '\test.docx';
-        echo FileUtils::handleLoadedFile($file);
+        // распакую ZIP
+        FilesHandler::unzip('Z:\MRI_files_83896.zip');
+        // разберусь с DICOM
+        FilesHandler::handleDicomDir('Z:\MOROZOV');
     }
 }

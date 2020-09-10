@@ -15,6 +15,7 @@ use Yii;
 use yii\base\Exception;
 use yii\base\Model;
 use yii\web\UploadedFile;
+use ZipArchive;
 
 class FilesHandler extends Model
 {
@@ -53,21 +54,76 @@ class FilesHandler extends Model
 
     private static function saveZip(UploadedFile $file): void
     {
-        $fileName = GrammarHandler::toLatin($file->name);
-        $user = User::findByUsername(GrammarHandler::getBaseFileName($fileName));
-        $path = Info::EXEC_FOLDER . '\\' . $fileName;
-        $file->saveAs($path);
-        // зарегистрирую файл
-        $md5 = md5_file($path);
-        $stat = stat($path);
-        $changeTime = $stat['mtime'];
-        if($user === null){
-            // создам пользователя
-            ExecutionHandler::createUser(GrammarHandler::toLatin(GrammarHandler::getBaseFileName($fileName)));
-            $user = User::findByUsername(GrammarHandler::getBaseFileName($fileName));
+        // сохраняю файл во временную папку
+        $root = Yii::$app->basePath;
+        // создам временную папку, если её ещё не существует
+        if (!is_dir($root . '/temp') && !mkdir($concurrentDirectory = $root . '/temp') && !is_dir($concurrentDirectory)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
-        (new Table_availability(['file_name' => $fileName, 'is_execution' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
-        // оповещу мессенджеры о наличии файла
-        Viber::notifyExecutionLoaded($user->username);
+        do{
+            $dirName = Yii::$app->security->generateRandomString();
+            $filePath = $root . "/temp/" . $dirName;
+        }
+        while(is_file($filePath));
+        $file->saveAs($filePath);
+        self::unzip($filePath);
+    }
+
+    public static function handleDicomDir(string $dir): void
+    {
+        if(is_dir($dir)){
+            // проверю, есть ли в папке DICOMDIR-файл. Если нет- папка левая, удалю её
+            $dicomdirDest = $dir . DIRECTORY_SEPARATOR . 'DICOMDIR';
+            if(is_file($dicomdirDest)){
+                // получу содержимое файла
+                $content = file_get_contents($dicomdirDest);
+                // уберу все непечатные символы
+                $clearedContent = GrammarHandler::clearText($content);
+                // теперь найду в этом бардаке номер обследования
+                //echo $clearedContent;
+                $executionNumber = GrammarHandler::findExecutionNumber($clearedContent);
+                if($executionNumber !== null){
+                    // добавляю в папку необходимый софт и добавляю её в ЛК
+                    ExecutionHandler::packFiles($executionNumber, $dir);
+                }
+            }
+        }
+    }
+
+    public static function unzip(string $file): void
+    {
+        if(is_file($file)){
+            echo 'have file';
+            $root = Yii::$app->basePath;
+            // создам временную папку, если её ещё не существует
+            if (!is_dir($root . '/temp') && !mkdir($concurrentDirectory = $root . '/temp') && !is_dir($concurrentDirectory)) {
+                throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+            }
+            do{
+                $dirName = Yii::$app->security->generateRandomString();
+                $filePath = $root . "/temp/" . $dirName;
+            }
+            while(is_dir($filePath));
+            $zip = new ZipArchive;
+            if ($zip->open($file) === TRUE) {
+                $zip->extractTo($filePath);
+                $zip->close();
+
+                // теперь найду корневую папку. Она может быть на директорию ниже, чем распакованная
+                $dirContent = array_slice(scandir($filePath), 2);
+                if(count($dirContent) ===  1){
+                    echo 'handle inner dir';
+                    self::handleDicomDir($filePath . DIRECTORY_SEPARATOR . $dirContent[0]);
+                }
+                else{
+                    echo 'handle root dir';
+                    self::handleDicomDir($filePath);
+                }
+            }
+            // удалю временную папку
+            FileUtils::removeDir($filePath);
+            // удалю исходный файл
+            unlink($file);
+        }
     }
 }

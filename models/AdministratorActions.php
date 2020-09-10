@@ -99,7 +99,7 @@ class AdministratorActions extends Model
                 unlink($conclusionFile);
                 ExecutionHandler::deleteAddConcs($execution->username);
             }
-            $executionFile = Info::CONC_FOLDER . '\\' . $id . '.zip';
+            $executionFile = Info::EXEC_FOLDER . '\\' . $id . '.zip';
             if(is_file($executionFile)){
                 unlink($executionFile);
             }

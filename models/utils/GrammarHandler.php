@@ -50,4 +50,22 @@ class GrammarHandler
     {
         return substr($answer, strripos($answer, '\\') + 1);
     }
+
+    public static function clearText(string $content)
+    {
+        return preg_replace('/[^(\x20-\x7F)]*/','', $content);
+    }
+
+    /**
+     * @param string $content
+     * @return string|null
+     */
+    public static function findExecutionNumber(?string $content): ?string
+    {
+        $matches = null;
+        if(preg_match('/LO([ A\d]+)0DA/', $content, $matches)){
+            return trim($matches[1]);
+        }
+        return null;
+    }
 }
