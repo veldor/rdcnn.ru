@@ -5,6 +5,7 @@ namespace app\models;
 
 
 use app\models\database\ViberPersonalList;
+use app\models\utils\FilesHandler;
 use app\models\utils\GrammarHandler;
 use app\priv\Info;
 use Exception;
@@ -172,8 +173,25 @@ class Telegram
                                 }
                             }
                         }
+                        else if($mime === 'application/zip'){
+                            $bot->sendMessage($message->getChat()->getId(), 'Разбираю архив');
+                            $file = $bot->getFile($document->getFileId());
+                            $downloadedFile = $bot->downloadFile($file->getFileId());
+                            $bot->sendMessage($message->getChat()->getId(), 'Архив скачан');
+                            $path = FileUtils::saveTempFile($downloadedFile, '.zip');
+                            if(is_file($path)){
+                                // сохраню файл
+                                $num = FilesHandler::unzip($path);
+                                if($num !== null){
+                                    $bot->sendMessage($message->getChat()->getId(), 'Добавлены файлы сканирования обследования ' . $num);
+                                }
+                                else{
+                                    $bot->sendMessage($message->getChat()->getId(), 'Не смог обработать архив');
+                                }
+                            }
+                        }
                         else{
-                            $bot->sendMessage($message->getChat()->getId(), 'Я понимаю только файлы в формате PDF и DOCX');
+                            $bot->sendMessage($message->getChat()->getId(), 'Я понимаю только файлы в формате PDF и DOCX (и ZIP)');
                         }
                     }
                     else{

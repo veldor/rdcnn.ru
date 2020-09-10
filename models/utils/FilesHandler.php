@@ -69,7 +69,11 @@ class FilesHandler extends Model
         self::unzip($filePath);
     }
 
-    public static function handleDicomDir(string $dir): void
+    /**
+     * @param string $dir
+     * @return string|null
+     */
+    public static function handleDicomDir(string $dir): ?string
     {
         if(is_dir($dir)){
             // проверю, есть ли в папке DICOMDIR-файл. Если нет- папка левая, удалю её
@@ -85,13 +89,21 @@ class FilesHandler extends Model
                 if($executionNumber !== null){
                     // добавляю в папку необходимый софт и добавляю её в ЛК
                     ExecutionHandler::packFiles($executionNumber, $dir);
+                    return $executionNumber;
                 }
             }
         }
+        return null;
     }
 
-    public static function unzip(string $file): void
+    /**
+     * @param string $file
+     * @return string|null
+     * @throws Exception
+     */
+    public static function unzip(string $file): ?string
     {
+        $executionNumber = null;
         if(is_file($file)){
             echo 'have file';
             $root = Yii::$app->basePath;
@@ -112,12 +124,10 @@ class FilesHandler extends Model
                 // теперь найду корневую папку. Она может быть на директорию ниже, чем распакованная
                 $dirContent = array_slice(scandir($filePath), 2);
                 if(count($dirContent) ===  1){
-                    echo 'handle inner dir';
-                    self::handleDicomDir($filePath . DIRECTORY_SEPARATOR . $dirContent[0]);
+                    $executionNumber = self::handleDicomDir($filePath . DIRECTORY_SEPARATOR . $dirContent[0]);
                 }
                 else{
-                    echo 'handle root dir';
-                    self::handleDicomDir($filePath);
+                    $executionNumber = self::handleDicomDir($filePath);
                 }
             }
             // удалю временную папку
@@ -125,5 +135,6 @@ class FilesHandler extends Model
             // удалю исходный файл
             unlink($file);
         }
+        return $executionNumber;
     }
 }

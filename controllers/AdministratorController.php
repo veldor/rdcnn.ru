@@ -186,9 +186,5 @@ class AdministratorController extends Controller
      */
     public function actionTest(): void
     {
-        // распакую ZIP
-        FilesHandler::unzip('Z:\MRI_files_83896.zip');
-        // разберусь с DICOM
-        FilesHandler::handleDicomDir('Z:\MOROZOV');
     }
 }
