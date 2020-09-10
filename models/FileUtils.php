@@ -6,6 +6,7 @@ namespace app\models;
 
 use app\models\database\Emails;
 use app\models\utils\GrammarHandler;
+use app\models\utils\TimeHandler;
 use app\priv\Info;
 use Exception;
 use RuntimeException;
@@ -25,12 +26,19 @@ class FileUtils
      */
     public static function checkUnhandledFolders(): array
     {
+        // проверю наличие папок
+        if(!is_dir(Info::EXEC_FOLDER)){
+            if (!mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
+                self::writeUpdateLog('execution folder can\'t exists and cat\'t be created');
+                echo TimeHandler::timestampToDate(time()) . "execution folder can\'t exists and cat\'t be created";
+            }
+        }
         // это список нераспознанных папок
         $unhandledFoldersList = [];
         // паттерн валидных папок
         $pattern = '/^[aа]?\d+$/ui';
         // получу список папок с заключениями
-        $dirs = array_slice(scandir(Yii::getAlias('@executionsDirectory')), 2);
+        $dirs = array_slice(scandir(Info::EXEC_FOLDER), 2);
         foreach ($dirs as $dir) {
             $path = Yii::getAlias('@executionsDirectory') . '/' . $dir;
             if (is_dir($path)) {
