@@ -368,9 +368,6 @@ function checkPatientDataFilling() {
                                 '                <a class="btn-link execution-id" href="/person/' + item['id'] + '">' + item['id'] + '</a>\n' +
                                 '            </td>\n' +
                                 '            <td>\n' +
-                                '\n' +
-                                '                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="' + item['id'] + '"></label><label class="btn btn-default activator" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Добавить заключение"><span class="text-info glyphicon glyphicon-file"></span><input id="addConclusion" data-id="' + item['id'] + '" class="hidden loader" type="file" accept="application/pdf" name="AdministratorActions[conclusion]"></label></form>\n' +
-                                '                    <form class="inline"><label><input class="hidden" name="AdministratorActions[executionId]" value="' + item['id'] + '"></label><label class="btn btn-default activator" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Добавить обследование"><span class="text-info glyphicon glyphicon-folder-close"></span><input id="addExecution" data-id="' + item['id'] + '" class="hidden loader" type="file" accept="application/zip" name="AdministratorActions[execution]"></label></form>\n' +
                                 '            </td>\n' +
                                 '            <td data-conclusion="' + item['id'] + '"><span class="glyphicon glyphicon-remove text-danger"></span></td>\n' +
                                 '            <td data-execution="' + item['id'] + '"><span class="glyphicon glyphicon-remove text-danger"></span></td>\n' +
@@ -397,7 +394,9 @@ function checkPatientDataFilling() {
                         let conclusionContainer = $('td[data-conclusion="' + item['id'] + '"]');
                         if (conclusionContainer.length) {
                             if (item['conclusionsCount'] > 0) {
-                                conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span> <b>(" + item['conclusionsCount'] + ")</b>").removeClass('field-danger').addClass('field-success');
+                                conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span> <b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button>").removeClass('field-danger').addClass('field-success');
+                                enableTooltips();
+                                handleAjaxActivators();
                             } else {
                                 conclusionContainer.html("<span class='glyphicon glyphicon-remove text-danger status-icon'></span>").addClass('field-danger').removeClass('field-success');
                             }

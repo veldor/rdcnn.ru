@@ -416,9 +416,13 @@ class FileUtils
                     ExecutionHandler::createUser(GrammarHandler::getBaseFileName($conclusionFile));
                 }
                 $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
-                $md5 = md5_file($path);
-                $item = new Table_availability(['file_name' => $conclusionFile, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]);
-                $item->save();
+                // проверю, не зарегистрировано ли уже обследование
+                $avail = Table_availability::findOne(['userId' => $user->username, 'file_name' => $actionResult['filename']]);
+                if($avail === null){
+                    $md5 = md5_file($path);
+                    $item = new Table_availability(['file_name' => $conclusionFile, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]);
+                    $item->save();
+                }
                 // отправлю оповещение о добавленном контенте, если указан адрес почты
                 if(Emails::checkExistent($user->id)){
                     Emails::sendEmail($item);

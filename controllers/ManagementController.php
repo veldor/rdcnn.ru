@@ -5,6 +5,7 @@ namespace app\controllers;
 
 
 use app\models\database\Emails;
+use app\models\ExecutionHandler;
 use app\models\FileUtils;
 use app\models\User;
 use app\models\utils\MailSettings;
@@ -47,6 +48,7 @@ class ManagementController extends Controller
                             'add-mail',
                             'change-mail',
                             'delete-mail',
+                            'delete-conclusions',
                         ],
                         'roles' => [
                             'manager'
@@ -237,5 +239,12 @@ class ManagementController extends Controller
             } catch (Throwable $e) {}
         }
         return ['status' => 2, 'message' => 'Не удалось удалить адрес электронной почты'];
+    }
+
+    public function actionDeleteConclusions($executionNumber){
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        // удалю все заключения по данному обследованию
+        ExecutionHandler::deleteAllConclusions($executionNumber);
+        return ['status' => 1, 'message' => 'Заключения удалены'];
     }
 }

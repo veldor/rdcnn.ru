@@ -138,7 +138,7 @@ if (!empty($executions)) {
             <td>
                 <?= Emails::checkExistent($execution->id) ? "<button class='btn btn-default tooltip-enabled' data-toggle='tooltip' data-placement='auto' title='Отправить сообщение с файлами'><span class='glyphicon glyphicon-circle-arrow-right text-info'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/change/<?= $execution->id ?>' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button>" : "<button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/<?= $execution->id ?>' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button>"?>
             </td>
-            <?= ExecutionHandler::isConclusion($execution->username) ? "<td data-conclusion='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-conclusion='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>" ?>
+            <?= ExecutionHandler::isConclusion($execution->username) ? "<td data-conclusion='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/{$execution->username}' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button></td>" : "<td data-conclusion='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>" ?>
             <?= ExecutionHandler::isExecution($execution->username) ? "<td data-execution='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-execution='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>" ?>
             <td>
                 <a class='btn btn-default activator' data-action='change-password'
@@ -154,6 +154,7 @@ if (!empty($executions)) {
     echo '</tbody></table>';
 }
 if ($executionsCounter === 0) {
+    echo "<table class='table-hover table'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'></tbody></table>";
     echo "<div class='col-xs-12'><h2 class='text-center'>Обследований не зарегистрировано</div>";
 }
 

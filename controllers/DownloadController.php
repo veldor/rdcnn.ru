@@ -82,7 +82,7 @@ class DownloadController extends Controller
      * @param $href string <p>Имя файла в виде 1.pdf</p>
      * @throws NotFoundHttpException <p>В случае отсутствия прав доступа или файла- ошибка</p>
      */
-    public function actionConclusion($href): void
+    public function actionConclusion(string $href): void
     {
         DownloadHandler::handleConclusion($href);
     }

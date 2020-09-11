@@ -20,4 +20,5 @@ return [
     'mail/add' => 'management/add-mail',
     'mail/change' => 'management/change-mail',
     'mail/delete' => 'management/delete-mail',
+    'delete/conclusions/<executionNumber:[0-9a-zA-Z]+>' => 'management/delete-conclusions',
 ];

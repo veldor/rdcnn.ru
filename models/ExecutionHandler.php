@@ -117,7 +117,7 @@ class ExecutionHandler extends Model
     public static function check(): void
     {
         // проверю наличие папок
-        if(!is_dir(Info::EXEC_FOLDER)){
+        if (!is_dir(Info::EXEC_FOLDER)) {
             if (!mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
                 FileUtils::writeUpdateLog('execution folder can\'t exists and cat\'t be created');
                 echo TimeHandler::timestampToDate(time()) . "execution folder can\'t exists and cat\'t be created";
@@ -149,22 +149,21 @@ class ExecutionHandler extends Model
                     $changeTime = $stat['mtime'];
                     $difference = time() - $changeTime;
                     if ($difference > 60) {
-                            $dirLatin = GrammarHandler::toLatin($entity);
-                            // вероятно, папка содержит файлы обследования
-                            // проверю, что папка не пуста
-                            if (count(scandir($path)) > 2) {
-                                // папка не пуста
-                                FilesHandler::handleDicomDir($path);
-                            } else {
-                                // удалю папку
-                                try{
-                                    self::rmRec($path);
-                                    echo TimeHandler::timestampToDate(time()) . "dir $entity is empty and deleted \n";
-                                }
-                                catch (\Exception $e){
-                                    FileUtils::writeUpdateLog('error delete dir ' . $path);
-                                }
+                        $dirLatin = GrammarHandler::toLatin($entity);
+                        // вероятно, папка содержит файлы обследования
+                        // проверю, что папка не пуста
+                        if (count(scandir($path)) > 2) {
+                            // папка не пуста
+                            FilesHandler::handleDicomDir($path);
+                        } else {
+                            // удалю папку
+                            try {
+                                self::rmRec($path);
+                                echo TimeHandler::timestampToDate(time()) . "dir $entity is empty and deleted \n";
+                            } catch (\Exception $e) {
+                                FileUtils::writeUpdateLog('error delete dir ' . $path);
                             }
+                        }
 
                     } else {
                         echo TimeHandler::timestampToDate(time()) . "dir $entity waiting for timeout \n";
@@ -189,7 +188,7 @@ class ExecutionHandler extends Model
                                 $stat = stat($path);
                                 $changeTime = $stat['mtime'];
                                 if ($changeTime !== $existentFile->file_create_time) {
-                                //if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
+                                    //if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
                                     // отправлю новую версию файла пользователю
                                     $md5 = md5_file($path);
                                     $existentFile->md5 = $md5;
@@ -206,11 +205,10 @@ class ExecutionHandler extends Model
                                 // оповещу мессенджеры о наличии файла
                                 Viber::notifyExecutionLoaded($user->username);
                             }
-                        }
-                        else{
+                        } else {
                             $stat = stat($path);
                             $changeTime = $stat['mtime'];
-                            if(time() > $changeTime + Info::DATA_SAVING_TIME){
+                            if (time() > $changeTime + Info::DATA_SAVING_TIME) {
                                 // если нет связанной учётной записи- удалю файл
                                 echo TimeHandler::timestampToDate(time()) . " delete zip $entity with no account bind\n";
                                 // удалю файл
@@ -223,7 +221,7 @@ class ExecutionHandler extends Model
         }
         $entity = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs';
         if (!is_dir($entity) && !is_dir($entity) && !mkdir($entity) && !is_dir($entity)) {
-            echo (sprintf('Directory "%s" was not created', $entity));
+            echo(sprintf('Directory "%s" was not created', $entity));
         }
         // теперь обработаю заключения
         $pattern = '/^[aа]?\W?\d+-?\.?\d*\.pdf$/ui';
@@ -280,8 +278,7 @@ class ExecutionHandler extends Model
                             echo TimeHandler::timestampToDate(time()) . "file $file not handled \n";
                         }
                     }
-                }
-                catch (\Exception $e){
+                } catch (\Exception $e) {
                     echo 'ERROR CHECKING FILE' . $e->getMessage();
                 }
             }
@@ -384,14 +381,14 @@ class ExecutionHandler extends Model
         rmdir($executionDir);
         // проверю, зарегистрирован ли пациент
         $user = User::findByUsername($executionNumber);
-        if($user === null){
+        if ($user === null) {
             // регистрирую
             self::checkUser($executionNumber);
             $user = User::findByUsername($executionNumber);
         }
         // теперь проверю, зарегистрирован ли файл
         $registeredFile = Table_availability::findOne(['is_execution' => 1, 'userId' => $executionNumber]);
-        if($registeredFile === null){
+        if ($registeredFile === null) {
             // регистрирую файл
             $md5 = md5_file($trueFileWay);
             $item = new Table_availability(['file_name' => GrammarHandler::toLatin($executionNumber) . '.zip', 'is_execution' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]);
@@ -477,6 +474,22 @@ class ExecutionHandler extends Model
             }
         }
         return $conclusionsCount;
+    }
+
+    public static function deleteAllConclusions($executionNumber): void
+    {
+        $conclusionFile = Info::CONC_FOLDER . '\\' . $executionNumber . '.pdf';
+        if (is_file($conclusionFile)) {
+            unlink($conclusionFile);
+        }
+        self::deleteAddConcs($executionNumber);
+        // также удалю информацию о доступности заключений из таблицы
+        $avail = Table_availability::findAll(['userId' => $executionNumber, 'is_conclusion' => 1]);
+        if($avail !== null){
+            foreach ($avail as $item) {
+                $item->delete();
+            }
+        }
     }
 
     public function scenarios(): array
