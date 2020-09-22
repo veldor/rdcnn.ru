@@ -33,6 +33,7 @@ ShowLoadingAsset::register($this);
             <button class="btn btn-default activator" data-action="/management/check-java"><span>Check Java</span></button>
             <button class="btn btn-default activator" data-action="/management/send-mail"><span>Send test mail</span></button>
             <button class="btn btn-default activator" data-action="/management/create-mail-table"><span>Create mail table</span></button>
+            <button class="btn btn-default activator" data-action="/management/clear-blacklist-table"><span>Clear blacklist table</span></button>
         </div>
     </div>
     <div class="col-sm-12">

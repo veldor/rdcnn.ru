@@ -7,6 +7,7 @@ namespace app\controllers;
 use app\models\database\Emails;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
+use app\models\Table_blacklist;
 use app\models\User;
 use app\models\utils\MailSettings;
 use app\models\utils\Management;
@@ -44,6 +45,7 @@ class ManagementController extends Controller
                             'send-mail',
                             'add-backgrounds',
                             'create-mail-table',
+                            'clear-blacklist-table',
                             'handle-mail',
                             'add-mail',
                             'change-mail',
@@ -241,10 +243,18 @@ class ManagementController extends Controller
         return ['status' => 2, 'message' => 'Не удалось удалить адрес электронной почты'];
     }
 
-    public function actionDeleteConclusions($executionNumber){
+    public function actionDeleteConclusions($executionNumber): array
+    {
         Yii::$app->response->format = Response::FORMAT_JSON;
         // удалю все заключения по данному обследованию
         ExecutionHandler::deleteAllConclusions($executionNumber);
         return ['status' => 1, 'message' => 'Заключения удалены'];
+    }
+    public function actionClearBlacklistTable(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        // удалю все записи из чёрного списка
+        Table_blacklist::clear();
+        return ['status' => 1, 'message' => 'Чёрный список вычещен'];
     }
 }

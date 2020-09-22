@@ -132,7 +132,7 @@ class LoginForm extends Model
         if ($blocked) {
             $blocked->last_try = time();
             $blocked->save();
-            $this->addError('password', 'Неверный логин или пароль!');
+            $this->addError('password', 'Компьютер в чёрном списке. Обратитесь к администратору!');
             return false;
         }
 

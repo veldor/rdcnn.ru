@@ -20,4 +20,14 @@ class Table_blacklist extends ActiveRecord
     {
         return 'blacklist';
     }
+
+    public static function clear()
+    {
+        $results = self::find()->all();
+        if(!empty($results)){
+            foreach ($results as $result) {
+                $result->delete();
+            }
+        }
+    }
 }

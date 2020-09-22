@@ -27,11 +27,9 @@ class FileUtils
     public static function checkUnhandledFolders(): array
     {
         // проверю наличие папок
-        if(!is_dir(Info::EXEC_FOLDER)){
-            if (!mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
-                self::writeUpdateLog('execution folder can\'t exists and cat\'t be created');
-                echo TimeHandler::timestampToDate(time()) . "execution folder can\'t exists and cat\'t be created";
-            }
+        if(!is_dir(Info::EXEC_FOLDER) && !mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
+            self::writeUpdateLog('execution folder can\'t exists and cat\'t be created');
+            echo TimeHandler::timestampToDate(time()) . "execution folder can\'t exists and cat\'t be created";
         }
         // это список нераспознанных папок
         $unhandledFoldersList = [];
@@ -284,13 +282,13 @@ class FileUtils
 
     public static function addBackgroundToPDF($file): void
     {
-        $pdfBackgoundImage = Yii::$app->basePath . '\\design\\back.jpg';
-        if (is_file($file) && is_file($pdfBackgoundImage)) {
+        $pdfBackgroundImage = Yii::$app->basePath . '\\design\\back.jpg';
+        if (is_file($file) && is_file($pdfBackgroundImage)) {
             $pdf = new Fpdi();
 
             $pdf->AddPage();
 
-            $pdf->Image($pdfBackgoundImage, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight());
+            $pdf->Image($pdfBackgroundImage, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight());
             try {
                 $pdf->setSourceFile($file);
                 $tplIdx = $pdf->importPage(1);
@@ -367,7 +365,7 @@ class FileUtils
                 return ['action_status' => GrammarHandler::convertToUTF(serialize($result))];
             }
         }
-        return $result;
+        return null;
     }
 
     /**
@@ -424,7 +422,7 @@ class FileUtils
                     $item->save();
                 }
                 // отправлю оповещение о добавленном контенте, если указан адрес почты
-                if(Emails::checkExistent($user->id)){
+                if(Emails::checkExistent($user->id) && $item !== null){
                     Emails::sendEmail($item);
                 }
                 return $path;
