@@ -282,13 +282,13 @@ class FileUtils
 
     public static function addBackgroundToPDF($file): void
     {
-        $pdfBackgroundImage = Yii::$app->basePath . '\\design\\back.jpg';
-        if (is_file($file) && is_file($pdfBackgroundImage)) {
+        $pdfBackgoundImage = Yii::$app->basePath . '\\design\\back.jpg';
+        if (is_file($file) && is_file($pdfBackgoundImage)) {
             $pdf = new Fpdi();
 
             $pdf->AddPage();
 
-            $pdf->Image($pdfBackgroundImage, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight());
+            $pdf->Image($pdfBackgoundImage, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight());
             try {
                 $pdf->setSourceFile($file);
                 $tplIdx = $pdf->importPage(1);
@@ -340,6 +340,9 @@ class FileUtils
                     if (is_file($javaPath)) {
                         $existentJavaPath = $javaPath;
                     }
+                    else{
+                        $existentJavaPath = 'java';
+                    }
                 }
             }
         }
@@ -352,11 +355,16 @@ class FileUtils
                 $command = "\"$existentJavaPath\" -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
                 echo $command . "\n";
                 exec($command, $result);
-                if (!empty($result) && count($result) === 2) {
+                if (!empty($result) && count($result) === 4) {
                     // получу вторую строку результата
                     $fileName = $result[1];
                     if (substr($fileName, strlen($fileName) - 4) === '.pdf') {
-                        return ['filename' => $fileName, 'action_status' => GrammarHandler::convertToUTF($result[0])];
+                        return [
+                            'filename' => $fileName,
+                            'action_status' => GrammarHandler::convertToUTF($result[0]),
+                            'execution_area' => GrammarHandler::convertToUTF($result[2]),
+                            'patient_name' => GrammarHandler::convertToUTF($result[3])
+                        ];
                     }
                 }
                 if (!empty($result) && count($result) === 1) {
@@ -365,7 +373,10 @@ class FileUtils
                 return ['action_status' => GrammarHandler::convertToUTF(serialize($result))];
             }
         }
-        return null;
+        else{
+            echo 'not java';
+        }
+        return $result;
     }
 
     /**
@@ -401,7 +412,7 @@ class FileUtils
         if (count($actionResult) === 1) {
             return 'Ошибка: ' . $actionResult['action_status'];
         }
-        if (count($actionResult) === 2) {
+        if (count($actionResult) === 4) {
             // добавлю фон заключению
             $conclusionFile = $actionResult['filename'];
             $path = Info::CONC_FOLDER . '\\' . $conclusionFile;
@@ -414,15 +425,19 @@ class FileUtils
                     ExecutionHandler::createUser(GrammarHandler::getBaseFileName($conclusionFile));
                 }
                 $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
-                // проверю, не зарегистрировано ли уже обследование
-                $avail = Table_availability::findOne(['userId' => $user->username, 'file_name' => $actionResult['filename']]);
-                if($avail === null){
-                    $md5 = md5_file($path);
-                    $item = new Table_availability(['file_name' => $conclusionFile, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]);
-                    $item->save();
-                }
+                $md5 = md5_file($path);
+                $item = new Table_availability([
+                    'file_name' => $conclusionFile,
+                        'is_conclusion' => true,
+                        'md5' => $md5,
+                        'file_create_time' => time(),
+                        'userId' => $user->username,
+                        'patient_name' => $actionResult['patient_name'],
+                        'execution_area' => $actionResult['execution_area']
+                    ]);
+                $item->save();
                 // отправлю оповещение о добавленном контенте, если указан адрес почты
-                if(Emails::checkExistent($user->id) && $item !== null){
+                if(Emails::checkExistent($user->id)){
                     Emails::sendEmail($item);
                 }
                 return $path;

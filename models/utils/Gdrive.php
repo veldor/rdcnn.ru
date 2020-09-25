@@ -27,7 +27,9 @@ class Gdrive
         // проверю существование временной папки для заключений
         $tempCloudFolder = Yii::$app->basePath . '\\cloud_tmp';
         if (!is_dir($tempCloudFolder)) {
-            mkdir($tempCloudFolder);
+            if (!mkdir($tempCloudFolder) && !is_dir($tempCloudFolder)) {
+                throw new RuntimeException(sprintf('Directory "%s" was not created', $tempCloudFolder));
+            }
         }
         $client = self::getClient();
         if ($client !== null) {

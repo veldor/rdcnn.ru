@@ -14,6 +14,8 @@ use yii\db\ActiveRecord;
  * @property string $file_name [varchar(255)]
  * @property int $file_create_time [int(10) unsigned]
  * @property string $md5 [char(32)]
+ * @property string $patient_name [varchar(255)]
+ * @property string $execution_area [varchar(255)]
  */
 class Table_availability extends ActiveRecord
 {
@@ -83,6 +85,26 @@ class Table_availability extends ActiveRecord
         if(!empty($existentConclusions)){
             foreach ($existentConclusions as $existentConclusion) {
                 $answer[] = $existentConclusion->file_name;
+            }
+        }
+        return $answer;
+    }
+
+    public static function getPatientName(string $username)
+    {
+        $existentItem = self::findOne(['userId' => $username, 'is_conclusion' => 1]);
+        if($existentItem !== null)
+            return $existentItem->patient_name;
+        return null;
+    }
+
+    public static function getConclusionAreas(string $username)
+    {
+        $answer = '';
+        $items = self::findAll(['userId' => $username, 'is_conclusion' => 1]);
+        if($items !== null){
+            foreach ($items as $item) {
+                $answer .= "{$item->execution_area} \n";
             }
         }
         return $answer;

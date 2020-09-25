@@ -181,11 +181,6 @@ class ManagementController extends Controller
         }
     }
 
-    public function actionCreateMailTable(): void
-    {
-        Management::createMailTable();
-    }
-
     public function actionHandleMail($id)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -255,6 +250,6 @@ class ManagementController extends Controller
         Yii::$app->response->format = Response::FORMAT_JSON;
         // удалю все записи из чёрного списка
         Table_blacklist::clear();
-        return ['status' => 1, 'message' => 'Чёрный список вычещен'];
+        return ['status' => 1, 'message' => 'Чёрный список вычищен'];
     }
 }

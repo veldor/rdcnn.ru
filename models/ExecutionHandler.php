@@ -190,20 +190,37 @@ class ExecutionHandler extends Model
                                 if ($changeTime !== $existentFile->file_create_time) {
                                     //if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
                                     // отправлю новую версию файла пользователю
-                                    $md5 = md5_file($path);
-                                    $existentFile->md5 = $md5;
-                                    $existentFile->file_create_time = $changeTime;
-                                    $existentFile->save();
-                                    Viber::notifyExecutionLoaded($user->username);
+                                    // получу имя пациента и область обследования
+                                    $info = FileUtils::handleLoadedFile($path);
+                                    if(count($info) === 4){
+                                        $md5 = md5_file($path);
+                                        $existentFile->md5 = $md5;
+                                        $existentFile->file_create_time = $changeTime;
+                                        $existentFile->patient_name = $info['patient_name'];
+                                        $existentFile->execution_area = $info['execution_area'];
+                                        $existentFile->save();
+                                        Viber::notifyExecutionLoaded($user->username);
+                                    }
                                 }
                             } else {
-                                // внесу информацию о файле в базу
-                                $md5 = md5_file($path);
-                                $stat = stat($path);
-                                $changeTime = $stat['mtime'];
-                                (new Table_availability(['file_name' => $entity, 'is_execution' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
-                                // оповещу мессенджеры о наличии файла
-                                Viber::notifyExecutionLoaded($user->username);
+                                $info = FileUtils::handleLoadedFile($path);
+                                if(count($info) === 4) {
+                                    // внесу информацию о файле в базу
+                                    $md5 = md5_file($path);
+                                    $stat = stat($path);
+                                    $changeTime = $stat['mtime'];
+                                    (new Table_availability([
+                                        'file_name' => $entity,
+                                        'is_execution' => true,
+                                        'md5' => $md5,
+                                        'file_create_time' => $changeTime,
+                                        'userId' => $user->username,
+                                        'patient_name' => $info['patient_name'],
+                                        'execution_area' => $info['execution_area']
+                                    ]))->save();
+                                    // оповещу мессенджеры о наличии файла
+                                    Viber::notifyExecutionLoaded($user->username);
+                                }
                             }
                         } else {
                             $stat = stat($path);
@@ -316,15 +333,26 @@ class ExecutionHandler extends Model
                         // найду пользователя
                         $user = User::findByUsername($name);
                         if ($user !== null) {
-                            // внесу информацию о файле в базу
-                            FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
-                            $md5 = md5_file($path);
-                            $stat = stat($path);
-                            $changeTime = $stat['mtime'];
-                            (new Table_availability(['file_name' => $file, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => $changeTime, 'userId' => $user->username]))->save();
-                            echo TimeHandler::timestampToDate(time()) . "add background to new {$file}\n";
-                            // оповещу мессенджеры о наличии файла
-                            Viber::notifyConclusionLoaded($file);
+                            $info = FileUtils::handleLoadedFile($path);
+                            if(count($info) === 4) {
+                                // внесу информацию о файле в базу
+                                FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
+                                $md5 = md5_file($path);
+                                $stat = stat($path);
+                                $changeTime = $stat['mtime'];
+                                (new Table_availability([
+                                    'file_name' => $file,
+                                    'is_conclusion' => true,
+                                    'md5' => $md5,
+                                    'file_create_time' => $changeTime,
+                                    'userId' => $user->username,
+                                    'patient_name' => $info['patient_name'],
+                                    'execution_area' => $info['execution_area']
+                                ]))->save();
+                                echo TimeHandler::timestampToDate(time()) . "add background to new {$file}\n";
+                                // оповещу мессенджеры о наличии файла
+                                Viber::notifyConclusionLoaded($file);
+                            }
                         }
                     }
                 }

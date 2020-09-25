@@ -111,7 +111,16 @@ class Telegram
                                 $path = FileUtils::saveTempFile($downloadedFile, '.pdf');
                                 if(is_file($path)){
                                     $answer = FileUtils::handleFileUpload($path);
-                                    $file = new \CURLFile($answer, 'application/pdf', GrammarHandler::getFileName($answer));
+                                    // отправлю сообщение с данными о фале
+                                    $fileName = GrammarHandler::getFileName($answer);
+                                    $availItem = Table_availability::findOne(['file_name' => $fileName]);
+                                    if($availItem !== null){
+                                        $bot->sendMessage($message->getChat()->getId(), "Обработано заключение\n
+                                        Имя пациента: {$availItem->patient_name}\n
+                                        Область обследования:{$availItem->execution_area}\n
+                                        Номер обследования: {$availItem->userId}");
+                                    }
+                                    $file = new \CURLFile($answer, 'application/pdf', $fileName);
                                     if(is_file($answer)){
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),

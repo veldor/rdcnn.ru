@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\Emails;
 use app\models\utils\GrammarHandler;
 use app\priv\Info;
 use Throwable;
@@ -46,6 +47,7 @@ class AdministratorActions extends Model
         // верну список пациентов со статусами данных
         $patientsList = User::findAllRegistered();
         if(!empty($patientsList)){
+            /** @var User $item */
             foreach ($patientsList as $item) {
                 if(!empty(Yii::$app->session['center']) && Yii::$app->session['center'] !== 'all' && Utils::isFiltered($item)){
                     continue;
@@ -53,8 +55,22 @@ class AdministratorActions extends Model
                     // проверю, загружены ли данные по пациенту
                     $patientInfo = [];
                     $patientInfo['id'] = $item->username;
+                    $patientInfo['real_id'] = $item->id;
                     $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
                     $patientInfo['conclusionsCount'] = ExecutionHandler::countConclusions($item->username);
+                    if($patientInfo['conclusionsCount'] > 0){
+                        // попробую найти имя пациента
+                        $availItems = Table_availability::findAll(['userId' => $item->username, 'is_conclusion' => 1]);
+                        if($availItems !== null){
+                            $patientInfo['patient_name'] = $availItems[0]->patient_name;
+                            $areas = [];
+                            foreach ($availItems as $availItem) {
+                                $areas[] = $availItem->execution_area;
+                            }
+                            $patientInfo['conclusion_areas'] = $areas;
+                        }
+                    }
+                    $patientInfo['hasMail'] = (bool) Emails::checkExistent($item->id);
                     $response['patientList'][] = $patientInfo;
             }
             $response['startCheckStatus'] = $startCheckStatus;
@@ -182,62 +198,4 @@ class AdministratorActions extends Model
         return ['status' => 2, 'message' => $this->errors];
     }
 
-    public function addConclusion(): array
-    {
-        if($this->validate()){
-            $execution = User::findByUsername($this->executionId);
-            if($execution === null){
-                return ['status' => 3, 'message' => 'Обследование не найдено'];
-            }
-            if(empty($this->conclusion)){
-                return ['status' => 4, 'message' => 'Файл не загрузился, попробуйте ещё раз'];
-            }
-            $counter = 0;
-
-            foreach ($this->conclusion as $file) {
-                if($counter > 0){
-                    $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $execution->username . "-{$counter}.pdf";
-                    $file_name = $execution->username . "-{$counter}.pdf";
-                }
-                else{
-                    $filename = Yii::getAlias('@conclusionsDirectory') . '\\' . $execution->username . '.pdf';
-                    $file_name = $execution->username . '.pdf';
-                }
-                $file->saveAs($filename);
-                $md5 = md5_file($filename);
-                // добавлю заключение в список доступных для скачивания
-                (new Table_availability(['file_name' => $file_name, 'is_conclusion' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $execution->username]))->save();
-                FileUtils::addBackgroundToPDF($filename);
-                // оповещу мессенджеры о наличии файла
-                try {
-                    Viber::notifyConclusionLoaded($file);
-                } catch (Exception $e) {
-                }
-                ++$counter;
-            }
-            return ['status' => 1, 'message' => 'Заключение добавлено'];
-        }
-        return ['status' => 2, 'message' => $this->errors];
-    }
-
-    /**
-     * @return array
-     */
-    public function addExecution(): array
-    {
-        if($this->validate()){
-            $this->executionId = GrammarHandler::toLatin($this->executionId);
-            $execution = User::findByUsername($this->executionId);
-            if($execution === null){
-                return ['status' => 3, 'message' => 'Обследование не найдено'];
-            }
-            if(empty($this->execution)){
-                return ['status' => 4, 'message' => 'Файл не загрузился, попробуйте ещё раз'];
-            }
-            $filename = Yii::getAlias('@executionsDirectory') . '\\' . $execution->username . '.zip';
-            $this->execution->saveAs($filename);
-            return ['status' => 1, 'message' => 'Файлы обследования добавлены'];
-        }
-        return ['status' => 2, 'message' => $this->errors];
-    }
 }

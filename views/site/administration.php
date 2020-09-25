@@ -3,6 +3,7 @@
 use app\assets\AdminAsset;
 use app\models\database\Emails;
 use app\models\ExecutionHandler;
+use app\models\Table_availability;
 use app\models\User;
 use app\models\Utils;
 use nirvana\showloading\ShowLoadingAsset;
@@ -128,34 +129,56 @@ if (!empty($executions)) {
             continue;
         }
         ++$executionsCounter;
-        ?>
-        <tr class="patient" data-id="<?= $execution->username ?>">
-            <td>
-                <a class='btn-link execution-id'
-                   href='/person/<?= $execution->username ?>'><?= $execution->username ?></a>
-                <span class="pull-right"><?= Utils::showDate($execution->created_at) ?></span>
-            </td>
-            <td>
-                <?= Emails::checkExistent($execution->id) ? "<button class='btn btn-default tooltip-enabled' data-toggle='tooltip' data-placement='auto' title='Отправить сообщение с файлами'><span class='glyphicon glyphicon-circle-arrow-right text-info'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/change/<?= $execution->id ?>' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button>" : "<button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/<?= $execution->id ?>' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button>"?>
-            </td>
-            <?= ExecutionHandler::isConclusion($execution->username) ? "<td data-conclusion='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/{$execution->username}' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button></td>" : "<td data-conclusion='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>" ?>
-            <?= ExecutionHandler::isExecution($execution->username) ? "<td data-execution='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>" : "<td data-execution='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>" ?>
-            <td>
-                <a class='btn btn-default activator' data-action='change-password'
-                   data-id='<?= $execution->username ?>' data-toggle='tooltip' data-placement='auto'
+
+        $patientName = Table_availability::getPatientName($execution->username);
+
+        $itemText = "<tr class='patient' data-id='{$execution->username}'>";
+        if($patientName !== null){
+            $itemText .= "<td>
+                            <a class='btn-link execution-id tooltip-enabled' href='/person/{$execution->username}' data-toggle='tooltip' data-placement='auto' title='{$patientName}'>$execution->username</a>
+                            <span class='pull-right'>" . Utils::showDate($execution->created_at) . "</span>
+                        </td>";
+        }
+        else{
+            $itemText .= "<td>
+                            <a class='btn-link execution-id' href='/person/{$execution->username}' >$execution->username</a>
+                            <span class='pull-right'>" . Utils::showDate($execution->created_at) . "</span>
+                        </td>";
+        }
+
+        if(Emails::checkExistent($execution->id)){
+            $itemText .= "<td class='mail-td'><button class='btn btn-default tooltip-enabled activator' data-action='/send-info-mail/{$execution->id}' data-toggle='tooltip' data-placement='auto' title='Отправить письмо'><span class='glyphicon glyphicon-circle-arrow-right text-info'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/{$execution->id}' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button></td>";
+        }
+        else{
+            $itemText .= "<td class='mail-td'><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/{$execution->id}' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button></td>";
+        }
+        if(ExecutionHandler::isConclusion($execution->username)){
+            $itemText .= "<td data-conclusion='$execution->username' class='field-success tooltip-enabled'  data-toggle='tooltip' data-container='body' data-placement='auto' title='" . Table_availability::getConclusionAreas($execution->username) . "'><span class='glyphicon glyphicon-ok text-success status-icon'></span><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/{$execution->username}' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button></td>";
+        }
+        else{
+            $itemText .= "<td data-conclusion='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>";
+        }
+        if(ExecutionHandler::isExecution($execution->username)){
+            $itemText .= "<td data-execution='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>";
+        }
+        else{
+            $itemText .= "<td data-execution='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>";
+        }
+        $itemText .= "<td>
+                <a class='btn btn-default custom-activator' data-action='change-password'
+                   data-id='{$execution->username}' data-toggle='tooltip' data-placement='auto'
                    title='Сменить пароль'><span class='text-info glyphicon glyphicon-retweet'></span></a>
-                <a class='btn btn-default activator' data-action='delete' data-id='<?= $execution->username ?>'
+                <a class='btn btn-default custom-activator' data-action='delete' data-id='{$execution->username}'
                    data-toggle='tooltip' data-placement='auto' title='Удалить запись'><span
                             class='text-danger glyphicon glyphicon-trash'></span></a>
-            </td>
-        </tr>
-        <?php
+            </td>";
+        $itemText .= "</tr>";
+        echo $itemText;
     }
     echo '</tbody></table>';
 }
 if ($executionsCounter === 0) {
-    echo "<table class='table-hover table'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'></tbody></table>";
-    echo "<div class='col-xs-12'><h2 class='text-center'>Обследований не зарегистрировано</div>";
+    echo "<div id='noExecutionsRegistered' class='col-xs-12'><h2 class='text-center'>Обследований не зарегистрировано</div>";
 }
 
 echo "<div class='col-xs-12 text-center'>";

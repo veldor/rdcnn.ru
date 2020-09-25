@@ -8,7 +8,12 @@ use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
 use app\models\utils\FilesHandler;
+use app\models\utils\GrammarHandler;
+use app\models\utils\MailHandler;
 use app\models\utils\Management;
+use app\models\utils\PdfParser;
+use Ottosmops\Pdftotext\Extract;
+use Spatie\PdfToText\Pdf;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -42,6 +47,7 @@ class AdministratorController extends Controller
                             'delete-unhandled-folder',
                             'rename-unhandled-folder',
                             'print-missed-conclusions-list',
+                            'send-info-mail',
                             'test'
                         ],
                         'roles' => [
@@ -108,38 +114,6 @@ class AdministratorController extends Controller
         throw new NotFoundHttpException();
     }
 
-    /**
-     * @return array
-     * @throws NotFoundHttpException
-     */
-    public function actionAddConclusion(): array
-    {
-        if(Yii::$app->request->isPost){
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            $model = new AdministratorActions(['scenario' => AdministratorActions::SCENARIO_ADD_CONCLUSION]);
-            $model->load(Yii::$app->request->post());
-            $model->conclusion = UploadedFile::getInstances($model, 'conclusion');
-            return $model->addConclusion();
-        }
-        throw new NotFoundHttpException();
-    }
-
-    /**
-     * @return array
-     * @throws NotFoundHttpException
-     * @throws Exception
-     */
-    public function actionAddExecutionData(): array
-    {
-        if(Yii::$app->request->isPost){
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            $model = new AdministratorActions(['scenario' => AdministratorActions::SCENARIO_ADD_CONCLUSION]);
-            $model->load(Yii::$app->request->post());
-            $model->execution = UploadedFile::getInstance($model, 'execution');
-            return $model->addExecution();
-        }
-        throw new NotFoundHttpException();
-    }
 
     /**
      * @return array
@@ -186,5 +160,12 @@ class AdministratorController extends Controller
      */
     public function actionTest(): void
     {
+
+    }
+
+    public function actionSendInfoMail($id){
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        // отправлю письмо с информацией, если есть адрес
+        return MailHandler::sendInfoMail($id);
     }
 }

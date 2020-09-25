@@ -80,10 +80,10 @@ class MyErrorHandler
                 // получу текст письма
                 $errorFile = Yii::$app->basePath . '\\errors\\errors.txt';
                 if(is_file($errorFile)){
-                    $text = file_get_contents($errorFile);
+                    $text = MailHandler::getMailText(file_get_contents($errorFile));
                     // отправлю письмо
                     $mail = Yii::$app->mailer->compose()
-                        ->setFrom([MailSettings::getInstance()->address => 'Ошибки сервера РДЦ'])
+                        ->setFrom([$settingsArray[0] => 'Ошибки сервера РДЦ'])
                         ->setSubject('Найдены новые ошибки')
                         ->setHtmlBody($text)
                         ->setTo(['eldorianwin@gmail.com' => 'Мне']);
@@ -94,6 +94,9 @@ class MyErrorHandler
                 }
             }
         }
+        else {
+            echo 'no mail settings file';
+        }
     }
 
     private static function asyncSendErrors(): void
@@ -103,7 +106,7 @@ class MyErrorHandler
             $command = "$file console/send-errors";
             $outFilePath =  Yii::$app->basePath . '/logs/mail_info_file.log';
             $outErrPath = Yii::$app->basePath . '/logs/mail_info_err.log';
-            $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
+            $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &';
             try{
                 // попробую вызвать процесс асинхронно
                 $handle = new \COM('WScript.Shell');

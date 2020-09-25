@@ -26,7 +26,7 @@ use yii\console\ExitCode;
  */
 class ConsoleController extends Controller
 {
-    public function init()
+    public function init():void
     {
         defined('YII_DEBUG') or define('YII_DEBUG', true);
         defined('YII_ENV') or define('YII_ENV', 'dev');
@@ -37,7 +37,7 @@ class ConsoleController extends Controller
      * @return int Exit code
      * @throws \Exception
      */
-    public function actionIndex()
+    public function actionIndex(): int
     {
         FileUtils::writeUpdateLog('start update check : ' . TimeHandler::timestampToDate(time()));
         // проверю, не запущено ли уже обновление, если запущено- ничего не делаю

@@ -37,16 +37,4 @@ class Management extends Model
         }
         return false;
     }
-
-    public static function createMailTable(): void
-    {
-        $connection = Yii::$app->getDb();
-        $command = $connection->createCommand("
-            CREATE TABLE `rdcnn`.`mailing`( `id` INT UNSIGNED NOT NULL AUTO_INCREMENT, `address` VARCHAR(255) NOT NULL, `patient_id` INT(11) NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `foreign_patient_id` FOREIGN KEY (`patient_id`) REFERENCES `rdcnn`.`person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE ); 
-");
-        try {
-            $result = $command->execute();
-        } catch (\yii\db\Exception $e) {
-        }
-    }
 }

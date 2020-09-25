@@ -77,14 +77,14 @@ function handleActivator(element) {
 
 function sendFiles(location, files, totalLength) {
     function msToTime(s) {
-        var ms = s % 1000;
+        let ms = s % 1000;
         s = (s - ms) / 1000;
-        var secs = s % 60;
+        let secs = s % 60;
         s = (s - secs) / 60;
-        var mins = s % 60;
-        var hrs = (s - mins) / 60;
+        let minutes = s % 60;
+        let hrs = (s - minutes) / 60;
 
-        return hrs + 'ч ' + mins + 'м ' + secs + 'с';
+        return hrs + 'ч ' + minutes + 'м ' + secs + 'с';
     }
 
     let startTime = new Date().getTime();
@@ -121,11 +121,11 @@ function sendFiles(location, files, totalLength) {
     }
 
     function stateChange(event) {
-        if (event.target.readyState == 4) {
-            if (event.target.status == 200) {
+        if (event.target.readyState === 4) {
+            if (event.target.status === 200) {
                 console.log(event);
                 // проверю, если загружены все файлы- покажу уведомление об успешной загрузке, иначе- гружу следующий файл
-                if(counter === files.length){
+                if (counter === files.length) {
                     deleteWaiter();
                     normalReload();
                     makeInformer(
@@ -133,8 +133,7 @@ function sendFiles(location, files, totalLength) {
                         "Добавление файлов",
                         "Все файлы загружены!"
                     );
-                }
-                else{
+                } else {
                     totalLoaded += lastFileSize;
                     // гружу следующий файл
                     file = files[counter];
@@ -242,7 +241,7 @@ $(function () {
     });
 
 
-    let activators = $('.activator');
+    let activators = $('.custom-activator');
     // назначу каждому из активаторов функцию
     activators.each(function () {
         handleActivator($(this));
@@ -353,7 +352,18 @@ function checkPatientDataFilling() {
                 }
             }
             if (i === "patientList") {
+                // найден список пациентов
                 if (answer.hasOwnProperty(i) && answer[i].length > 0) {
+                    // найдены пациенты. Проверю, если до этого пациентов не было,
+                    // уберу надпись, что обследования не зарегистрированы
+                    let noExecutionsRegisteredDiv = $('div#noExecutionsRegistered');
+                    if (noExecutionsRegisteredDiv.length === 1) {
+                        noExecutionsRegisteredDiv.remove();
+                        // добавлю таблицу
+                        let table = "<table class='table-hover table'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'></tbody></table>";
+                        $('div#mainWrap>div.container').append(table);
+                    }
+                    // отображу счётчики
                     patientsCount.text(answer[i].length);
                     let withoutExecutionsCounter = 0;
                     let withoutConclusionsCounter = 0;
@@ -363,26 +373,60 @@ function checkPatientDataFilling() {
                         let user = $('tr[data-id="' + item['id'] + '"]');
                         if (!user.length) {
                             // добавлю новый элемент наверх списка
-                            let td = $('<tr class="new-element patient" data-id="' + item['id'] + '">\n' +
-                                '            <td>\n' +
-                                '                <a class="btn-link execution-id" href="/person/' + item['id'] + '">' + item['id'] + '</a>\n' +
-                                '            </td>\n' +
-                                '            <td>\n' +
-                                '            </td>\n' +
-                                '            <td data-conclusion="' + item['id'] + '"><span class="glyphicon glyphicon-remove text-danger"></span></td>\n' +
-                                '            <td data-execution="' + item['id'] + '"><span class="glyphicon glyphicon-remove text-danger"></span></td>\n' +
-                                '            <td>\n' +
-                                '                <a class="btn btn-default activator" data-action="change-password" data-id="' + item['id'] + '" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Сменить пароль"><span class="text-info glyphicon glyphicon-retweet"></span></a>\n' +
-                                '                <a class="btn btn-default activator" data-action="delete" data-id="' + item['id'] + '" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Удалить запись"><span class="text-danger glyphicon glyphicon-trash"></span></a>\n' +
-                                '            </td>\n' +
-                                '        </tr>');
+                            let td = '<tr class="new-element patient" data-id="' + item['id'] + '">';
 
+                            // если определено имя пациента- покажу его при наведении на номер обследования
+                            if (item['patient_name']) {
+                                td += '<td><a class="btn-link execution-id tooltip-enabled" href="/person/' + item['id'] + '"  data-toggle="tooltip" data-placement="auto" title="' + item['patient_name'] + '">' + item['id'] + '</a>';
+                            } else {
+                                td += '<td><a class="btn-link execution-id" href="/person/' + item['id'] + '">' + item['id'] + '</a>';
+                            }
+
+                            // проверю наличие почты
+                            if (item['hasMail']) {
+                                td += "<td class='mail-td'><button class='btn btn-default tooltip-enabled activator' data-action='/send-info-mail/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Отправить письмо'><span class='glyphicon glyphicon-circle-arrow-right text-info'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button></td>";
+                            } else {
+                                td += "<td class='mail-td'><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button></td>";
+                            }
+
+                            // проверю наличие заключения
+                            if (item['conclusionsCount'] > 0) {
+                                if (item['conclusion_areas']) {
+                                    let areasText = '';
+                                    for(let i = 0; item['conclusion_areas'][i]; i++){
+                                        areasText += item['conclusion_areas'][i] + " \n";
+                                    }
+                                    td += "<td><span class='glyphicon glyphicon-ok text-success status-icon' data-toggle='tooltip' data-placement='auto' title='" + areasText + "'></span><b>(" + item['conclusionsCount'] + ")</b></td>";
+                                } else {
+                                    td += "<td><span class='glyphicon glyphicon-ok text-success status-icon'></span><b>(" + item['conclusionsCount'] + ")</b></td>";
+                                }
+
+                            } else {
+                                td += "<td><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"
+                            }
+                            // проверю наличие снимков
+                            if (item['execution']) {
+                                td += "<td><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>";
+                            } else {
+                                td += "<td><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"
+                            }
+
+                            td+= "<td><a class=\"btn btn-default custom-activator\" data-action=\"change-password\" data-id=\"" + item['id'] + "\" data-toggle=\"tooltip\" data-placement=\"auto\" title=\"\" data-original-title=\"Сменить пароль\"><span class=\"text-info glyphicon glyphicon-retweet\"></span></a><a class=\"btn btn-default custom-activator\" data-action=\"delete\" data-id=\"" + item['id'] + "\" data-toggle=\"tooltip\" data-placement=\"auto\" title=\"\" data-original-title=\"Удалить запись\"><span class=\"text-danger glyphicon glyphicon-trash\"></span></a></td>"
+
+                            td += '</tr>';
+                            td = $(td);
+                            let addMailBtn = td.find('.add-mail');
+                            addMailBtn.on('click.add', function () {
+                                sendAjax('get', $(this).attr('data-action'), simpleModalHandler);
+                            });
                             // активирую функции
-                            let activators = td.find('.activator');
+                            let activators = td.find('.custom-activator');
                             // назначу каждому из активаторов функцию
                             activators.each(function () {
                                 handleActivator($(this));
                             });
+
+                            td.find('.tooltip-enabled').tooltip();
 
                             let loaders = td.find('.loader');
                             loaders.each(function () {
@@ -391,22 +435,52 @@ function checkPatientDataFilling() {
 
                             $('tbody#executionsBody').prepend(td);
                         }
-                        let conclusionContainer = $('td[data-conclusion="' + item['id'] + '"]');
-                        if (conclusionContainer.length) {
-                            if (item['conclusionsCount'] > 0) {
-                                conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span> <b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button>").removeClass('field-danger').addClass('field-success');
-                                enableTooltips();
-                                handleAjaxActivators();
-                            } else {
-                                conclusionContainer.html("<span class='glyphicon glyphicon-remove text-danger status-icon'></span>").addClass('field-danger').removeClass('field-success');
+                        else{
+                            // запись найдена, проверю актуальность данных
+                            // проверю наличие фиo пациента
+                            if(item['patient_name']){
+                                // изменю текст первой ячейки
+                                user.find('a.execution-id').attr('data-toggle', 'tooltip').attr('data-placement', 'auto').attr('data-original-title', item['patient_name']).tooltip();
                             }
-                        }
-                        let executionContainer = $('td[data-execution="' + item['id'] + '"]');
-                        if (executionContainer.length) {
-                            if (item['execution']) {
-                                executionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span>").removeClass('field-danger').addClass('field-success');
-                            } else {
-                                executionContainer.html("<span class='glyphicon glyphicon-remove text-danger status-icon'></span>").addClass('field-danger').removeClass('field-success');
+                            if(item['hasMail']){
+                                user.find('td.mail-td').html("<button class='btn btn-default tooltip-enabled activator' data-action='/send-info-mail/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Отправить письмо'><span class='glyphicon glyphicon-circle-arrow-right text-info'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button>");
+                            }
+                            else{
+                                user.find('td.mail-td').html("<button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button>")
+                            }
+                            let addMailBtn = user.find('.add-mail');
+                            addMailBtn.on('click.add', function () {
+                                sendAjax('get', $(this).attr('data-action'), simpleModalHandler);
+                            });
+                            user.find('.tooltip-enabled').tooltip();
+
+                            let conclusionContainer = $('td[data-conclusion="' + item['id'] + '"]');
+                            if (conclusionContainer.length) {
+                                if (item['conclusionsCount'] > 0) {
+                                    conclusionContainer.addClass('field-success').removeClass('field-danger');
+                                    if (item['conclusion_areas']) {
+                                        let areasText = '';
+                                        for(let i = 0; item['conclusion_areas'][i]; i++){
+                                            areasText += item['conclusion_areas'][i] + " \n";
+                                        }
+                                        conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon' data-toggle='tooltip' data-placement='auto' title='" + areasText + "'></span><b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button>") ;
+                                    } else {
+                                        conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span><b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button>");
+                                    }
+                                } else {
+                                    conclusionContainer.removeClass('field-success').addClass('field-danger');
+                                    conclusionContainer.html("<span class='glyphicon glyphicon-remove text-danger status-icon'></span>").addClass('field-danger').removeClass('field-success');
+                                }
+                            }
+                            let executionContainer = $('td[data-execution="' + item['id'] + '"]');
+                            if (executionContainer.length) {
+                                if (item['execution']) {
+                                    executionContainer.addClass('field-success').removeClass('field-danger');
+                                    executionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span>").removeClass('field-danger').addClass('field-success');
+                                } else {
+                                    executionContainer.removeClass('field-success').addClass('field-danger');
+                                    executionContainer.html("<span class='glyphicon glyphicon-remove text-danger status-icon'></span>").addClass('field-danger').removeClass('field-success');
+                                }
                             }
                         }
                         if (!item['execution']) {
@@ -416,6 +490,7 @@ function checkPatientDataFilling() {
                             ++withoutConclusionsCounter;
                         }
                     }
+                    handleAjaxActivators();
                     withoutConclusions.text(withoutConclusionsCounter);
                     withoutExecutions.text(withoutExecutionsCounter);
                     // теперь нужно убрать удалённые обследования
