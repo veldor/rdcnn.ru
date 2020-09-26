@@ -4,6 +4,7 @@
 namespace app\models\utils;
 
 
+use app\models\Table_availability;
 use app\models\Table_statistics;
 use app\models\User;
 use Yii;
@@ -56,18 +57,22 @@ class DownloadHandler
                     $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $href;
                     // проверю, если файл результатов сканирования присутствует- выдам его на загрузку
                     if (is_file($file)) {
-                        if($print){
-                            Yii::$app->response->sendFile($file, 'Заключение врача по обследованию №' . $href, ['inline' => true]);
-                            if (!Yii::$app->user->can('manage')) {
-                                // если обследование скачал пациент а не администратор- посчитаю скачивание
-                                Table_statistics::plusConclusionPrint($executionNumber);
+                        // получу данные о пациенте
+                        $avail = Table_availability::findOne(['file_name' => $href]);
+                        if($avail !== null){
+                            if($print){
+                                Yii::$app->response->sendFile($file, 'МРТ ' . "{$avail->execution_area}.pdf", ['inline' => true]);
+                                if (!Yii::$app->user->can('manage')) {
+                                    // если обследование скачал пациент а не администратор- посчитаю скачивание
+                                    Table_statistics::plusConclusionPrint($executionNumber);
+                                }
                             }
-                        }
-                        else{
-                            Yii::$app->response->sendFile($file, 'Заключение врача по обследованию №' . $href);
-                            if (!Yii::$app->user->can('manage')) {
-                                // если обследование скачал пациент а не администратор- посчитаю скачивание
-                                Table_statistics::plusConclusionDownload($executionNumber);
+                            else{
+                                Yii::$app->response->sendFile($file, 'МРТ ' . "{$avail->execution_area}.pdf");
+                                if (!Yii::$app->user->can('manage')) {
+                                    // если обследование скачал пациент а не администратор- посчитаю скачивание
+                                    Table_statistics::plusConclusionDownload($executionNumber);
+                                }
                             }
                         }
                         return;

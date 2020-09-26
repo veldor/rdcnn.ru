@@ -530,10 +530,13 @@ class Viber extends Model
                 // получу путь к файлу
                 if ($linkInfo->file_type === 'execution') {
                     $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
-                    $fileName = 'Архив сканирования по обследованию ' . $executionInfo->username . '.zip';
+                    $fileName = $executionInfo->username . '.zip';
                 } else if ($linkInfo->file_type === 'conclusion') {
-                    $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $linkInfo->file_name;
-                    $fileName = 'Заключение врача по обследованию ' . $executionInfo->username . '.pdf';
+                    $availData = Table_availability::findOne(['file_name' => $linkInfo->file_name]);
+                    if($availData !== null){
+                        $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $linkInfo->file_name;
+                        $fileName = 'МРТ ' . $availData->execution_area . ' ' . $availData->patient_name . '.pdf';
+                    }
                 }
             }
             if (!empty($file) && !empty($fileName) && is_file($file)) {

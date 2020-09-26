@@ -25,6 +25,13 @@ $this->title = 'РДЦ, обследование ' . $execution->username;
 
 <h1 class="text-center">Обследование № <?= $execution->username ?></h1>
 
+<?php
+$name = Table_availability::getPatientName($execution->username);
+if($name !== null){
+    echo "<h2 class='text-center'>{$name}</h2>";
+}
+?>
+
 <div class="col-sm-12 col-md-6 col-md-offset-3">
 
     <?php
@@ -40,21 +47,10 @@ $this->title = 'РДЦ, обследование ' . $execution->username;
         if (empty($conclusions)) {
             echo "<a id='conclusionNotReadyBtn' class='btn btn-primary btn-block margin with-wrap disabled' role='button'>Заключение врача в работе</a>";
         } else {
-            $counter = 0;
-            if (count($conclusions) > 1) {
-                $counter = 1;
-                $counterEnd = ' №' . $counter;
-            } else {
-                $counterEnd = '';
-            }
             foreach ($conclusions as $conclusion) {
-                if ($counter > 0) {
-                    $counterEnd = ' №' . $counter;
-                    ++$counter;
-                }
                 echo "
-                <a href='" . Url::toRoute(['/download/conclusion', 'href' => $conclusion]) . "' class='btn btn-primary btn-block margin with-wrap conclusion hinted' data-href='$conclusion'>Загрузить заключение врача$counterEnd</a>
-                <a target='_blank' href='" . Url::toRoute(['/download/print-conclusion', 'href' => $conclusion]) . "' class='btn btn-info btn-block margin with-wrap print-conclusion hinted' data-href='$conclusion'>Распечатать заключение врача$counterEnd</a>
+                <a href='" . Url::toRoute(['/download/conclusion', 'href' => $conclusion->file_name]) . "' class='btn btn-primary btn-block margin with-wrap conclusion hinted' data-href='$conclusion->file_name'>Загрузить заключение врача<br/>{$conclusion->execution_area}</a>
+                <a target='_blank' href='" . Url::toRoute(['/download/print-conclusion', 'href' => $conclusion->file_name]) . "' class='btn btn-info btn-block margin with-wrap print-conclusion hinted' data-href='$conclusion->file_name'>Распечатать заключение врача<br/>{$conclusion->execution_area}</a>
 ";
             }
         }

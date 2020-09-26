@@ -6,11 +6,7 @@ namespace app\models\utils;
 
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
-use app\models\Table_availability;
-use app\models\User;
-use app\models\Viber;
-use app\priv\Info;
-use http\Exception\RuntimeException;
+use RuntimeException;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
@@ -33,6 +29,11 @@ class FilesHandler extends Model
                 try {
                     FileUtils::handleFileUpload($savedFile);
                 } catch (Exception $e) {
+                } finally {
+                    try{
+                        unlink($savedFile);
+                    }
+                    catch (\Exception $e){}
                 }
                 break;
             case 'zip':

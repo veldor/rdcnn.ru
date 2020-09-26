@@ -425,9 +425,10 @@ class FileUtils
                     ExecutionHandler::createUser(GrammarHandler::getBaseFileName($conclusionFile));
                 }
                 $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
-                $md5 = md5_file($path);
-                $item = new Table_availability([
-                    'file_name' => $conclusionFile,
+                if(!Table_availability::isRegistered($conclusionFile)){
+                    $md5 = md5_file($path);
+                    $item = new Table_availability([
+                        'file_name' => $conclusionFile,
                         'is_conclusion' => true,
                         'md5' => $md5,
                         'file_create_time' => time(),
@@ -435,10 +436,11 @@ class FileUtils
                         'patient_name' => $actionResult['patient_name'],
                         'execution_area' => $actionResult['execution_area']
                     ]);
-                $item->save();
-                // отправлю оповещение о добавленном контенте, если указан адрес почты
-                if(Emails::checkExistent($user->id)){
-                    Emails::sendEmail($item);
+                    $item->save();
+                    // отправлю оповещение о добавленном контенте, если указан адрес почты
+                    if(Emails::checkExistent($user->id)){
+                        Emails::sendEmail($item);
+                    }
                 }
                 return $path;
             }

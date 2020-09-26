@@ -506,15 +506,14 @@ class ExecutionHandler extends Model
 
     public static function deleteAllConclusions($executionNumber): void
     {
-        $conclusionFile = Info::CONC_FOLDER . '\\' . $executionNumber . '.pdf';
-        if (is_file($conclusionFile)) {
-            unlink($conclusionFile);
-        }
-        self::deleteAddConcs($executionNumber);
         // также удалю информацию о доступности заключений из таблицы
         $avail = Table_availability::findAll(['userId' => $executionNumber, 'is_conclusion' => 1]);
         if($avail !== null){
             foreach ($avail as $item) {
+                $conclusionFile = Info::CONC_FOLDER . '\\' . $item->file_name;
+                if(is_file($conclusionFile)){
+                    unlink($conclusionFile);
+                }
                 $item->delete();
             }
         }

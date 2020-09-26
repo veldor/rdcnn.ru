@@ -76,18 +76,11 @@ class Table_availability extends ActiveRecord
 
     /**
      * @param $id
-     * @return array
+     * @return Table_availability[]
      */
     public static function getConclusions($id): array
     {
-        $answer = [];
-        $existentConclusions = self::findAll(['userId' => $id, 'is_conclusion' => true]);
-        if(!empty($existentConclusions)){
-            foreach ($existentConclusions as $existentConclusion) {
-                $answer[] = $existentConclusion->file_name;
-            }
-        }
-        return $answer;
+        return self::findAll(['userId' => $id, 'is_conclusion' => true]);
     }
 
     public static function getPatientName(string $username)
@@ -108,5 +101,10 @@ class Table_availability extends ActiveRecord
             }
         }
         return $answer;
+    }
+
+    public static function isRegistered($conclusionFile)
+    {
+        return (bool) self::find()->where(['file_name' => $conclusionFile])->count();
     }
 }

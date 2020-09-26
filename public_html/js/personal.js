@@ -109,13 +109,11 @@ $(function () {
                     startTitleNotificator();
                     // актуализирую данные
                     let endCounter = conclusionsCount;
-                    let counterEnd;
                     $(data.conclusions).each(function () {
                         // если ссылка на заключение уже есть- ничего не делаю, если нет- добавляю ссылку
-                        if($('a.conclusion[data-href="' + this + '"]').length === 0){
+                        if($('a.conclusion[data-href="' + this.file_name + '"]').length === 0){
                             ++endCounter;
-                            counterEnd = '#' + endCounter;
-                            container.append("<a href='/conclusion/" + this + "' class='btn btn-primary btn-block margin with-wrap conclusion' data-href='" + this + "'>Загрузить заключение врача " + counterEnd + "</a><a target='_blank' href='/print-conclusion/" + this + "' class='btn btn-info btn-block margin with-wrap print-conclusion hinted' data-href='" + this + "'>Распечатать заключение врача " + counterEnd + "</a>");
+                            container.append("<a href='/conclusion/" + this.file_name + "' class='btn btn-primary btn-block margin with-wrap conclusion' data-href='" + this.file_name + "'>Загрузить заключение врача <br/>" + this.execution_area + "</a><a target='_blank' href='/print-conclusion/" + this.file_name + "' class='btn btn-info btn-block margin with-wrap print-conclusion hinted' data-href='" + this.file_name + "'>Распечатать заключение врача<br/>" + this.execution_area + "</a>");
                         }
                     });
                 }
@@ -129,31 +127,24 @@ $(function () {
                 if(existentConclusions.length > 0 && data.conclusions.length > 0){
                     // удалю заглушку об отсутствии заключений врача
                     $('a#conclusionNotReadyBtn').remove();
-                    existentConclusions.each(function () {
+                    $(existentConclusions).each(function () {
                         let href = $(this).attr('data-href');
-                        // если данного заключения нет в списке актуальных- удалю его и ссылку на распечатывание заключения
-                        if(!data.conclusions.includes(href)){
-                            $('a.print-conclusion[data-href="' + href + '"]').remove();
-                            $(this.remove());
+                        let existent = false;
+
+                        let counter = 0;
+                        while (data.conclusions[counter]){
+                            if(data.conclusions[counter].file_name === href){
+                                existent = true;
+                                break;
+                            }
+                            counter++;
+                        }
+                        if(!existent){
+                                $('a.print-conclusion[data-href="' + href + '"]').remove();
+                                $(this.remove());
+                            console.log('remove conclusion');
                         }
                     });
-                }
-                // тут переназову список по порядку
-                existentConclusions = getConclusions();
-                if(existentConclusions.length > 0){
-                    // если заключение только одно- оно идёт без номера
-                    if(existentConclusions.length === 1){
-                        existentConclusions.text('Загрузить заключение врача');
-                        $('a.print-conclusion[data-href="' + existentConclusions.attr('data-href') + '"]').text('Распечатать заключение врача');
-                    }
-                    else{
-                        serialNumber = 1;
-                        existentConclusions.each(function () {
-                            $(this).text('Загрузить заключение врача №' + serialNumber);
-                            $('a.print-conclusion[data-href="' + $(this).attr('data-href') + '"]').text('Распечатать заключение врача №' + serialNumber);
-                            serialNumber++;
-                        });
-                    }
                 }
                 // обновлю данные о количестве заключений
                 conclusionsCount = data.conclusions.length;
