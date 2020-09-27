@@ -7,13 +7,8 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
-use app\models\utils\FilesHandler;
-use app\models\utils\GrammarHandler;
 use app\models\utils\MailHandler;
 use app\models\utils\Management;
-use app\models\utils\PdfParser;
-use Ottosmops\Pdftotext\Extract;
-use Spatie\PdfToText\Pdf;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -21,7 +16,6 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use yii\web\UploadedFile;
 
 class AdministratorController extends Controller
 {
@@ -163,7 +157,8 @@ class AdministratorController extends Controller
 
     }
 
-    public function actionSendInfoMail($id){
+    public function actionSendInfoMail($id): array
+    {
         Yii::$app->response->format = Response::FORMAT_JSON;
         // отправлю письмо с информацией, если есть адрес
         return MailHandler::sendInfoMail($id);

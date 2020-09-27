@@ -15,6 +15,7 @@ use yii\helpers\Url;
  * @property int $id [int(10) unsigned]
  * @property string $address [varchar(255)]
  * @property string $patient_id [int(11)]
+ * @property bool $mailed_yet [tinyint(1)]
  */
 class Emails extends ActiveRecord
 {

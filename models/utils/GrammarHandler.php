@@ -68,4 +68,35 @@ class GrammarHandler
         }
         return null;
     }
+
+    /**
+     * <b>Получение имени и отчества пациента</b>
+     * @param $name
+     * @return string|null
+     */
+    public static function handlePersonals($name)
+    {
+        if ($data = self::personalsToArray($name)) {
+            if (is_array($data)) {
+                return "{$data['name']} {$data['fname']}";
+            }
+            return $data;
+
+        }
+        return $name;
+    }
+
+    /**
+     * @param $string
+     * @return array|string
+     */
+    public static function personalsToArray($string)
+    {
+        // извлекаю имя и отчество из персональных данных
+        $result = explode(' ', $string);
+        if (count($result) === 3) {
+            return ['lname' => $result[0], 'name' => $result[1], 'fname' => $result[2]];
+        }
+        return $string;
+    }
 }

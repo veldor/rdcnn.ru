@@ -384,7 +384,8 @@ function checkPatientDataFilling() {
 
                             // проверю наличие почты
                             if (item['hasMail']) {
-                                td += "<td class='mail-td'><button class='btn btn-default tooltip-enabled activator' data-action='/send-info-mail/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Отправить письмо'><span class='glyphicon glyphicon-circle-arrow-right text-info'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button></td>";
+                                let hint = item['mailed'] ? 'Отправить письмо(уже отправлялось)' : 'Отправить письмо';
+                                td += "<td class='mail-td'><button class='btn btn-default tooltip-enabled activator' data-action='/send-info-mail/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='" + hint + "'><span class='glyphicon glyphicon-circle-arrow-right text-info'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button></td>";
                             } else {
                                 td += "<td class='mail-td'><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button></td>";
                             }
@@ -443,7 +444,9 @@ function checkPatientDataFilling() {
                                 user.find('a.execution-id').attr('data-toggle', 'tooltip').attr('data-placement', 'auto').attr('data-original-title', item['patient_name']).tooltip();
                             }
                             if(item['hasMail']){
-                                user.find('td.mail-td').html("<button class='btn btn-default tooltip-enabled activator' data-action='/send-info-mail/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Отправить письмо'><span class='glyphicon glyphicon-circle-arrow-right text-info'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button>");
+                                let hint = item['mailed'] ? 'Отправить письмо<br/>(уже отправлялось)' : 'Отправить письмо';
+                                let color = item['mailed'] ? 'text-danger' : 'text-info';
+                                user.find('td.mail-td').html("<button class='btn btn-default tooltip-enabled activator' data-action='/send-info-mail/" + item['real_id'] + "' data-toggle='tooltip' data-html='true' data-placement='auto' title='" + hint + "'><span class='glyphicon glyphicon-circle-arrow-right " + color + "'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button>");
                             }
                             else{
                                 user.find('td.mail-td').html("<button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button>")

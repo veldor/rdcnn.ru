@@ -61,7 +61,7 @@ class AdministratorActions extends Model
                     if($patientInfo['conclusionsCount'] > 0){
                         // попробую найти имя пациента
                         $availItems = Table_availability::findAll(['userId' => $item->username, 'is_conclusion' => 1]);
-                        if($availItems !== null){
+                        if($availItems !== null && count($availItems) > 0){
                             $patientInfo['patient_name'] = $availItems[0]->patient_name;
                             $areas = [];
                             foreach ($availItems as $availItem) {
@@ -70,7 +70,11 @@ class AdministratorActions extends Model
                             $patientInfo['conclusion_areas'] = $areas;
                         }
                     }
-                    $patientInfo['hasMail'] = (bool) Emails::checkExistent($item->id);
+                    $mailInfo = Emails::findOne(['patient_id' => $item->id]);
+                    $patientInfo['hasMail'] = (bool) $mailInfo;
+                    if($mailInfo !== null){
+                        $patientInfo['mailed'] = $mailInfo->mailed_yet;
+                    }
                     $response['patientList'][] = $patientInfo;
             }
             $response['startCheckStatus'] = $startCheckStatus;

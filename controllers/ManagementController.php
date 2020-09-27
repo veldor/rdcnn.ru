@@ -46,6 +46,7 @@ class ManagementController extends Controller
                             'add-backgrounds',
                             'create-mail-table',
                             'clear-blacklist-table',
+                            'change-data-table',
                             'handle-mail',
                             'add-mail',
                             'change-mail',
@@ -251,5 +252,14 @@ class ManagementController extends Controller
         // удалю все записи из чёрного списка
         Table_blacklist::clear();
         return ['status' => 1, 'message' => 'Чёрный список вычищен'];
+    }
+
+    public function actionChangeDataTable(){
+        $connection = Yii::$app->getDb();
+        $command = $connection->createCommand("ALTER TABLE `rdcnn`.`dataavailability` ADD COLUMN `patient_name` VARCHAR(255) NULL AFTER `md5`, ADD COLUMN `execution_area` VARCHAR(255) NULL AFTER `patient_name`;");
+        $command->execute();
+        $command = $connection->createCommand(" ALTER TABLE `rdcnn`.`mailing` ADD COLUMN `mailed_yet` BOOL DEFAULT 0 NULL AFTER `patient_id`; 
+");
+        $command->execute();
     }
 }
