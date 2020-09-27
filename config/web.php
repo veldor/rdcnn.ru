@@ -1,10 +1,19 @@
 <?php
 
+use yii\caching\FileCache;
+use app\models\User;
+use yii\rbac\DbManager;
+use yii\swiftmailer\Mailer;
+use yii\log\FileTarget;
+use yii\web\UrlNormalizer;
+use yii\gii\Module;
+
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 $urlRules = require __DIR__ . '/rules.php';
 $mailSettings = require __DIR__ . '/mail_settings.php';
 
+/** @noinspection SpellCheckingInspection */
 $config = [
     'id' => 'rdcnn',
     'name' => 'Личный кабинет РДЦ',
@@ -26,21 +35,21 @@ $config = [
             'cookieValidationKey' => 'gxkNeMijVac31ZSkIruoBDLZThktrOJr',
         ],
         'cache' => [
-            'class' => 'yii\caching\FileCache',
+            'class' => FileCache::class,
         ],
         'user' => [
-            'identityClass' => 'app\models\User',
+            'identityClass' => User::class,
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-template', 'httpOnly' => true],
         ],
         'authManager' => [
-            'class' => 'yii\rbac\DbManager',
+            'class' => DbManager::class,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
         'mailer' => [
-            'class' => 'yii\swiftmailer\Mailer',
+            'class' => Mailer::class,
             'useFileTransport' => false,
             'messageConfig' => [
                 'charset' => 'UTF-8',
@@ -68,7 +77,7 @@ $config = [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
-                    'class' => 'yii\log\FileTarget',
+                    'class' => FileTarget::class,
                     'levels' => ['error', 'warning'],
                 ],
             ],
@@ -79,7 +88,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'normalizer' => [
-                'class' => 'yii\web\UrlNormalizer',
+                'class' => UrlNormalizer::class,
                 'action' => yii\web\UrlNormalizer::ACTION_REDIRECT_TEMPORARY, // используем временный редирект вместо постоянного
             ],
             'rules' =>  $urlRules,
@@ -100,14 +109,14 @@ if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
-        'class' => 'yii\debug\Module',
+        'class' => \yii\debug\Module::class,
         // uncomment the following to add your IP if you are not connecting from localhost.
         'allowedIPs' => ['*']
     ];
 
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
-        'class' => 'yii\gii\Module',
+        'class' => Module::class,
         // uncomment the following to add your IP if you are not connecting from localhost.
         'allowedIPs' => ['*']
     ];

@@ -15,7 +15,6 @@ use app\models\utils\TimeHandler;
 use Exception;
 use Throwable;
 use Yii;
-use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -71,20 +70,7 @@ class ManagementController extends Controller
         // отмечу время проверки обновления
         FileUtils::setLastCheckUpdateTime();
         $file = Yii::$app->basePath . '\\updateFromGithub.bat';
-        if (is_file($file)) {
-            $command = $file . ' ' . Yii::$app->basePath;
-            $outFilePath = Yii::$app->basePath . '\\logs\\update_file.log';
-            $outErrPath = Yii::$app->basePath . '\\logs\\update_err.log';
-            $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
-            echo $command;
-            try {
-                // попробую вызвать процесс асинхронно
-                $handle = new \COM('WScript.Shell');
-                $handle->Run($command, 0, false);
-            } catch (Exception $e) {
-                exec($command);
-            }
-        }
+        $this->startScript($file);
     }
 
     /**
@@ -96,27 +82,14 @@ class ManagementController extends Controller
         FileUtils::writeUpdateLog('result is  : ' . Management::handleChanges());
     }
 
-    public function actionUpdateDependencies()
+    public function actionUpdateDependencies(): void
     {
 
         $file = Yii::$app->basePath . '\\composerUpdate.bat';
-        if (is_file($file)) {
-            $command = $file . ' ' . Yii::$app->basePath;
-            $outFilePath = Yii::$app->basePath . '\\logs\\update_file.log';
-            $outErrPath = Yii::$app->basePath . '\\logs\\update_err.log';
-            $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
-            echo $command;
-            try {
-                // попробую вызвать процесс асинхронно
-                $handle = new \COM('WScript.Shell');
-                $handle->Run($command, 0, false);
-            } catch (Exception $e) {
-                exec($command);
-            }
-        }
+        $this->startScript($file);
     }
 
-    public function actionResetChangeCheckCounter()
+    public function actionResetChangeCheckCounter(): void
     {
         FileUtils::setUpdateFinished();
     }
@@ -126,7 +99,6 @@ class ManagementController extends Controller
         $file = Yii::$app->basePath . '\\yii.bat';
         $command = "$file console";
         exec($command, $output);
-        var_dump($output);
     }
 
     public function actionRestartServer(): void
@@ -254,12 +226,40 @@ class ManagementController extends Controller
         return ['status' => 1, 'message' => 'Чёрный список вычищен'];
     }
 
-    public function actionChangeDataTable(){
+    public function actionChangeDataTable(): void
+    {
         $connection = Yii::$app->getDb();
         $command = $connection->createCommand("ALTER TABLE `rdcnn`.`dataavailability` ADD COLUMN `patient_name` VARCHAR(255) NULL AFTER `md5`, ADD COLUMN `execution_area` VARCHAR(255) NULL AFTER `patient_name`;");
-        $command->execute();
+        try {
+            $command->execute();
+        } catch (\yii\db\Exception $e) {
+        }
         $command = $connection->createCommand(" ALTER TABLE `rdcnn`.`mailing` ADD COLUMN `mailed_yet` BOOL DEFAULT 0 NULL AFTER `patient_id`; 
 ");
-        $command->execute();
+        try {
+            $command->execute();
+        } catch (\yii\db\Exception $e) {
+        }
+    }
+
+    /**
+     * @param string $file
+     */
+    private function startScript(string $file): void
+    {
+        if (is_file($file)) {
+            $command = $file . ' ' . Yii::$app->basePath;
+            $outFilePath = Yii::$app->basePath . '\\logs\\update_file.log';
+            $outErrPath = Yii::$app->basePath . '\\logs\\update_err.log';
+            $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
+            echo $command;
+            try {
+                // попробую вызвать процесс асинхронно
+                $handle = new \COM('WScript.Shell');
+                $handle->Run($command, 0, false);
+            } catch (Exception $e) {
+                exec($command);
+            }
+        }
     }
 }

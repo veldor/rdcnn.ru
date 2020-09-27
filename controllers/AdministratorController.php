@@ -25,6 +25,7 @@ class AdministratorController extends Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function () {
+                    /** @noinspection SpellCheckingInspection */
                     return $this->redirect('/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
                 },
                 'rules' => [
@@ -94,8 +95,7 @@ class AdministratorController extends Controller
     /**
      * @return array
      * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws Throwable
+     * @throws NotFoundHttpException|Throwable
      */
     public function actionDeleteItem(): array
     {
@@ -150,7 +150,6 @@ class AdministratorController extends Controller
     }
 
     /**
-     * @throws Exception
      */
     public function actionTest(): void
     {

@@ -1,7 +1,5 @@
 <?php
 
-
-
 /* @var $this View */
 
 use app\assets\ShowAsset;

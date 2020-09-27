@@ -9,7 +9,7 @@ namespace app\assets;
 
 use yii\web\AssetBundle;
 use yii\web\YiiAsset;
-use yii\bootstrap\BootstrapPluginAsset;
+use yii\bootstrap\BootstrapAsset;
 
 /**
  * Main application asset bundle.
@@ -17,23 +17,19 @@ use yii\bootstrap\BootstrapPluginAsset;
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
-class AdminAsset extends AssetBundle
+class ViewerAsset extends AssetBundle
 {
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
         'css/site.css',
-        'css/admin.css',
-        //'css/bootstrap.min.css',
-        'css/dark-mode.css',
     ];
     public $js = [
         'js/globals.js',
-        'js/admin.js',
-        'js/dark-mode-switch.min.js'
+        'js/papaya.js'
     ];
     public $depends = [
         YiiAsset::class,
-        BootstrapPluginAsset::class,
+        BootstrapAsset::class,
     ];
 }

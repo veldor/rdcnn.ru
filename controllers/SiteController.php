@@ -39,7 +39,8 @@ class SiteController extends Controller
                         'allow' => true,
                         'actions' => [
                             'index',
-                            'error'
+                            'error',
+                            'dicom-viewer'
                         ],
                         'roles' => ['?', '@'],
                     ],
@@ -196,7 +197,8 @@ class SiteController extends Controller
         return $this->redirect('site/index', 301);
     }
 
-    public function actionTest(){
+    public function actionTest(): void
+    {
         // попробую получить информацию о DICOM
         DicomHandler::readInfoFromDicomdir();
     }
@@ -251,5 +253,11 @@ class SiteController extends Controller
         $updateErrorsInfo = FileUtils::getUpdateErrorInfo();
         $errors = FileUtils::getServiceErrorsInfo();
         return $this->render('management', ['updateInfo' => $updateInfo, 'outputInfo' => $outputInfo, 'errorsInfo' => $errorsInfo, 'errors' => $errors, 'updateOutputInfo' => $updateOutputInfo, 'updateErrorsInfo' => $updateErrorsInfo]);
+    }
+
+    public function actionDicomViewer(): string
+    {
+        $this->layout = 'empty';
+        return $this->render('dicom-viewer');
     }
 }

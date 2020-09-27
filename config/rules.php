@@ -1,4 +1,5 @@
 <?php
+/** @noinspection SpellCheckingInspection */
 return [
     'error' => 'site/error',
     'iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8' => 'site/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8',
@@ -22,4 +23,5 @@ return [
     'mail/delete' => 'management/delete-mail',
     'send-info-mail/<id:\d+>' => 'administrator/send-info-mail',
     'delete/conclusions/<executionNumber:[0-9a-zA-Z]+>' => 'management/delete-conclusions',
+    '/dicom-viewer' => 'site/dicom-viewer',
 ];

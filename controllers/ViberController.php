@@ -5,6 +5,7 @@ namespace app\controllers;
 
 
 use app\models\Viber;
+use JsonException;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 
@@ -26,7 +27,10 @@ class ViberController extends Controller
 
     public function actionConnect(): void
     {
-        Viber::handleRequest();
+        try {
+            Viber::handleRequest();
+        } catch (JsonException $e) {
+        }
     }
 
     /**

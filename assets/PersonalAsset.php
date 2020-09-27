@@ -8,6 +8,8 @@
 namespace app\assets;
 
 use yii\web\AssetBundle;
+use yii\web\YiiAsset;
+use yii\bootstrap\BootstrapPluginAsset;
 
 /**
  * Main application asset bundle.
@@ -27,7 +29,7 @@ class PersonalAsset extends AssetBundle
         'js/personal.js',
     ];
     public $depends = [
-        'yii\web\YiiAsset',
-        'yii\bootstrap\BootstrapPluginAsset',
+        YiiAsset::class,
+        BootstrapPluginAsset::class,
     ];
 }

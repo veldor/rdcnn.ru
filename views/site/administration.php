@@ -1,5 +1,7 @@
 <?php
 
+/* @var $this View */
+
 use app\assets\AdminAsset;
 use app\models\database\Emails;
 use app\models\ExecutionHandler;

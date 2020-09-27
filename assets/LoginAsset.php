@@ -8,6 +8,8 @@
 namespace app\assets;
 
 use yii\web\AssetBundle;
+use yii\bootstrap\BootstrapPluginAsset;
+use yii\web\YiiAsset;
 
 /**
  * Main application asset bundle.
@@ -26,7 +28,7 @@ class LoginAsset extends AssetBundle
         'js/login.js',
     ];
     public $depends = [
-        'yii\web\YiiAsset',
-        'yii\bootstrap\BootstrapPluginAsset',
+        YiiAsset::class,
+        BootstrapPluginAsset::class,
     ];
 }

@@ -8,6 +8,8 @@
 namespace app\assets;
 
 use yii\web\AssetBundle;
+use yii\bootstrap\BootstrapAsset;
+use yii\web\YiiAsset;
 
 /**
  * Main application asset bundle.
@@ -27,7 +29,7 @@ class ShowAsset extends AssetBundle
         'js/papaya.js',
     ];
     public $depends = [
-        'yii\web\YiiAsset',
-        'yii\bootstrap\BootstrapAsset',
+        YiiAsset::class,
+        BootstrapAsset::class,
     ];
 }
