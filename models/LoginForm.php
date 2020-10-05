@@ -17,11 +17,11 @@ use yii\db\StaleObjectException;
  */
 class LoginForm extends Model
 {
-    const SCENARIO_ADMIN_LOGIN = 'admin_login';
-    const SCENARIO_USER_LOGIN = 'user_login';
+    public const SCENARIO_ADMIN_LOGIN = 'admin_login';
+    public const SCENARIO_USER_LOGIN = 'user_login';
 
 
-    public function scenarios()
+    public function scenarios():array
     {
         return [
             self::SCENARIO_ADMIN_LOGIN => ['username', 'password'],
@@ -38,7 +38,7 @@ class LoginForm extends Model
     /**
      * @return array the validation rules.
      */
-    public function rules()
+    public function rules():array
     {
         return [
             // username and password are both required
@@ -47,7 +47,7 @@ class LoginForm extends Model
         ];
     }
 
-    public function attributeLabels()
+    public function attributeLabels():array
     {
         return [
             'username' => 'Номер обследования',
@@ -61,11 +61,11 @@ class LoginForm extends Model
      *
      * @param string $attribute the attribute currently being validated
      */
-    public function validatePassword($attribute)
+    public function validatePassword(string $attribute): void
     {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
-            if (!empty($user)) {
+            if ($user !== null) {
                 // проверю, если было больше 5 неудачных попыток ввода пароля- время между попытками должно составлять не меньше 10 минут
                 if ($user->failed_try > 2 && $user->last_login_try > time() - 600) {
                     $this->addError($attribute, 'Слишком много неверных попыток ввода пароля. Должно пройти не менее 10 минут с последней попытки');
@@ -76,7 +76,7 @@ class LoginForm extends Model
                     return;
                 }
 
-                if (!$user->validatePassword($this->$attribute)) {
+                if (!$user->validatePassword(trim($this->$attribute))) {
                     $user->last_login_try = time();
                     $user->failed_try = ++$user->failed_try;
                     $user->save();
@@ -101,8 +101,8 @@ class LoginForm extends Model
                 throw new Exception('Не найден пользователь!');
             }
             $user->failed_try = 0;
-            if (!$user->user_access_token) {
-                $user->user_access_token = Yii::$app->getSecurity()->generateRandomString(255);
+            if (!$user->access_token) {
+                $user->access_token = Yii::$app->getSecurity()->generateRandomString(255);
             }
             $user->save();
             return Yii::$app->user->login($this->getUser(), 0);
@@ -118,7 +118,7 @@ class LoginForm extends Model
     public function getUser(): User
     {
         if ($this->_user === false) {
-            $this->_user = User::findByUsername($this->username);
+            $this->_user = User::findByUsername(trim($this->username));
         }
         return $this->_user;
     }
@@ -140,13 +140,13 @@ class LoginForm extends Model
         $admin = User::getAdmin();
 
         // проверю, правильно ли введено имя
-        if ($admin->username !== $this->username) {
+        if ($admin->username !== trim($this->username)) {
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
             return false;
         }
 
-        if (!$admin->validatePassword($this->password)) {
+        if (!$admin->validatePassword(trim($this->password))) {
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
             return false;
@@ -206,7 +206,7 @@ class LoginForm extends Model
                 $this->addError('username', 'Было выполнено слишком много неверных попыток ввода пароля. В целях безопасности данные были удалены. Вы можете обратиться к нам для восстановления доступа');
                 return false;
             }
-            if (!$user->validatePassword($this->password)) {
+            if (!$user->validatePassword(trim($this->password))) {
                 $user->last_login_try = time();
                 $user->failed_try = ++$user->failed_try;
                 $user->save();

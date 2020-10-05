@@ -99,4 +99,19 @@ class GrammarHandler
         }
         return $string;
     }
+
+    public static function startsWith( $haystack, $needle ): bool
+    {
+        $length = strlen( $needle );
+        return strpos($haystack, $needle) === 0;
+    }
+
+    public static function endsWith( $haystack, $needle ): bool
+    {
+        $length = strlen( $needle );
+        if( !$length ) {
+            return true;
+        }
+        return substr( $haystack, -$length ) === $needle;
+    }
 }

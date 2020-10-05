@@ -18,7 +18,7 @@ class FilesHandler extends Model
 
     public static function handleDroppedFile(UploadedFile $file): void
     {
-        echo $file->extension;
+        echo $file->extension . "\n";
         // для начала - проверю тип файла
         switch ($file->extension) {
             case 'pdf':
@@ -30,10 +30,10 @@ class FilesHandler extends Model
                     FileUtils::handleFileUpload($savedFile);
                 } catch (Exception $e) {
                 } finally {
-                    try{
+                    try {
                         unlink($savedFile);
+                    } catch (\Exception $e) {
                     }
-                    catch (\Exception $e){}
                 }
                 break;
             case 'zip':
@@ -61,11 +61,10 @@ class FilesHandler extends Model
         if (!is_dir($root . '/temp') && !mkdir($concurrentDirectory = $root . '/temp') && !is_dir($concurrentDirectory)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
         }
-        do{
+        do {
             $dirName = Yii::$app->security->generateRandomString();
             $filePath = $root . "/temp/" . $dirName;
-        }
-        while(is_file($filePath));
+        } while (is_file($filePath));
         $file->saveAs($filePath);
         self::unzip($filePath);
     }
@@ -76,23 +75,24 @@ class FilesHandler extends Model
      */
     public static function handleDicomDir(string $dir): ?string
     {
-        if(is_dir($dir)){
+        if (is_dir($dir)) {
             // проверю, есть ли в папке DICOMDIR-файл. Если нет- папка левая, удалю её
             $dicomdirDest = $dir . DIRECTORY_SEPARATOR . 'DICOMDIR';
-            if(is_file($dicomdirDest)){
+            if (is_file($dicomdirDest)) {
                 // получу содержимое файла
                 $content = file_get_contents($dicomdirDest);
                 // уберу все непечатные символы
                 $clearedContent = GrammarHandler::clearText($content);
                 // теперь найду в этом бардаке номер обследования
-                //echo $clearedContent;
                 $executionNumber = GrammarHandler::findExecutionNumber($clearedContent);
-                if($executionNumber !== null){
+                if ($executionNumber !== null) {
                     // добавляю в папку необходимый софт и добавляю её в ЛК
                     ExecutionHandler::packFiles($executionNumber, $dir);
                     return $executionNumber;
                 }
             }
+            // если папка не содержит файл DICOMDIR- удалю её
+            ExecutionHandler::rmRec($dir);
         }
         return null;
     }
@@ -105,18 +105,17 @@ class FilesHandler extends Model
     public static function unzip(string $file): ?string
     {
         $executionNumber = null;
-        if(is_file($file)){
+        if (is_file($file)) {
             echo 'have file';
             $root = Yii::$app->basePath;
             // создам временную папку, если её ещё не существует
             if (!is_dir($root . '/temp') && !mkdir($concurrentDirectory = $root . '/temp') && !is_dir($concurrentDirectory)) {
                 throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
             }
-            do{
+            do {
                 $dirName = Yii::$app->security->generateRandomString();
                 $filePath = $root . "/temp/" . $dirName;
-            }
-            while(is_dir($filePath));
+            } while (is_dir($filePath));
             $zip = new ZipArchive;
             if ($zip->open($file) === TRUE) {
                 $zip->extractTo($filePath);
@@ -124,10 +123,9 @@ class FilesHandler extends Model
 
                 // теперь найду корневую папку. Она может быть на директорию ниже, чем распакованная
                 $dirContent = array_slice(scandir($filePath), 2);
-                if(count($dirContent) ===  1){
+                if (count($dirContent) === 1) {
                     $executionNumber = self::handleDicomDir($filePath . DIRECTORY_SEPARATOR . $dirContent[0]);
-                }
-                else{
+                } else {
                     $executionNumber = self::handleDicomDir($filePath);
                 }
             }

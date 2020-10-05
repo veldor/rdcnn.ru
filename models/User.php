@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Exception;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
@@ -75,7 +76,11 @@ class User extends ActiveRecord implements IdentityInterface
         return static::find()->where(['username' => self::ADMIN_NAME])->one();
     }
 
-    public static function findAllRegistered()
+    /**
+     * @return User[]
+     * @throws Exception
+     */
+    public static function findAllRegistered(): array
     {
         // верну все записи кроме админской
 
@@ -89,7 +94,8 @@ class User extends ActiveRecord implements IdentityInterface
         return static::find()->where(['<>', 'username', self::ADMIN_NAME])->orderBy('created_at DESC')->all();
     }
 
-    public function validatePassword($password){
+    public function validatePassword($password): bool
+    {
         return Yii::$app->security->validatePassword($password, $this->password_hash);
     }
 

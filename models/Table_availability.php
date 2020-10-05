@@ -3,7 +3,7 @@
 
 namespace app\models;
 
-
+use Exception;
 use yii\db\ActiveRecord;
 
 /**
@@ -26,6 +26,7 @@ class Table_availability extends ActiveRecord
 
     /**
      * @return string
+     * @throws Exception
      */
     public static function getWithoutConclusions(): string
     {
@@ -106,5 +107,19 @@ class Table_availability extends ActiveRecord
     public static function isRegistered($conclusionFile)
     {
         return (bool) self::find()->where(['file_name' => $conclusionFile])->count();
+    }
+
+    public static function getRegistered()
+    {
+        /** @var Table_availability[] $data */
+        $data = self::find()->all();
+        if(!empty($data)){
+            $answer = [];
+            foreach ($data as $item) {
+                $answer[$item->file_name] = $item;
+            }
+            return $answer;
+        }
+        return [];
     }
 }
