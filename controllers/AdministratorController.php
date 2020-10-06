@@ -151,9 +151,9 @@ class AdministratorController extends Controller
 
     /**
      */
-    public function actionTest(): void
+    public function actionTest()
     {
-
+        return $this->renderPartial('/site/mail-template', ['text' => 'hello']);
     }
 
     public function actionSendInfoMail($id): array

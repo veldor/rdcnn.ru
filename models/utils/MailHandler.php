@@ -93,13 +93,6 @@ class MailHandler extends Model
                         }
                     }
                 }
-                $text.= "<p class='text-center'>Надеемся, что вы остались довольны посещением нашего центра. <br/>
-                В любом случае, мы будем рады, если вы найдёте минуту и оставите отзыв о нашем центре. <br/>
-                Чтобы оставить отзыв, нажмите на одну из ссылок, находящихся ниже<br/>
-                <div class='text-center'><a class='btn btn-success' href='https://search.google.com/local/writereview?placeid=ChIJHXcPvNHVUUER5IWxpxP1DfM'>Оставить отзыв на Google</a></div>
-                <div class='text-center'><a class='btn btn-success' href='https://prodoctorov.ru/new/rate/lpu/48447/'>Оставить отзыв на ПроДокторов</a></div>
-                <div class='text-center'><a class='btn btn-success' href='https://yandex.ru/maps/47/nizhny-novgorod/?add-review=true&ll=43.957299%2C56.325628&mode=search&oid=1122933423&ol=biz&z=14'>Оставить отзыв на Яндекс</a></div>
-                </p>";
                 if(self::sendMessage('Информация о пройденном обследовании', $text, $mail->address, $patientName)){
                     // Отмечу, что на данный адрес уже отправлялось письмо
                     if($mail->mailed_yet === 0){
