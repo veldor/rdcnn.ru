@@ -108,14 +108,14 @@ function sendFiles(location, files, totalLength) {
     xhr.send(fd)
 
     function uploadProgress(event) {
-        let percent = parseInt((event.loaded + totalLoaded) / totalLength * 100);
+        let percent = parseInt((parseInt(event.loaded) + totalLoaded) / totalLength * 100);
         // подсчитаю примерное оставшееся время для загрузки
         // определю, за какое время загружается 1%
         let now = new Date().getTime();
         let timeDifference = now - startTime;
         let perPercent = timeDifference / percent;
-        let spendedPercents = 100 - percent;
-        let spendMillis = spendedPercents * perPercent;
+        let spentPercents = 100 - percent;
+        let spendMillis = spentPercents * perPercent;
         let time = msToTime(parseInt(spendMillis));
         shaderStatus.html("Отправка файла " + counter + " из " + files.length + "<br/> Завершено " + percent + "%<br/>Приблизительное время до завершения " + time + "<br/>Не перезагружайте страницу до завершения процесса");
     }
@@ -143,7 +143,7 @@ function sendFiles(location, files, totalLength) {
                     xhr.upload.addEventListener('progress', uploadProgress, false);
                     xhr.onreadystatechange = stateChange;
                     xhr.open('POST', location);
-                    var fd = new FormData
+                    let fd = new FormData
                     fd.append("file", file)
                     xhr.send(fd)
                 }
@@ -273,84 +273,6 @@ $(function () {
 function checkPatientDataFilling() {
     sendSilentAjax('get', '/patients/check', function (answer) {
         for (let i in answer) {
-            if (i === "waitingFolders") {
-                if (answer.hasOwnProperty(i) && answer[i].length > 0) {
-                    waitingFoldersContainer.removeClass('hidden');
-                    // очищу список
-                    waitingFoldersList.html("");
-                    for (let counter = 0; counter < answer[i].length; counter++) {
-                        waitingFoldersList.append('<li class="text-center"><b class="text-info">' + answer[i][counter] + '</b></li>');
-                    }
-                }
-            }
-            if (i === "unhandledFolders") {
-                if (answer.hasOwnProperty(i) && answer[i].length > 0) {
-                    // найден список неопознанных папок, отображу его
-                    unhandledFoldersContainer.removeClass('hidden');
-                    // очищу список
-                    unhandledFoldersList.html("");
-                    let item;
-                    let newElement;
-                    // отображу список
-                    for (let counter = 0; counter < answer[i].length; counter++) {
-                        item = answer[i][counter];
-                        newElement = $('<tr class="unhandled-folder-list-item" data-name="' + item + '"><td><b class="text-danger">' + item + '</b></td><td><a class="btn btn-default activator change-unhandled-folder" data-toggle="tooltip" data-placement="auto"  data-name="' + item + '" data-title="Изменить имя"><span class="glyphicon glyphicon-pencil text-info"></span></a><a class="btn btn-default activator delete-unhandled-folder" data-toggle="tooltip"  data-name="' + item + '" data-placement="auto" data-title="Удалить папку"><span class="glyphicon glyphicon-trash text-danger"></span></a></td></tr>');
-                        newElement.find('.activator').tooltip();
-                        // удалю папку
-                        newElement.find('.delete-unhandled-folder').on('click.delete', function () {
-                            let name = $(this).attr('data-name');
-                            // выдам предупреждение об удалении папки
-                            makeInformerModal(
-                                "Удаление неопознанной папки",
-                                "Папка <b class='text-info'>" + name + "</b> будет безвозвратно удалена. Выполнить действие?",
-                                function () {
-                                    sendAjax('post',
-                                        '/delete-unhandled-folder',
-                                        function (data) {
-                                            if (data.hasOwnProperty('status')) {
-                                                unhandledFoldersList.find('tr[data-name="' + name + '"]').remove();
-                                                makeInformerModal("Успех",
-                                                    "Папка <b class='text-info'>" + name + "</b> Удалена!",
-                                                    function () {
-                                                    })
-                                            }
-                                        },
-                                        {'folderName': name}
-                                    )
-                                },
-                                function () {
-                                }
-                            )
-                        });
-
-                        newElement.find('.change-unhandled-folder').on('click.editName', function () {
-                            let name = $(this).attr('data-name');
-                            makeInformerModal("Изменение названия папки",
-                                "<input class='form-control' id='changeUnhandledFolderName' value='" + name + "'/>",
-                                function () {
-                                    let newName = $('#changeUnhandledFolderName').val();
-                                    if (newName) {
-                                        sendAjax('post',
-                                            '/rename-unhandled-folder',
-                                            function () {
-                                                makeInformerModal("Успех", "Папка <b class='text-info'>" + name + "</b> переименована в <b class='text-success'>" + newName + "</b>");
-                                            },
-                                            {'oldName': name, 'newName': newName}
-                                        )
-                                    }
-                                },
-                                function () {
-                                }
-                            )
-                        });
-                        // добавлю элемент
-                        unhandledFoldersList.append(newElement);
-                    }
-                } else {
-                    // неопознанных папок не найдено, скрою список
-                    unhandledFoldersContainer.addClass('hidden');
-                }
-            }
             if (i === "patientList") {
                 // найден список пациентов
                 if (answer.hasOwnProperty(i) && answer[i].length > 0) {
@@ -394,26 +316,24 @@ function checkPatientDataFilling() {
                             if (item['conclusionsCount'] > 0) {
                                 if (item['conclusion_areas']) {
                                     let areasText = '';
-                                    for(let i = 0; item['conclusion_areas'][i]; i++){
+                                    for (let i = 0; item['conclusion_areas'][i]; i++) {
                                         areasText += item['conclusion_areas'][i] + " \n";
                                     }
-                                    td += "<td><span class='glyphicon glyphicon-ok text-success status-icon' data-toggle='tooltip' data-placement='auto' title='" + areasText + "'></span><b>(" + item['conclusionsCount'] + ")</b></td>";
+                                    td += "<td data-conclusion='" + item['id'] + "' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon' data-toggle='tooltip' data-placement='auto' title='" + areasText + "'></span><b>(" + item['conclusionsCount'] + ")</b></td>";
                                 } else {
-                                    td += "<td><span class='glyphicon glyphicon-ok text-success status-icon'></span><b>(" + item['conclusionsCount'] + ")</b></td>";
+                                    td += "<td data-conclusion='" + item['id'] + "' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span><b>(" + item['conclusionsCount'] + ")</b></td>";
                                 }
 
                             } else {
-                                td += "<td><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"
+                                td += "<td data-conclusion='" + item['id'] + "' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"
                             }
                             // проверю наличие снимков
                             if (item['execution']) {
-                                td += "<td><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>";
+                                td += "<td data-execution='" + item['id'] + "' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon'></span></td>";
                             } else {
-                                td += "<td><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"
+                                td += "<td data-execution='" + item['id'] + "' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>"
                             }
-
-                            td+= "<td><a class=\"btn btn-default custom-activator\" data-action=\"change-password\" data-id=\"" + item['id'] + "\" data-toggle=\"tooltip\" data-placement=\"auto\" title=\"\" data-original-title=\"Сменить пароль\"><span class=\"text-info glyphicon glyphicon-retweet\"></span></a><a class=\"btn btn-default custom-activator\" data-action=\"delete\" data-id=\"" + item['id'] + "\" data-toggle=\"tooltip\" data-placement=\"auto\" title=\"\" data-original-title=\"Удалить запись\"><span class=\"text-danger glyphicon glyphicon-trash\"></span></a></td>"
-
+                            td += "<td><a class=\"btn btn-default custom-activator\" data-action=\"change-password\" data-id=\"" + item['id'] + "\" data-toggle=\"tooltip\" data-placement=\"auto\" title=\"\" data-original-title=\"Сменить пароль\"><span class=\"text-info glyphicon glyphicon-retweet\"></span></a><a class=\"btn btn-default custom-activator\" data-action=\"delete\" data-id=\"" + item['id'] + "\" data-toggle=\"tooltip\" data-placement=\"auto\" title=\"\" data-original-title=\"Удалить запись\"><span class=\"text-danger glyphicon glyphicon-trash\"></span></a></td>"
                             td += '</tr>';
                             td = $(td);
                             let addMailBtn = td.find('.add-mail');
@@ -435,20 +355,18 @@ function checkPatientDataFilling() {
                             });
 
                             $('tbody#executionsBody').prepend(td);
-                        }
-                        else{
+                        } else {
                             // запись найдена, проверю актуальность данных
                             // проверю наличие фиo пациента
-                            if(item['patient_name']){
+                            if (item['patient_name']) {
                                 // изменю текст первой ячейки
                                 user.find('a.execution-id').attr('data-toggle', 'tooltip').attr('data-placement', 'auto').attr('data-original-title', item['patient_name']).tooltip();
                             }
-                            if(item['hasMail']){
+                            if (item['hasMail']) {
                                 let hint = item['mailed'] ? 'Отправить письмо<br/>(уже отправлялось)' : 'Отправить письмо';
                                 let color = item['mailed'] ? 'text-danger' : 'text-info';
                                 user.find('td.mail-td').html("<button class='btn btn-default tooltip-enabled activator' data-action='/send-info-mail/" + item['real_id'] + "' data-toggle='tooltip' data-html='true' data-placement='auto' title='" + hint + "'><span class='glyphicon glyphicon-circle-arrow-right " + color + "'></span></button><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Изменить электронную почту'><span class='glyphicon glyphicon-envelope text-info'></span></button>");
-                            }
-                            else{
+                            } else {
                                 user.find('td.mail-td').html("<button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/" + item['real_id'] + "' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button>")
                             }
                             let addMailBtn = user.find('.add-mail');
@@ -463,10 +381,10 @@ function checkPatientDataFilling() {
                                     conclusionContainer.addClass('field-success').removeClass('field-danger');
                                     if (item['conclusion_areas']) {
                                         let areasText = '';
-                                        for(let i = 0; item['conclusion_areas'][i]; i++){
-                                            areasText += item['conclusion_areas'][i] + " \n";
+                                        for (let i = 0; item['conclusion_areas'][i]; i++) {
+                                            areasText += item['conclusion_areas'][i] + " <br/>\n";
                                         }
-                                        conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon' data-toggle='tooltip' data-placement='auto' title='" + areasText + "'></span><b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button>") ;
+                                        conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon tooltip-enabled' data-html='true' data-toggle='tooltip' data-placement='auto' title='" + areasText + "'></span><b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button>");
                                     } else {
                                         conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span><b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button>");
                                     }
@@ -494,6 +412,7 @@ function checkPatientDataFilling() {
                         }
                     }
                     handleAjaxActivators();
+                    enableTooltips();
                     withoutConclusions.text(withoutConclusionsCounter);
                     withoutExecutions.text(withoutExecutionsCounter);
                     // теперь нужно убрать удалённые обследования
@@ -517,7 +436,6 @@ function checkPatientDataFilling() {
                         })
                     }
                 }
-
             }
         }
     });

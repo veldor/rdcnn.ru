@@ -112,18 +112,17 @@ class ExecutionHandler extends Model
 
     /**
      * @throws Exception
-     * @throws \yii\db\Exception
+     * @throws \Exception
      */
     public static function check(): void
     {
+        // для начала- получу все данные о зарегистрированных файлах
+        $availData = Table_availability::getRegistered();
         // проверю наличие папок
-        if (!is_dir(Info::EXEC_FOLDER)) {
-            if (!mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
-                FileUtils::writeUpdateLog('execution folder can\'t exists and cat\'t be created');
-                echo TimeHandler::timestampToDate(time()) . "execution folder can\'t exists and cat\'t be created";
-            }
+        if (!is_dir(Info::EXEC_FOLDER) && !mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
+            FileUtils::writeUpdateLog('execution folder can\'t exists and cat\'t be created');
+            echo TimeHandler::timestampToDate(time()) . "execution folder can\'t exists and cat\'t be created";
         }
-        echo TimeHandler::timestampToDate(time()) . "start report \n";
         // проверю устаревшие данные
         // получу всех пользователей
         $users = User::findAllRegistered();
@@ -132,13 +131,12 @@ class ExecutionHandler extends Model
                 // ищу данные по доступности обследований.
                 if (($user->created_at + Info::DATA_SAVING_TIME) < time()) {
                     AdministratorActions::simpleDeleteItem($user->username);
-                    echo TimeHandler::timestampToDate(time()) . "user {$user->username} expired and deleted\n";
+                    echo TimeHandler::timestampToDate(time()) . "user {$user->username} удалён по таймауту\n";
                 }
             }
         }
         // автоматическая обработка папок
         $entities = array_slice(scandir(Info::EXEC_FOLDER), 2);
-        $pattern = '/^[aа]?[0-9]+$/ui';
         // проверю папки
         if (!empty($entities)) {
             foreach ($entities as $entity) {
@@ -149,7 +147,6 @@ class ExecutionHandler extends Model
                     $changeTime = $stat['mtime'];
                     $difference = time() - $changeTime;
                     if ($difference > 60) {
-                        $dirLatin = GrammarHandler::toLatin($entity);
                         // вероятно, папка содержит файлы обследования
                         // проверю, что папка не пуста
                         if (count(scandir($path)) > 2) {
@@ -159,7 +156,7 @@ class ExecutionHandler extends Model
                             // удалю папку
                             try {
                                 self::rmRec($path);
-                                echo TimeHandler::timestampToDate(time()) . "dir $entity is empty and deleted \n";
+                                echo TimeHandler::timestampToDate(time()) . "$entity удалена пустая папка \n";
                             } catch (\Exception $e) {
                                 FileUtils::writeUpdateLog('error delete dir ' . $path);
                             }
@@ -168,70 +165,69 @@ class ExecutionHandler extends Model
                     } else {
                         echo TimeHandler::timestampToDate(time()) . "dir $entity waiting for timeout \n";
                     }
+                } else if (is_file($path) && GrammarHandler::endsWith($path, '.zip') && !array_key_exists($entity, $availData)) {
+                    // если обнаружен .zip - проверю, зарегистрирован ли он, если нет- проверю, содержит ли DICOM
+                    echo "handle unregistered zip $entity \n";
+                    $result = FilesHandler::unzip($path);
+                    if ($result !== null) {
+                        echo "added zip $result \n";
+                    }
                 }
             }
             // теперь перепроверю данные для получения актуальной информации о имеющихся файлах
             $entities = array_slice(scandir(Info::EXEC_FOLDER), 2);
-            $pattern = '/^A?[0-9]+.zip$/';
+            $pattern = '/^A?\d+.zip$/';
             if (!empty($entities)) {
                 foreach ($entities as $entity) {
-                    echo TimeHandler::timestampToDate(time()) . " check zip $entity\n";
                     $path = Info::EXEC_FOLDER . '/' . $entity;
                     if (is_file($path) && preg_match($pattern, $entity)) {
                         // найден файл, обработаю информацию о нём
-                        $existentFile = Table_availability::findOne(['is_execution' => true, 'file_name' => $entity]);
                         $user = User::findByUsername(GrammarHandler::getBaseFileName($entity));
-                        if ($user !== null) {
-                            if ($existentFile !== null) {
-                                // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
-                                //$md5 = md5_file($path);
-                                $stat = stat($path);
-                                $changeTime = $stat['mtime'];
-                                if ($changeTime !== $existentFile->file_create_time) {
-                                    //if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
-                                    // отправлю новую версию файла пользователю
-                                    // получу имя пациента и область обследования
-                                    $info = FileUtils::handleLoadedFile($path);
-                                    if(count($info) === 4){
-                                        $md5 = md5_file($path);
-                                        $existentFile->md5 = $md5;
-                                        $existentFile->file_create_time = $changeTime;
-                                        $existentFile->patient_name = $info['patient_name'];
-                                        $existentFile->execution_area = $info['execution_area'];
-                                        $existentFile->save();
-                                        Viber::notifyExecutionLoaded($user->username);
-                                    }
-                                }
-                            } else {
-                                $info = FileUtils::handleLoadedFile($path);
-                                if(count($info) === 4) {
-                                    // внесу информацию о файле в базу
-                                    $md5 = md5_file($path);
-                                    $stat = stat($path);
-                                    $changeTime = $stat['mtime'];
-                                    (new Table_availability([
-                                        'file_name' => $entity,
-                                        'is_execution' => true,
-                                        'md5' => $md5,
-                                        'file_create_time' => $changeTime,
-                                        'userId' => $user->username,
-                                        'patient_name' => $info['patient_name'],
-                                        'execution_area' => $info['execution_area']
-                                    ]))->save();
-                                    // оповещу мессенджеры о наличии файла
-                                    Viber::notifyExecutionLoaded($user->username);
-                                }
-                            }
-                        } else {
+                        // если учётная запись не найдена- зарегистрирую
+                        if ($user === null) {
+                            self::createUser(GrammarHandler::getBaseFileName($entity));
+                            $user = User::findByUsername(GrammarHandler::getBaseFileName($entity));
+                        }
+                        if (array_key_exists($entity, $availData)) {
+                            $existentFile = $availData[$entity];
+                            // проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
+                            //$md5 = md5_file($path);
                             $stat = stat($path);
                             $changeTime = $stat['mtime'];
-                            if (time() > $changeTime + Info::DATA_SAVING_TIME) {
-                                // если нет связанной учётной записи- удалю файл
-                                echo TimeHandler::timestampToDate(time()) . " delete zip $entity with no account bind\n";
-                                // удалю файл
-                                self::rmRec($path);
+                            if ($changeTime !== $existentFile->file_create_time) {
+                                //if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
+                                // отправлю новую версию файла пользователю
+                                $md5 = md5_file($path);
+                                $existentFile->md5 = $md5;
+                                $existentFile->file_create_time = $changeTime;
+                                $existentFile->save();
+                                Viber::notifyExecutionLoaded($user->username);
                             }
+                        } else {
+                            // внесу информацию о файле в базу
+                            $md5 = md5_file($path);
+                            $stat = stat($path);
+                            $changeTime = $stat['mtime'];
+                            (new Table_availability([
+                                'file_name' => $entity,
+                                'is_execution' => true,
+                                'md5' => $md5,
+                                'file_create_time' => $changeTime,
+                                'userId' => $user->username
+                            ]))->save();
+                            // оповещу мессенджеры о наличии файла
+                            Viber::notifyExecutionLoaded($user->username);
                         }
+//                        else {
+//                            $stat = stat($path);
+//                            $changeTime = $stat['mtime'];
+//                            if (time() > $changeTime + Info::DATA_SAVING_TIME) {
+//                                // если нет связанной учётной записи- удалю файл
+//                                echo TimeHandler::timestampToDate(time()) . " delete zip $entity with no account bind\n";
+//                                // удалю файл
+//                                self::rmRec($path);
+//                            }
+//                        }
                     }
                 }
             }
@@ -240,121 +236,49 @@ class ExecutionHandler extends Model
         if (!is_dir($entity) && !is_dir($entity) && !mkdir($entity) && !is_dir($entity)) {
             echo(sprintf('Directory "%s" was not created', $entity));
         }
+
+
+        if (!is_dir(Info::CONC_FOLDER) && !is_dir(Info::CONC_FOLDER) && !mkdir(Info::CONC_FOLDER) && !is_dir(Info::CONC_FOLDER)) {
+            echo(sprintf('Directory "%s" was not created', Info::CONC_FOLDER));
+        }
+
         // теперь обработаю заключения
-        $pattern = '/^[aа]?\W?\d+-?\.?\d*\.pdf$/ui';
-        $dotPattern = '/^([aа]?\W?\d+)\.(\d+\.pdf)$/ui';
-        // проверю папку с заключениями
         $conclusionsDir = Info::CONC_FOLDER;
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
             $files = array_slice(scandir($conclusionsDir), 2);
             foreach ($files as $file) {
                 try {
                     $path = Info::CONC_FOLDER . '\\' . $file;
-                    if (is_file($path)) {
-                        // проверю, подходит ли файл под регулярку
-                        if (preg_match($pattern, $file)) {
-                            // получу данные о файле
+                    if (is_file($path) && (GrammarHandler::endsWith($file, '.pdf') || GrammarHandler::endsWith($file, '.doc') || GrammarHandler::endsWith($file, '.docx'))) {
+                        // обрабатываю файлы .pdf .doc .docx
+                        // проверю, зарегистрирован ли файл
+                        if (array_key_exists($file, $availData)) {
+                            // если файл уже зарегистрирован- проверю, если он не менялся- пропущу его, иначе-
+                            // обновлю информацию
+                            $existentFile = $availData[$file];
                             $stat = stat($path);
                             $changeTime = $stat['mtime'];
-                            $difference = time() - $changeTime;
-                            if ($difference > 30) {
-                                // переименую файл в нормальный вид
-                                $fileLatin = GrammarHandler::toLatin($file);
-                                // уберу пробелы
-                                $filePureName = preg_replace('/\s/', '', $fileLatin);
-                                // заменю разделитель-точку на тире
-                                if (preg_match($dotPattern, $file, $arr)) {
-                                    // переименую файл
-                                    $filePureName = $arr[1] . '-' . $arr[2];
-                                    rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
-                                    echo TimeHandler::timestampToDate(time()) . "file $file renamed from dot to $filePureName \n";
-                                }
-                                // проверю наличие учётной записи
-                                // если это не дублирующее заключение
-                                if (empty(strpos($filePureName, '-'))) {
-                                    echo TimeHandler::timestampToDate(time()) . "check user $filePureName\n";
-                                    try {
-                                        self::checkUser(GrammarHandler::getBaseFileName($filePureName));
-                                    } catch (\Exception $e) {
-                                        echo 'ERROR WHEN CHECK USER ' . $e->getMessage();
-                                    }
-                                }
-                                // если файл не соответствует строгому шаблону
-                                if ($file !== $filePureName) {
-                                    try {
-                                        rename($path, Info::CONC_FOLDER . '\\' . $filePureName);
-                                        echo TimeHandler::timestampToDate(time()) . "file $file renamed to $filePureName \n";
-                                    } catch (\Exception $e) {
-                                        echo "skipped file $file no renamed to $filePureName with error {$e->getMessage()}\n";
-                                    }
-                                }
-                            } else {
-                                echo TimeHandler::timestampToDate(time()) . "file $file in conclusions waiting for timeout \n";
+                            if ($existentFile->file_create_time === $changeTime) {
+                                continue;
                             }
-                        } else {
-                            echo TimeHandler::timestampToDate(time()) . "file $file not handled \n";
+                            echo "refresh file info\n";
+                            // иначе - обновлю информацию о файле
+                            FileUtils::handleFileUpload($path);
+                            $stat = stat($path);
+                            $changeTime = $stat['mtime'];
+                            $existentFile->file_create_time = $changeTime;
+                            $existentFile->save();
+                        }
+                        else{
+                            // иначе- отправляю файл на обработку
+                            $newFilePath = FileUtils::handleFileUpload($path);
+                            if($newFilePath !== $path){
+                                unlink($path);
+                            }
                         }
                     }
                 } catch (\Exception $e) {
-                    echo 'ERROR CHECKING FILE' . $e->getMessage();
-                }
-            }
-        }
-
-        echo 'check conclusions actuality';
-
-        // теперь проверю актуальность данных по доступности заключений
-        $conclusionsDir = Info::CONC_FOLDER;
-        if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
-            $files = array_slice(scandir($conclusionsDir), 2);
-            $strictPattern = '/^A?\d+-?\d*\.pdf$/ui';
-            foreach ($files as $file) {
-                $path = Info::CONC_FOLDER . '/' . $file;
-                if (is_file($path) && preg_match($strictPattern, $file)) {
-                    $existentFile = Table_availability::findOne(['is_conclusion' => true, 'file_name' => $file]);
-                    if ($existentFile !== null) {
-// проверю дату изменения и md5 файлов. Если они совпадают- ничего не делаю, если не совпадают- отправлю в вайбер уведомление об обновлении файла
-                        $md5 = md5_file($path);
-                        $stat = stat($path);
-                        $changeTime = $stat['mtime'];
-                        if ($changeTime !== $existentFile->file_create_time && $md5 !== $existentFile->md5) {
-                            FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
-                            $md5 = md5_file($path);
-                            // отправлю новую версию файла пользователю
-                            $existentFile->md5 = $md5;
-                            $existentFile->file_create_time = $changeTime;
-                            $existentFile->save();
-                            echo TimeHandler::timestampToDate(time()) . "add background to existent {$file}\n";
-                            Viber::notifyConclusionLoaded($file);
-                        }
-                    } else {
-                        $name = GrammarHandler::getBaseFileName($file);
-                        echo TimeHandler::timestampToDate(time()) . "check file owner {$file} by name " . $name . "\n";
-                        // найду пользователя
-                        $user = User::findByUsername($name);
-                        if ($user !== null) {
-                            $info = FileUtils::handleLoadedFile($path);
-                            if(count($info) === 4) {
-                                // внесу информацию о файле в базу
-                                FileUtils::addBackgroundToPDF($conclusionsDir . DIRECTORY_SEPARATOR . $file);
-                                $md5 = md5_file($path);
-                                $stat = stat($path);
-                                $changeTime = $stat['mtime'];
-                                (new Table_availability([
-                                    'file_name' => $file,
-                                    'is_conclusion' => true,
-                                    'md5' => $md5,
-                                    'file_create_time' => $changeTime,
-                                    'userId' => $user->username,
-                                    'patient_name' => $info['patient_name'],
-                                    'execution_area' => $info['execution_area']
-                                ]))->save();
-                                echo TimeHandler::timestampToDate(time()) . "add background to new {$file}\n";
-                                // оповещу мессенджеры о наличии файла
-                                Viber::notifyConclusionLoaded($file);
-                            }
-                        }
-                    }
+                    echo 'ERROR CHECKING FILE' . $e->getMessage() . "\n";
                 }
             }
         }
@@ -508,10 +432,10 @@ class ExecutionHandler extends Model
     {
         // также удалю информацию о доступности заключений из таблицы
         $avail = Table_availability::findAll(['userId' => $executionNumber, 'is_conclusion' => 1]);
-        if($avail !== null){
+        if ($avail !== null) {
             foreach ($avail as $item) {
                 $conclusionFile = Info::CONC_FOLDER . '\\' . $item->file_name;
-                if(is_file($conclusionFile)){
+                if (is_file($conclusionFile)) {
                     unlink($conclusionFile);
                 }
                 $item->delete();

@@ -27,7 +27,7 @@ class FileUtils
     public static function checkUnhandledFolders(): array
     {
         // проверю наличие папок
-        if(!is_dir(Info::EXEC_FOLDER) && !mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
+        if (!is_dir(Info::EXEC_FOLDER) && !mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
             self::writeUpdateLog('execution folder can\'t exists and cat\'t be created');
             echo TimeHandler::timestampToDate(time()) . "execution folder can\'t exists and cat\'t be created";
         }
@@ -293,7 +293,7 @@ class FileUtils
                 $pdf->setSourceFile($file);
                 $tplIdx = $pdf->importPage(1);
                 //use the imported page and place it at point 0,0; calculate width and height
-//automaticallay and ajust the page size to the size of the imported page
+//automatically and adjust the page size to the size of the imported page
                 $pdf->useTemplate($tplIdx, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight(), true);
 
                 $pageCounter = 2;
@@ -339,8 +339,7 @@ class FileUtils
                     $javaPath = 'C:\Program Files\Java\jre1.8.0_261\bin\java.exe';
                     if (is_file($javaPath)) {
                         $existentJavaPath = $javaPath;
-                    }
-                    else{
+                    } else {
                         $existentJavaPath = 'java';
                     }
                 }
@@ -353,8 +352,8 @@ class FileUtils
             $conclusionsDir = Info::CONC_FOLDER;
             if (is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)) {
                 $command = "\"$existentJavaPath\" -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
-                echo $command . "\n";
                 exec($command, $result);
+                echo GrammarHandler::convertToUTF($result[0]);
                 if (!empty($result) && count($result) === 4) {
                     // получу вторую строку результата
                     $fileName = $result[1];
@@ -372,8 +371,7 @@ class FileUtils
                 }
                 return ['action_status' => GrammarHandler::convertToUTF(serialize($result))];
             }
-        }
-        else{
+        } else {
             echo 'not java';
         }
         return $result;
@@ -425,21 +423,35 @@ class FileUtils
                     ExecutionHandler::createUser(GrammarHandler::getBaseFileName($conclusionFile));
                 }
                 $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
-                if(!Table_availability::isRegistered($conclusionFile)){
+                if (!Table_availability::isRegistered($conclusionFile)) {
                     $md5 = md5_file($path);
+                    $stat = stat($path);
+                    $changeTime = $stat['mtime'];
                     $item = new Table_availability([
                         'file_name' => $conclusionFile,
                         'is_conclusion' => true,
                         'md5' => $md5,
-                        'file_create_time' => time(),
+                        'file_create_time' => $changeTime,
                         'userId' => $user->username,
                         'patient_name' => $actionResult['patient_name'],
                         'execution_area' => $actionResult['execution_area']
                     ]);
                     $item->save();
                     // отправлю оповещение о добавленном контенте, если указан адрес почты
-                    if(Emails::checkExistent($user->id)){
+                    if (Emails::checkExistent($user->id)) {
                         Emails::sendEmail($item);
+                    }
+                } else {
+                    $info = Table_availability::findOne(['file_name' => $conclusionFile]);
+                    $md5 = md5_file($path);
+                    $stat = stat($path);
+                    $changeTime = $stat['mtime'];
+                    if ($info !== null) {
+                        $info->md5 = $md5;
+                        $info->file_create_time = $changeTime;
+                        $info->patient_name = $actionResult['patient_name'];
+                        $info->execution_area = $actionResult['execution_area'];
+                        $info->save();
                     }
                 }
                 return $path;

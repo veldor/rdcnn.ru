@@ -23,6 +23,7 @@ class ViewerAsset extends AssetBundle
     public $baseUrl = '@web';
     public $css = [
         'css/site.css',
+        'css/papaya.css',
     ];
     public $js = [
         'js/globals.js',

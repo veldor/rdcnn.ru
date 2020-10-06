@@ -11,6 +11,7 @@ use Google_Exception;
 use Google_Service_Drive;
 use Google_Service_Drive_DriveFile;
 use GuzzleHttp\Psr7\Response;
+use JsonException;
 use RuntimeException;
 use Yii;
 use yii\console\Exception;
@@ -20,16 +21,14 @@ class Gdrive
 
     /**
      * @throws Exception
-     * @throws Google_Exception
+     * @throws Google_Exception|JsonException
      */
     public static function check(): void
     {
         // проверю существование временной папки для заключений
         $tempCloudFolder = Yii::$app->basePath . '\\cloud_tmp';
-        if (!is_dir($tempCloudFolder)) {
-            if (!mkdir($tempCloudFolder) && !is_dir($tempCloudFolder)) {
-                throw new RuntimeException(sprintf('Directory "%s" was not created', $tempCloudFolder));
-            }
+        if (!is_dir($tempCloudFolder) && !mkdir($tempCloudFolder) && !is_dir($tempCloudFolder)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $tempCloudFolder));
         }
         $client = self::getClient();
         if ($client !== null) {
@@ -68,6 +67,7 @@ class Gdrive
      * @return Google_Client|null the authorized client object
      * @throws Google_Exception
      * @throws Exception
+     * @throws JsonException
      */
     private static function getClient(): ?Google_Client
     {
@@ -122,7 +122,7 @@ class Gdrive
     {
         try {
             $fileName = $file->getName();
-            echo "handle {$fileName}\n";
+            //echo "handle {$fileName}\n";
             // если это .pdf
             if (strlen($fileName) > 4 && substr($fileName, strlen($fileName) - 4) === '.pdf') {
                 /** @var Response $response */

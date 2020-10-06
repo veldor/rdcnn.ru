@@ -19,13 +19,7 @@ function handleForm() {
             let modal = makeInformerModal("Успешно", message);
             let copyPassBtn = modal.find('button#copyPassBtn');
             copyPassBtn.on('click.copy', function () {
-                let pass = $(this).attr('data-password');
-                copyPassTextarea.removeClass('hidden');
-                copyPassTextarea.text(pass);
-                copyPassTextarea.select();
-                document.execCommand('copy');
-                copyPassTextarea.addClass('hidden');
-                $(this).html('<span class="text-info">Пароль скопирован</span>');
+                copyPass.call(this);
             });
         }, form);
     });

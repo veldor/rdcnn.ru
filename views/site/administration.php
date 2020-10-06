@@ -97,28 +97,9 @@ echo Html::endForm();
 
 echo '</div>';
 
-// тут список нераспознанных папок
 
 echo "
-    <div id='unhandledFoldersContainer' class='col-xs-12 hidden margin'>
-        <h2 class='text-center text-danger'><span class='glyphicon glyphicon-warning-sign'></span> Найдены неопознанные папки <span class='glyphicon glyphicon-warning-sign'></span></h2>
-        <h3 class='text-danger text-center'>Удалите или назовите папки правильно!</h3>
-        <table class='table-hover table'><thead><tr><th>Имя папки</th><th>Действия</th></tr></thead><tbody id='unhandledFoldersList'></tbody></table>
-    </div>
-";
-
-// тут список папок, ожидающих обработки
-
-echo "
-    <div id='waitingFoldersContainer' class='col-xs-12 hidden margin'>
-        <h2 class='text-center text-info'><span class='glyphicon glyphicon-info-sign'></span> Файлы данных обследований ожидают обработки <span class='glyphicon glyphicon-info-sign'></span></h2>
-        <h3 class='text-info text-center'>Они появятся в результатах обследования через некоторое время</h3>
-        <ul id='waitingFoldersList'></ul>
-    </div>
-";
-
-echo "
-    <div class='col-xs-12 margin'> <div class='col-xs-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-xs-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b><br/><a target='_blank' href='" . Url::toRoute('administrator/print-missed-conclusions-list') . "' class='btn btn-default'><span class='text-info'>Распечатать список</span></a></div><div class='col-xs-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
+    <div class='col-xs-12 margin'> <div class='col-xs-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-xs-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b></div><div class='col-xs-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
 ";
 
 $executionsCounter = 0;
@@ -156,7 +137,7 @@ if (!empty($executions)) {
             $itemText .= "<td class='mail-td'><button class='btn btn-default add-mail tooltip-enabled' data-action='/mail/add/{$execution->id}' data-toggle='tooltip' data-placement='auto' title='Добавить электронную почту'><span class='glyphicon glyphicon-envelope text-success'></span></button></td>";
         }
         if (ExecutionHandler::isConclusion($execution->username)) {
-            $itemText .= "<td data-conclusion='$execution->username' class='field-success tooltip-enabled'  data-toggle='tooltip' data-container='body' data-placement='auto' title='" . Table_availability::getConclusionAreas($execution->username) . "'><span class='glyphicon glyphicon-ok text-success status-icon'></span><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/{$execution->username}' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button></td>";
+            $itemText .= "<td data-conclusion='$execution->username' class='field-success'><span class='glyphicon glyphicon-ok text-success status-icon' data-toggle='tooltip' data-container='body' data-placement='auto' title='" . Table_availability::getConclusionAreas($execution->username) . "'></span><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/{$execution->username}' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button></td>";
         } else {
             $itemText .= "<td data-conclusion='$execution->username' class='field-danger'><span class='glyphicon glyphicon-remove text-danger status-icon'></span></td>";
         }
