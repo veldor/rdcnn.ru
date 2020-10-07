@@ -43,8 +43,8 @@ class MailHandler extends Model
                 <p class="text-center">
                 Спасибо, что выбрали нас для прохождения обследования МРТ.
                 Результаты обследования будут доступны в личном кабинете.
-                 <div class="text-center"><a class="btn btn-info" href="https://rdcnn.ru/person/' . $id . '">перейти в личный кабинет</a></div>
-                Пароль для входа в личный кабинет вы можете найти на вашем согласии на обследование.
+                 <div class="text-center"><a class="btn btn-info fit-down" href="https://rdcnn.ru/person/' . $id . '">перейти в личный кабинет</a></div>
+                <b class="notice">Пароль</b> для входа в личный кабинет находится в <b class="notice">акте оказанных медицинских услуг</b>.
                 </p>
             ';
                 // проверю наличие снимков
@@ -60,7 +60,7 @@ class MailHandler extends Model
                             $existentLink = TempDownloadLinks::createLink($user, 'execution', $existentExecution->file_name);
                         }
                         $text .= "<p class='text-center'>
-                                        Уже доступен для скачивания архив обследования- 
+                                        Доступен для скачивания архив обследования- 
                                         <div class='text-center'><a class='btn btn-info' href='" . Url::toRoute(['download/download-temp', 'link' => $existentLink->link], 'https') . "'>скачать архив обследования</a></div>
                                   </p>";
                     }

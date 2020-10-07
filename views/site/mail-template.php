@@ -17,7 +17,8 @@
             width: 100%;
             margin: auto;
             padding: 0;
-            border: 30px solid #CFE7E7;
+            border: 20px solid #CFE7E7;
+            border-radius: 10px;
             border-spacing: 0;
         }
 
@@ -80,8 +81,20 @@
         tr td.overline{
             border-top: 5px solid #CFE7E7;
         }
-        div.btns-block{
+        div.btns-block, .fit-down{
             margin-bottom: 1em;
+        }
+
+        img.advice{
+            width: 100%;
+        }
+
+        .notice{
+            text-decoration: underline;
+        }
+
+        .fit-down{
+            margin-top: 1em;
         }
 
     </style>
@@ -92,7 +105,7 @@
     <tbody>
     <tr>
         <td colspan="2" class="text-center">
-            <a href="http://xn----ttbeqkc.xn--p1ai/"><img alt="logo image" src="https://rdcnn.ru/images/logo.png"/></a>
+            <a href="http://xn----ttbeqkc.xn--p1ai/"><img alt="logo image" class="advice" src="https://rdcnn.ru/images/horizontal-logo.png"/></a>
         </td>
     </tr>
     <tr>
@@ -132,7 +145,7 @@
             <div class="advice">
                 <h3>Актуальные предложения</h3>
                 <a href="http://xn----ttbeqkc.xn--p1ai/nn/actions">
-                    <img  alt="advice image" src="http://xn----ttbeqkc.xn--p1ai/actions.png"/>
+                    <img class="advice" alt="advice image" src="http://xn----ttbeqkc.xn--p1ai/actions.png"/>
                 </a>
             </div>
         </td>
