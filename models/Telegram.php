@@ -98,93 +98,97 @@ class Telegram
                 try{
                     $message = $Update->getMessage();
                     $document = $message->getDocument();
-                    if($document !== null && ViberPersonalList::iWorkHere($message->getChat()->getId())){
-                        // зарегистрируюсь для получения ошибок обработки
-                        $msg_text = $message->getText();
-                        if($msg_text === 'register for errors'){
-                            ViberPersonalList::subscribeGetErrors($message->getChat()->getId());
-                            $bot->sendMessage($message->getChat()->getId(), 'Вы подписаны на получение ошибок');
-                            return;
-                        }
-                        $mime = $document->getMimeType();
-                        $bot->sendMessage($message->getChat()->getId(), 'Mime is ' . $mime);
-                        if($mime === 'application/pdf'){
-                            $bot->sendMessage($message->getChat()->getId(), 'обрабатываю PDF');
-                            $file = $bot->getFile($document->getFileId());
-                            // в строке- содержимое файла
-                            $downloadedFile = $bot->downloadFile($file->getFileId());
-                            if(!empty($downloadedFile) && $downloadedFile !== ''){
-                                // файл получен
-                                // файл получен
-                                // сохраню полученный файл во временную папку
-                                $path = FileUtils::saveTempFile($downloadedFile, '.pdf');
-                                if(is_file($path)){
-                                    $answer = FileUtils::handleFileUpload($path);
-                                    // отправлю сообщение с данными о фале
-                                    $fileName = GrammarHandler::getFileName($answer);
-                                    $availItem = Table_availability::findOne(['file_name' => $fileName]);
-                                    if($availItem !== null){
-                                        $bot->sendMessage($message->getChat()->getId(), "Обработано заключение\n
+                    if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                        if($document !== null){
+                            $mime = $document->getMimeType();
+                            $bot->sendMessage($message->getChat()->getId(), 'Mime is ' . $mime);
+                            if($mime === 'application/pdf'){
+                                $bot->sendMessage($message->getChat()->getId(), 'обрабатываю PDF');
+                                $file = $bot->getFile($document->getFileId());
+                                // в строке- содержимое файла
+                                $downloadedFile = $bot->downloadFile($file->getFileId());
+                                if(!empty($downloadedFile) && $downloadedFile !== ''){
+                                    // файл получен
+                                    // файл получен
+                                    // сохраню полученный файл во временную папку
+                                    $path = FileUtils::saveTempFile($downloadedFile, '.pdf');
+                                    if(is_file($path)){
+                                        $answer = FileUtils::handleFileUpload($path);
+                                        // отправлю сообщение с данными о фале
+                                        $fileName = GrammarHandler::getFileName($answer);
+                                        $availItem = Table_availability::findOne(['file_name' => $fileName]);
+                                        if($availItem !== null){
+                                            $bot->sendMessage($message->getChat()->getId(), "Обработано заключение\n
                                         Имя пациента: {$availItem->patient_name}\n
                                         Область обследования:{$availItem->execution_area}\n
                                         Номер обследования: {$availItem->userId}");
+                                        }
+                                        $file = new CURLFile($answer, 'application/pdf', $fileName);
+                                        if(is_file($answer)){
+                                            $bot->sendDocument(
+                                                $message->getChat()->getId(),
+                                                $file
+                                            );
+                                        }
+                                        else{
+                                            $bot->sendMessage($message->getChat()->getId(), $answer);
+                                        }
                                     }
-                                    $file = new CURLFile($answer, 'application/pdf', $fileName);
-                                    if(is_file($answer)){
-                                        $bot->sendDocument(
-                                            $message->getChat()->getId(),
-                                            $file
-                                        );
+                                }
+                            }
+                            else if($mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
+                                $bot->sendMessage($message->getChat()->getId(), 'обрабатываю DOCX');
+                                $file = $bot->getFile($document->getFileId());
+                                // в строке- содержимое файла
+                                $downloadedFile = $bot->downloadFile($file->getFileId());
+                                if(!empty($downloadedFile) && $downloadedFile !== ''){
+                                    // файл получен
+                                    // сохраню полученный файл во временную папку
+                                    $path = FileUtils::saveTempFile($downloadedFile, '.docx');
+                                    self::sendFileBack($path, $bot, $message);
+                                }
+                            }
+                            else if($mime === 'application/msword'){
+                                $bot->sendMessage($message->getChat()->getId(), 'обрабатываю DOC');
+                                $file = $bot->getFile($document->getFileId());
+                                // в строке- содержимое файла
+                                $downloadedFile = $bot->downloadFile($file->getFileId());
+                                if(!empty($downloadedFile) && $downloadedFile !== ''){
+                                    // файл получен
+                                    // сохраню полученный файл во временную папку
+                                    $path = FileUtils::saveTempFile($downloadedFile, '.doc');
+                                    self::sendFileBack($path, $bot, $message);
+                                }
+                            }
+                            else if($mime === 'application/zip'){
+                                $bot->sendMessage($message->getChat()->getId(), 'Разбираю архив');
+                                $file = $bot->getFile($document->getFileId());
+                                $downloadedFile = $bot->downloadFile($file->getFileId());
+                                $bot->sendMessage($message->getChat()->getId(), 'Архив скачан');
+                                $path = FileUtils::saveTempFile($downloadedFile, '.zip');
+                                if(is_file($path)){
+                                    // сохраню файл
+                                    $num = FilesHandler::unzip($path);
+                                    if($num !== null){
+                                        $bot->sendMessage($message->getChat()->getId(), 'Добавлены файлы сканирования обследования ' . $num);
                                     }
                                     else{
-                                        $bot->sendMessage($message->getChat()->getId(), $answer);
+                                        $bot->sendMessage($message->getChat()->getId(), 'Не смог обработать архив');
                                     }
                                 }
                             }
-                        }
-                        else if($mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
-                            $bot->sendMessage($message->getChat()->getId(), 'обрабатываю DOCX');
-                            $file = $bot->getFile($document->getFileId());
-                            // в строке- содержимое файла
-                            $downloadedFile = $bot->downloadFile($file->getFileId());
-                            if(!empty($downloadedFile) && $downloadedFile !== ''){
-                                // файл получен
-                                // сохраню полученный файл во временную папку
-                                $path = FileUtils::saveTempFile($downloadedFile, '.docx');
-                                self::sendFileBack($path, $bot, $message);
-                            }
-                        }
-                        else if($mime === 'application/msword'){
-                            $bot->sendMessage($message->getChat()->getId(), 'обрабатываю DOC');
-                            $file = $bot->getFile($document->getFileId());
-                            // в строке- содержимое файла
-                            $downloadedFile = $bot->downloadFile($file->getFileId());
-                            if(!empty($downloadedFile) && $downloadedFile !== ''){
-                                // файл получен
-                                // сохраню полученный файл во временную папку
-                                $path = FileUtils::saveTempFile($downloadedFile, '.doc');
-                                self::sendFileBack($path, $bot, $message);
-                            }
-                        }
-                        else if($mime === 'application/zip'){
-                            $bot->sendMessage($message->getChat()->getId(), 'Разбираю архив');
-                            $file = $bot->getFile($document->getFileId());
-                            $downloadedFile = $bot->downloadFile($file->getFileId());
-                            $bot->sendMessage($message->getChat()->getId(), 'Архив скачан');
-                            $path = FileUtils::saveTempFile($downloadedFile, '.zip');
-                            if(is_file($path)){
-                                // сохраню файл
-                                $num = FilesHandler::unzip($path);
-                                if($num !== null){
-                                    $bot->sendMessage($message->getChat()->getId(), 'Добавлены файлы сканирования обследования ' . $num);
-                                }
-                                else{
-                                    $bot->sendMessage($message->getChat()->getId(), 'Не смог обработать архив');
-                                }
+                            else{
+                                $bot->sendMessage($message->getChat()->getId(), 'Я понимаю только файлы в формате PDF и DOCX (и ZIP)');
                             }
                         }
                         else{
-                            $bot->sendMessage($message->getChat()->getId(), 'Я понимаю только файлы в формате PDF и DOCX (и ZIP)');
+                            // зарегистрируюсь для получения ошибок обработки
+                            $msg_text = $message->getText();
+                            if($msg_text === 'register for errors'){
+                                ViberPersonalList::subscribeGetErrors($message->getChat()->getId());
+                                $bot->sendMessage($message->getChat()->getId(), 'Вы подписаны на получение ошибок');
+                                return;
+                            }
                         }
                     }
                     else{
