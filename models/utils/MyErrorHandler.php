@@ -23,8 +23,8 @@ class MyErrorHandler
     public static function sendError(Exception $e): void
     {
         $root = Yii::$app->basePath;
-        $errorInfo = 'Surprise ';
-        $errorInfo .= time() . "\r\n";
+        $errorInfo = '';
+        $errorInfo .= TimeHandler::timestampToDate(time()) . "\r\n";
         $errorInfo .= 'url ' .  Url::to() . "\r\n";
         $errorInfo .=  'message ' . $e->getMessage() . "\r\n";
         $errorInfo .=  'code ' . $e->getCode() . "\r\n";
