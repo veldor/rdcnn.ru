@@ -6,7 +6,10 @@ namespace app\models\utils;
 
 use app\models\Table_availability;
 use app\models\Table_statistics;
+use app\models\Telegram;
 use app\models\User;
+use TelegramBot\Api\Exception;
+use TelegramBot\Api\InvalidArgumentException;
 use Yii;
 use yii\web\NotFoundHttpException;
 
@@ -65,6 +68,11 @@ class DownloadHandler
                                 if (!Yii::$app->user->can('manage')) {
                                     // если обследование скачал пациент а не администратор- посчитаю скачивание
                                     Table_statistics::plusConclusionPrint($executionNumber);
+                                    try {
+                                        Telegram::sendError("Кто-то распечатал заключение. За всё время заключений распечатано: " . Table_statistics::getTotalConclusionsPrintCount());
+                                    } catch (InvalidArgumentException $e) {
+                                    } catch (Exception $e) {
+                                    }
                                 }
                             }
                             else{
@@ -72,6 +80,11 @@ class DownloadHandler
                                 if (!Yii::$app->user->can('manage')) {
                                     // если обследование скачал пациент а не администратор- посчитаю скачивание
                                     Table_statistics::plusConclusionDownload($executionNumber);
+                                    try {
+                                        Telegram::sendError("Кто-то скачал заключение. За всё время заключений скачано: " . Table_statistics::getTotalConclusionsCount());
+                                    } catch (InvalidArgumentException $e) {
+                                    } catch (Exception $e) {
+                                    }
                                 }
                             }
                         }
@@ -110,6 +123,11 @@ class DownloadHandler
                     if (!Yii::$app->user->can('manage')){
                         // запишу данные о скачивании
                         Table_statistics::plusExecutionDownload($executionNumber);
+                        try {
+                            Telegram::sendError("Кто-то скачал файл обследования. За всё время обследований скачано: " . Table_statistics::getTotalExecutionsCount());
+                        } catch (InvalidArgumentException $e) {
+                        } catch (Exception $e) {
+                        }
                     }
                     Yii::$app->response->sendFile($file, 'MRI_files_' . $execution->username . '.zip');
                 }

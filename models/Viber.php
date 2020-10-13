@@ -12,6 +12,7 @@ use app\models\utils\GrammarHandler;
 use app\priv\Info;
 use Exception;
 use phpDocumentor\Reflection\Types\Self_;
+use TelegramBot\Api\InvalidArgumentException;
 use Viber\Api\Event;
 use Viber\Api\Keyboard;
 use Viber\Api\Keyboard\Button;
@@ -531,11 +532,24 @@ class Viber extends Model
                 if ($linkInfo->file_type === 'execution') {
                     $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
                     $fileName = $executionInfo->username . '.zip';
+                    Table_statistics::plusExecutionDownload($executionInfo->username);
+                    try {
+                        Telegram::sendError("Кто-то скачал файл обследования. За всё время обследований скачано: " . Table_statistics::getTotalExecutionsCount());
+                    } catch (InvalidArgumentException $e) {
+                    } catch (\TelegramBot\Api\Exception $e) {
+                    }
                 } else if ($linkInfo->file_type === 'conclusion') {
                     $availData = Table_availability::findOne(['file_name' => $linkInfo->file_name]);
-                    if($availData !== null){
+                    if ($availData !== null) {
                         $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $linkInfo->file_name;
                         $fileName = 'МРТ ' . $availData->execution_area . ' ' . $availData->patient_name . '.pdf';
+
+                        Table_statistics::plusConclusionDownload($executionInfo->username);
+                        try {
+                            Telegram::sendError("Кто-то скачал заключение. За всё время заключений скачано: " . Table_statistics::getTotalConclusionsCount());
+                        } catch (InvalidArgumentException $e) {
+                        } catch (\TelegramBot\Api\Exception $e) {
+                        }
                     }
                 }
             }
@@ -605,8 +619,9 @@ class Viber extends Model
                 ->setActionType('reply')
                 ->setActionBody('статистика загрузок')
                 ->setText('Статистика загрузок'),
-            ];
+        ];
     }
+
     /**
      * @return array
      */
@@ -618,6 +633,6 @@ class Viber extends Model
             ->setActionType('reply')
             ->setActionBody('команды')
             ->setText('Показать доступные команды'),
-            ];
+        ];
     }
 }

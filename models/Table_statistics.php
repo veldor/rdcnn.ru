@@ -58,16 +58,16 @@ class Table_statistics extends ActiveRecord
     /**
      * @return int
      */
-    private static function getTotalConclusionsCount():int
+    public static function getTotalConclusionsCount():int
     {
         return self::find()->where(['type' => 'download_conclusion'])->count();
     }
 
-    private static function getTotalExecutionsCount(): int
+    public static function getTotalExecutionsCount(): int
     {
         return self::find()->where(['type' => 'download_execution'])->count();
     }
-    private static function getTotalConclusionsPrintCount(): int
+    public static function getTotalConclusionsPrintCount(): int
     {
         return self::find()->where(['type' => 'print_conclusion'])->count();
     }

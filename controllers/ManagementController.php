@@ -227,7 +227,7 @@ class ManagementController extends Controller
         Yii::$app->response->format = Response::FORMAT_JSON;
         // удалю все записи из чёрного списка
         Table_blacklist::clear();
-        return ['status' => 1, 'message' => 'Чёрный список вычищен'];
+        return ['status' => 1, 'message' => 'Чёрный список вычищен', 'reload' => true];
     }
 
     public function actionChangeTgTable(): void

@@ -45,8 +45,7 @@ $this->title = 'Всякие разные настройки';
                     <button class="btn btn-default activator" data-action="/management/restart-server"><span>Restart server</span></button>
                     <!--            <button class="btn btn-default activator" data-action="/management/check-java"><span>Check Java</span></button>-->
                     <button class="btn btn-default activator" data-action="/management/send-mail"><span>Send test mail</span></button>
-                    <button class="btn btn-default activator" data-action="/management/clear-blacklist-table"><span>Clear blacklist table</span></button>
-                    <button class="btn btn-default activator" data-action="/management/change-tg-table"><span>Change tg table</span></button>
+                    <!--<button class="btn btn-default activator" data-action="/management/change-tg-table"><span>Change tg table</span></button>-->
                 </div>
             </div>
         </div>
@@ -97,6 +96,7 @@ $this->title = 'Всякие разные настройки';
                 echo "<tr><td>{$item->ip}</td><td>" . TimeHandler::timestampToDate($item->last_try) . "</td></tr>";
             }
             echo "</table>";
+            echo '<div class="text-center"><button class="btn btn-default activator" data-action="/management/clear-blacklist-table"><span>Clear blacklist table</span></button></div>';
         }
         else{
             echo "<h2 class='text-center'>Empty</h2>";
