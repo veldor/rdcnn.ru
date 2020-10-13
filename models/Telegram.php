@@ -104,6 +104,7 @@ class Telegram
                         if($msg_text === 'register for errors'){
                             ViberPersonalList::subscribeGetErrors($message->getChat()->getId());
                             $bot->sendMessage($message->getChat()->getId(), 'Вы подписаны на получение ошибок');
+                            return;
                         }
                         $mime = $document->getMimeType();
                         $bot->sendMessage($message->getChat()->getId(), 'Mime is ' . $mime);
@@ -221,7 +222,7 @@ class Telegram
                 ViberPersonalList::register($message->getChat()->getId());
                 return 'Ага, вы работаете на нас :) /help для списка команд';
         }
-        return 'Не понимаю, о чём вы :(';
+        return 'Не понимаю, о чём вы :( (вы написали ' . $msg_text . ')';
     }
 
     /**
