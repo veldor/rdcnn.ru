@@ -25,6 +25,7 @@ $this->title = 'Всякие разные настройки';
 
 <ul class="nav nav-tabs">
     <li id="bank_set_li" class="active"><a href="#global_actions" data-toggle="tab" class="active">Обшие действия</a></li>
+    <li><a href="#reports" data-toggle="tab">Отчёты</a></li>
     <li><a href="#blacklist_actions" data-toggle="tab">Чёрный список</a></li>
     <li><a href="#telegram_actions" data-toggle="tab">Телеграм</a></li>
 </ul>
@@ -48,39 +49,41 @@ $this->title = 'Всякие разные настройки';
                     <button class="btn btn-default activator" data-action="/management/change-tg-table"><span>Change tg table</span></button>
                 </div>
             </div>
-            <div class="col-sm-12">
-                <div class="col-sm-4">
-                    <h3 class="text-center">Update log</h3>
-                    <?=str_replace("\n", '<br/>', $updateInfo)?>
-                </div>
-                <div class="col-sm-4">
-                    <h3 class="text-center">Action log</h3>
-                    <?=str_replace("\n", '<br/>', $outputInfo)?>
-                </div>
-                <div class="col-sm-4">
-                    <h3 class="text-center">Errors log</h3>
-                    <?=str_replace("\n", '<br/>', $errorsInfo)?>
-                </div>
-            </div>
-            <div class="col-sm-12">
-                <div class="col-sm-4">
-                    <h3 class="text-center">Update process log</h3>
-                    <?=str_replace("\n", '<br/>', $updateOutputInfo)?>
-                </div>
-                <div class="col-sm-4">
-                    <h3 class="text-center">Update errors log</h3>
-                    <?=str_replace("\n", '<br/>', $updateErrorsInfo)?>
-                </div>
-                <div class="col-sm-4">
-                    <h3 class="text-center">Java info</h3>
-                    <?=str_replace("\n", '<br/>', FileUtils::getJavaInfo())?>
-                </div>
-            </div>
-            <div class="col-sm-12 text-center">
-                <h3>Service errors</h3>
-                <?=str_replace("\n", '<br/>', $errors)?>
-            </div>
+        </div>
+    </div>
+    <div class="tab-pane margened" id="reports">
 
+        <div class="col-sm-12">
+            <div class="col-sm-4">
+                <h3 class="text-center">Update log</h3>
+                <?=str_replace("\n", '<br/>', $updateInfo)?>
+            </div>
+            <div class="col-sm-4">
+                <h3 class="text-center">Action log</h3>
+                <?=str_replace("\n", '<br/>', $outputInfo)?>
+            </div>
+            <div class="col-sm-4">
+                <h3 class="text-center">Errors log</h3>
+                <?=str_replace("\n", '<br/>', $errorsInfo)?>
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="col-sm-4">
+                <h3 class="text-center">Update process log</h3>
+                <?=str_replace("\n", '<br/>', $updateOutputInfo)?>
+            </div>
+            <div class="col-sm-4">
+                <h3 class="text-center">Update errors log</h3>
+                <?=str_replace("\n", '<br/>', $updateErrorsInfo)?>
+            </div>
+            <div class="col-sm-4">
+                <h3 class="text-center">Java info</h3>
+                <?=str_replace("\n", '<br/>', FileUtils::getJavaInfo())?>
+            </div>
+        </div>
+        <div class="col-sm-12 text-center">
+            <h3>Service errors</h3>
+            <?=str_replace("\n", '<br/>', $errors)?>
         </div>
     </div>
     <div class="tab-pane margened" id="blacklist_actions">
