@@ -4,8 +4,10 @@
 namespace app\models\utils;
 
 
+use app\models\Telegram;
 use Exception;
 use RuntimeException;
+use TelegramBot\Api\InvalidArgumentException;
 use Yii;
 use yii\helpers\Url;
 
@@ -15,6 +17,8 @@ class MyErrorHandler
     /**
      * Обработка ошибок
      * @param Exception $e
+     * @throws \TelegramBot\Api\Exception
+     * @throws InvalidArgumentException
      */
     public static function sendError(Exception $e): void
     {
@@ -43,6 +47,7 @@ class MyErrorHandler
             file_put_contents($root . '/errors/' . 'errors.txt', $errorInfo . "\r\n\r\n\r\n");
         // отправлю ошибки асинхронно
         self::asyncSendErrors();
+        Telegram::sendError($errorInfo);
     }
 
     /**

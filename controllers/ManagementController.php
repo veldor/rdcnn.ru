@@ -45,7 +45,7 @@ class ManagementController extends Controller
                             'add-backgrounds',
                             'create-mail-table',
                             'clear-blacklist-table',
-                            'change-data-table',
+                            'change-tg-table',
                             'handle-mail',
                             'add-mail',
                             'change-mail',
@@ -184,12 +184,13 @@ class ManagementController extends Controller
         }
         return ['status' => 2, 'message' => 'Не удалось сохранить адрес'];
     }
+
     public function actionChangeMail()
     {
         // добавлю адрес электронной почты, если он валидный и ещё не зарегистрирован
         Yii::$app->response->format = Response::FORMAT_JSON;
         $form = Emails::findOne(Yii::$app->request->post()['Emails']['id']);
-        if($form !== null){
+        if ($form !== null) {
             $form->load(Yii::$app->request->post());
             // проверю, что данному обследованию ещё не назначен адрес
             if ($form->save()) {
@@ -199,14 +200,16 @@ class ManagementController extends Controller
         return ['status' => 2, 'message' => 'Не удалось сохранить адрес'];
     }
 
-    public function actionDeleteMail(){
+    public function actionDeleteMail()
+    {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $existentMail = Emails::findOne(['patient_id' => Yii::$app->request->post()['id']]);
-        if($existentMail !== null){
+        if ($existentMail !== null) {
             try {
                 $existentMail->delete();
                 return ['status' => 1];
-            } catch (Throwable $e) {}
+            } catch (Throwable $e) {
+            }
         }
         return ['status' => 2, 'message' => 'Не удалось удалить адрес электронной почты'];
     }
@@ -218,6 +221,7 @@ class ManagementController extends Controller
         ExecutionHandler::deleteAllConclusions($executionNumber);
         return ['status' => 1, 'message' => 'Заключения удалены'];
     }
+
     public function actionClearBlacklistTable(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -226,16 +230,10 @@ class ManagementController extends Controller
         return ['status' => 1, 'message' => 'Чёрный список вычищен'];
     }
 
-    public function actionChangeDataTable(): void
+    public function actionChangeTgTable(): void
     {
         $connection = Yii::$app->getDb();
-        $command = $connection->createCommand("ALTER TABLE `rdcnn`.`dataavailability` ADD COLUMN `patient_name` VARCHAR(255) NULL AFTER `md5`, ADD COLUMN `execution_area` VARCHAR(255) NULL AFTER `patient_name`;");
-        try {
-            $command->execute();
-        } catch (\yii\db\Exception $e) {
-        }
-        $command = $connection->createCommand(" ALTER TABLE `rdcnn`.`mailing` ADD COLUMN `mailed_yet` BOOL DEFAULT 0 NULL AFTER `patient_id`; 
-");
+        $command = $connection->createCommand("ALTER TABLE `rdcnn`.`viber_personal_list` ADD COLUMN `get_errors` BOOL DEFAULT 0 NULL AFTER `viber_id`;");
         try {
             $command->execute();
         } catch (\yii\db\Exception $e) {

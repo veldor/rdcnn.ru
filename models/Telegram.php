@@ -8,9 +8,11 @@ use app\models\database\ViberPersonalList;
 use app\models\utils\FilesHandler;
 use app\models\utils\GrammarHandler;
 use app\priv\Info;
+use CURLFile;
 use Exception;
 use TelegramBot\Api\BotApi;
 use TelegramBot\Api\Client;
+use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\InvalidJsonException;
 use TelegramBot\Api\Types\Message;
 use TelegramBot\Api\Types\Update;
@@ -97,6 +99,12 @@ class Telegram
                     $message = $Update->getMessage();
                     $document = $message->getDocument();
                     if($document !== null && ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                        // зарегистрируюсь для получения ошибок обработки
+                        $msg_text = $message->getText();
+                        if($msg_text === 'register for errors'){
+                            ViberPersonalList::subscribeGetErrors($message->getChat()->getId());
+                            $bot->sendMessage($message->getChat()->getId(), 'Вы подписаны на получение ошибок');
+                        }
                         $mime = $document->getMimeType();
                         $bot->sendMessage($message->getChat()->getId(), 'Mime is ' . $mime);
                         if($mime === 'application/pdf'){
@@ -120,7 +128,7 @@ class Telegram
                                         Область обследования:{$availItem->execution_area}\n
                                         Номер обследования: {$availItem->userId}");
                                     }
-                                    $file = new \CURLFile($answer, 'application/pdf', $fileName);
+                                    $file = new CURLFile($answer, 'application/pdf', $fileName);
                                     if(is_file($answer)){
                                         $bot->sendDocument(
                                             $message->getChat()->getId(),
@@ -142,20 +150,7 @@ class Telegram
                                 // файл получен
                                 // сохраню полученный файл во временную папку
                                 $path = FileUtils::saveTempFile($downloadedFile, '.docx');
-                                if(is_file($path)){
-                                    $answer = FileUtils::handleFileUpload($path);
-                                    $file = new \CURLFile($answer, 'application/pdf', GrammarHandler::getFileName($answer));
-                                    if(is_file($answer)){
-                                        $bot->sendDocument(
-                                            $message->getChat()->getId(),
-                                            $file
-                                        );
-                                    }
-                                    else{
-                                        $bot->sendMessage($message->getChat()->getId(), $answer);
-                                    }
-                                    unlink($path);
-                                }
+                                self::sendFileBack($path, $bot, $message);
                             }
                         }
                         else if($mime === 'application/msword'){
@@ -167,20 +162,7 @@ class Telegram
                                 // файл получен
                                 // сохраню полученный файл во временную папку
                                 $path = FileUtils::saveTempFile($downloadedFile, '.doc');
-                                if(is_file($path)){
-                                    $answer = FileUtils::handleFileUpload($path);
-                                    $file = new \CURLFile($answer, 'application/pdf', GrammarHandler::getFileName($answer));
-                                    if(is_file($answer)){
-                                        $bot->sendDocument(
-                                            $message->getChat()->getId(),
-                                            $file
-                                        );
-                                    }
-                                    else{
-                                        $bot->sendMessage($message->getChat()->getId(), $answer);
-                                    }
-                                    unlink($path);
-                                }
+                                self::sendFileBack($path, $bot, $message);
                             }
                         }
                         else if($mime === 'application/zip'){
@@ -240,5 +222,50 @@ class Telegram
                 return 'Ага, вы работаете на нас :) /help для списка команд';
         }
         return 'Не понимаю, о чём вы :(';
+    }
+
+    /**
+     * @param string $path
+     * @param $bot
+     * @param Message $message
+     * @throws \TelegramBot\Api\Exception
+     * @throws InvalidArgumentException
+     * @throws \yii\base\Exception
+     */
+    private static function sendFileBack(string $path, $bot, Message $message): void
+    {
+        /** @var BotApi|Client $bot */
+        if (is_file($path)) {
+            $answer = FileUtils::handleFileUpload($path);
+            $file = new CURLFile($answer, 'application/pdf', GrammarHandler::getFileName($answer));
+            if (is_file($answer)) {
+                $bot->sendDocument(
+                    $message->getChat()->getId(),
+                    $file
+                );
+            } else {
+                $bot->sendMessage($message->getChat()->getId(), $answer);
+            }
+            unlink($path);
+        }
+    }
+
+    /**
+     * @param string $errorInfo
+     * @throws InvalidArgumentException
+     * @throws \TelegramBot\Api\Exception
+     */
+    public static function sendError(string $errorInfo): void
+    {
+        // проверю, есть ли учётные записи для отправки данных
+        $subscribers = ViberPersonalList::findAll(['get_errors' => 1]);
+        if(!empty($subscribers)){
+            $token = Info::TG_BOT_TOKEN;
+            /** @var BotApi|Client $bot */
+            $bot = new Client($token);
+            foreach ($subscribers as $subscriber) {
+                $bot->sendMessage($subscriber->viber_id, $errorInfo);
+            }
+        }
     }
 }

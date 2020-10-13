@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\models\utils\GrammarHandler;
+use TelegramBot\Api\InvalidArgumentException;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -143,12 +144,14 @@ class LoginForm extends Model
         if ($admin->username !== trim($this->username)) {
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
+            Telegram::sendError("Попытка входа с неверными данными\nЛогин: {$this->username}");
             return false;
         }
 
         if (!$admin->validatePassword(trim($this->password))) {
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
+            Telegram::sendError("Попытка входа с неверными данными\nПароль: {$this->password}");
             return false;
         }
 
@@ -161,6 +164,11 @@ class LoginForm extends Model
             }
         }
         $admin->save();
+        try {
+            Telegram::sendError("Успешный вход в систему");
+        } catch (InvalidArgumentException $e) {
+        } catch (\TelegramBot\Api\Exception $e) {
+        }
         return Yii::$app->user->login($admin, 60 * 60 * 30);
     }
 
