@@ -234,6 +234,7 @@ function simpleAnswerHandlerReload(data) {
 
 // ТИПИЧНАЯ ОБРАБОТКА ОТВЕТА AJAX
 function simpleAnswerHandler(data) {
+    console.log('have answer');
     if (data['status']) {
         console.log(data.reload)
         if (data['status'] === 1) {
@@ -342,6 +343,7 @@ function handleAjaxActivators() {
         let action = $(this).attr('data-action');
         if (action) {
             // отправлю запрос на форму
+            console.log('send ajax');
             sendAjax(
                 "get",
                 action,

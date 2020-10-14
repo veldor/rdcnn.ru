@@ -114,9 +114,10 @@ class ManagementController extends Controller
         }
     }
 
-    public function actionSendMail(): void
+    public function actionSendMail(): array
     {
         try {
+            Yii::$app->response->format = Response::FORMAT_JSON;
             $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
             // получу данные
             $content = file_get_contents($settingsFile);
@@ -131,12 +132,12 @@ class ManagementController extends Controller
                     ->setHtmlBody($text)
                     ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
                 // попробую отправить письмо, в случае ошибки- вызову исключение
-                echo $mail->send();
-            } else {
-                echo 'no mail settings';
+                $mail->send();
+                return ['status' => 1, 'message' => 'Тестовое письмо успешно отправлено'];
             }
+            return ['status' => 1, 'message' => 'Отсутствуют настройки почты'];
         } catch (Exception $e) {
-            echo $e->getMessage();
+            return ['status' => 1, 'message' => 'Ошибка отправки почты: ' . $e->getMessage()];
         }
     }
 
