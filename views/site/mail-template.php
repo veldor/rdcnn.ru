@@ -9,6 +9,9 @@
 <!DOCTYPE HTML>
 <html lang="ru">
 <head>
+    <meta name='viewport'
+          content='width=device-width, initial-scale=1.0, maximum-scale=1.0,
+     user-scalable=0' >
     <meta charset="utf-8">
     <style type="text/css">
         #main-table {
@@ -18,6 +21,16 @@
             margin: auto;
             padding: 0;
             border: 20px solid #CFE7E7;
+            border-radius: 10px;
+            border-spacing: 0;
+        }
+
+        .advice-table{
+            font-family: Arial, Times New Roman, Helvetica, sans-serif;
+            max-width: 600px;
+            width: 100%;
+            margin: auto;
+            padding: 0;
             border-radius: 10px;
             border-spacing: 0;
         }
@@ -140,6 +153,9 @@
             <a href="http://xn----ttbeqkc.xn--p1ai/">мрт-кт.рф</a>
         </td>
     </tr>
+    </tbody>
+</table>
+<table class="text-center advice-table">
     <tr>
         <td colspan="2">
             <div class="advice">
@@ -150,7 +166,6 @@
             </div>
         </td>
     </tr>
-    </tbody>
 </table>
 </body>
 </html>

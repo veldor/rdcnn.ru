@@ -9,9 +9,9 @@ use app\models\ExecutionHandler;
 use app\models\FileUtils;
 use app\models\Table_blacklist;
 use app\models\User;
+use app\models\utils\ComHandler;
 use app\models\utils\MailSettings;
 use app\models\utils\Management;
-use app\models\utils\TimeHandler;
 use Exception;
 use Throwable;
 use Yii;
@@ -35,17 +35,11 @@ class ManagementController extends Controller
                         'allow' => true,
                         'actions' => [
                             'check-update',
-                            'check-changes',
                             'update-dependencies',
-                            'reset-change-check-counter',
-                            'check-changes-sync',
-                            'check-java',
                             'restart-server',
                             'send-mail',
                             'add-backgrounds',
-                            'create-mail-table',
                             'clear-blacklist-table',
-                            'change-tg-table',
                             'handle-mail',
                             'add-mail',
                             'change-mail',
@@ -63,30 +57,25 @@ class ManagementController extends Controller
     }
 
     /**
-     * принудительная загрузка обновления с гитхаба
+     * <b>принудительная загрузка обновления с гитхаба</b>
      */
-    public function actionCheckUpdate(): void
+    public function actionCheckUpdate(): array
     {
-        // отмечу время проверки обновления
-        FileUtils::setLastCheckUpdateTime();
-        $file = Yii::$app->basePath . '\\updateFromGithub.bat';
-        $this->startScript($file);
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        Management::updateSoft();
+        return ['status' => 1, 'message' => 'Запущено обновление ПО'];
     }
 
     /**
-     * принудительная проверка содержимого папок
+     * <b>обновление зависимостей Composer</b>
+     * @return array
      */
-    public function actionCheckChanges(): void
+    public function actionUpdateDependencies(): array
     {
-        FileUtils::writeUpdateLog('try to start : ' . TimeHandler::timestampToDate(time()));
-        FileUtils::writeUpdateLog('result is  : ' . Management::handleChanges());
-    }
-
-    public function actionUpdateDependencies(): void
-    {
-
+        Yii::$app->response->format = Response::FORMAT_JSON;
         $file = Yii::$app->basePath . '\\composerUpdate.bat';
-        $this->startScript($file);
+        Management::startScript($file);
+        return ['status' => 1, 'message' => 'Запущено обновление зависимостей'];
     }
 
     public function actionResetChangeCheckCounter(): void
@@ -94,19 +83,13 @@ class ManagementController extends Controller
         FileUtils::setUpdateFinished();
     }
 
-    public function actionCheckChangesSync(): void
+    public function actionRestartServer(): array
     {
-        $file = Yii::$app->basePath . '\\yii.bat';
-        $command = "$file console";
-        exec($command, $output);
-    }
-
-    public function actionRestartServer(): void
-    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
         $file = Yii::$app->basePath . '\\restartServer.bat';
-        // попробую вызвать процесс асинхронно
-        $handle = new \COM('WScript.Shell');
-        $handle->Run($file, 0, false);
+        ComHandler::runCommand($file);
+        return ['status' => 1, 'message' => 'Инициирована перезагрузка сервера'];
+
     }
 
     public function actionCheckJava(): void
@@ -120,7 +103,10 @@ class ManagementController extends Controller
             echo $command;
             try {
                 // попробую вызвать процесс асинхронно
+                /** @noinspection PhpUndefinedClassInspection */
+                /** @noinspection PhpFullyQualifiedNameUsageInspection */
                 $handle = new \COM('WScript.Shell');
+                /** @noinspection PhpUndefinedMethodInspection */
                 $handle->Run($command, 0, false);
             } catch (Exception $e) {
                 exec($command);
@@ -228,36 +214,5 @@ class ManagementController extends Controller
         // удалю все записи из чёрного списка
         Table_blacklist::clear();
         return ['status' => 1, 'message' => 'Чёрный список вычищен', 'reload' => true];
-    }
-
-    public function actionChangeTgTable(): void
-    {
-        $connection = Yii::$app->getDb();
-        $command = $connection->createCommand("ALTER TABLE `rdcnn`.`viber_personal_list` ADD COLUMN `get_errors` BOOL DEFAULT 0 NULL AFTER `viber_id`;");
-        try {
-            $command->execute();
-        } catch (\yii\db\Exception $e) {
-        }
-    }
-
-    /**
-     * @param string $file
-     */
-    private function startScript(string $file): void
-    {
-        if (is_file($file)) {
-            $command = $file . ' ' . Yii::$app->basePath;
-            $outFilePath = Yii::$app->basePath . '\\logs\\update_file.log';
-            $outErrPath = Yii::$app->basePath . '\\logs\\update_err.log';
-            $command .= ' > ' . $outFilePath . ' 2>' . $outErrPath . ' &"';
-            echo $command;
-            try {
-                // попробую вызвать процесс асинхронно
-                $handle = new \COM('WScript.Shell');
-                $handle->Run($command, 0, false);
-            } catch (Exception $e) {
-                exec($command);
-            }
-        }
     }
 }

@@ -37,15 +37,9 @@ $this->title = 'Всякие разные настройки';
             <div class="col-sm-12">
                 <div class="btn-group-vertical">
                     <button class="btn btn-default activator" data-action="/management/check-update"><span>Check update</span></button>
-                    <button class="btn btn-default activator" data-action="/management/check-changes"><span>Check changes</span></button>
                     <button class="btn btn-default activator" data-action="/management/update-dependencies"><span>Updating dependencies</span></button>
-                    <!--            <button class="btn btn-default activator" data-action="/management/add-backgrounds"><span>Add backgrounds</span></button>-->
-                    <!--            <button class="btn btn-default activator" data-action="/management/reset-change-check-counter"><span>Reset check counter</span></button>-->
-                    <!--            <button class="btn btn-default activator" data-action="/management/check-changes-sync"><span>Sync check changes</span></button>-->
                     <button class="btn btn-default activator" data-action="/management/restart-server"><span>Restart server</span></button>
-                    <!--            <button class="btn btn-default activator" data-action="/management/check-java"><span>Check Java</span></button>-->
                     <button class="btn btn-default activator" data-action="/management/send-mail"><span>Send test mail</span></button>
-                    <!--<button class="btn btn-default activator" data-action="/management/change-tg-table"><span>Change tg table</span></button>-->
                 </div>
             </div>
         </div>

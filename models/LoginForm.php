@@ -144,14 +144,14 @@ class LoginForm extends Model
         if ($admin->username !== trim($this->username)) {
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
-            Telegram::sendError("Попытка входа с неверными данными\nЛогин: {$this->username}");
+            Telegram::sendDebug("Попытка входа с неверными данными\nЛогин: {$this->username}");
             return false;
         }
 
         if (!$admin->validatePassword(trim($this->password))) {
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
-            Telegram::sendError("Попытка входа с неверными данными\nПароль: {$this->password}");
+            Telegram::sendDebug("Попытка входа с неверными данными\nПароль: {$this->password}");
             return false;
         }
 
@@ -165,7 +165,7 @@ class LoginForm extends Model
         }
         $admin->save();
         try {
-            Telegram::sendError("Успешный вход в систему");
+            Telegram::sendDebug("Успешный вход в систему");
         } catch (InvalidArgumentException $e) {
         } catch (\TelegramBot\Api\Exception $e) {
         }

@@ -47,7 +47,7 @@ class MyErrorHandler
             file_put_contents($root . '/errors/' . 'errors.txt', $errorInfo . "\r\n\r\n\r\n");
         // отправлю ошибки асинхронно
         self::asyncSendErrors();
-        Telegram::sendError($errorInfo);
+        Telegram::sendDebug($errorInfo);
     }
 
     /**

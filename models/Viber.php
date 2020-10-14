@@ -534,7 +534,7 @@ class Viber extends Model
                     $fileName = $executionInfo->username . '.zip';
                     Table_statistics::plusExecutionDownload($executionInfo->username);
                     try {
-                        Telegram::sendError("Кто-то скачал файл обследования. За всё время обследований скачано: " . Table_statistics::getTotalExecutionsCount());
+                        Telegram::sendDebug("Кто-то скачал файл обследования. За всё время обследований скачано: " . Table_statistics::getTotalExecutionsCount());
                     } catch (InvalidArgumentException $e) {
                     } catch (\TelegramBot\Api\Exception $e) {
                     }
@@ -546,7 +546,7 @@ class Viber extends Model
 
                         Table_statistics::plusConclusionDownload($executionInfo->username);
                         try {
-                            Telegram::sendError("Кто-то скачал заключение. За всё время заключений скачано: " . Table_statistics::getTotalConclusionsCount());
+                            Telegram::sendDebug("Кто-то скачал заключение. За всё время заключений скачано: " . Table_statistics::getTotalConclusionsCount());
                         } catch (InvalidArgumentException $e) {
                         } catch (\TelegramBot\Api\Exception $e) {
                         }

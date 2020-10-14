@@ -7,6 +7,7 @@ namespace app\models;
 use app\models\database\ViberPersonalList;
 use app\models\utils\FilesHandler;
 use app\models\utils\GrammarHandler;
+use app\models\utils\Management;
 use app\priv\Info;
 use CURLFile;
 use Exception;
@@ -43,6 +44,8 @@ class Telegram
                     if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
                         $answer = 'Команды:
 /help - вывод справки
+/cbl - очистить чёрный список IP
+/upd - обновить ПО сервера
 /conc - список незагруженных заключений
 /exec - список незагруженных обследований';
                     }
@@ -55,6 +58,26 @@ class Telegram
                 }
                 catch (Exception $e){
                     $bot->sendMessage($message->getChat()->getId(), $e->getMessage());
+                }
+            });
+// команда для очистки чёрного списка
+            $bot->command('cbl', static function ($message) use ($bot) {
+                /** @var Message $message */
+                // проверю, зарегистрирован ли пользователь как работающий у нас
+                if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                    Table_blacklist::clear();
+                    /** @var Message $message */
+                    $bot->sendMessage($message->getChat()->getId(),'Чёрный список вычищен');
+                }
+            });
+// команда для обновления ПО сервера
+            $bot->command('upd', static function ($message) use ($bot) {
+                /** @var Message $message */
+                // проверю, зарегистрирован ли пользователь как работающий у нас
+                if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                    Management::updateSoft();
+                    /** @var Message $message */
+                    $bot->sendMessage($message->getChat()->getId(), 'Обновляю ПО через телеграм-запрос');
                 }
             });
 // команда для вывода незагруженных заключений
@@ -257,20 +280,21 @@ class Telegram
 
     /**
      * @param string $errorInfo
-     * @throws InvalidArgumentException
-     * @throws \TelegramBot\Api\Exception
      */
-    public static function sendError(string $errorInfo): void
+    public static function sendDebug(string $errorInfo): void
     {
-        // проверю, есть ли учётные записи для отправки данных
-        $subscribers = ViberPersonalList::findAll(['get_errors' => 1]);
-        if(!empty($subscribers)){
-            $token = Info::TG_BOT_TOKEN;
-            /** @var BotApi|Client $bot */
-            $bot = new Client($token);
-            foreach ($subscribers as $subscriber) {
-                $bot->sendMessage($subscriber->viber_id, $errorInfo);
+        try{
+            // проверю, есть ли учётные записи для отправки данных
+            $subscribers = ViberPersonalList::findAll(['get_errors' => 1]);
+            if(!empty($subscribers)){
+                $token = Info::TG_BOT_TOKEN;
+                /** @var BotApi|Client $bot */
+                $bot = new Client($token);
+                foreach ($subscribers as $subscriber) {
+                    $bot->sendMessage($subscriber->viber_id, $errorInfo);
+                }
             }
         }
+        catch (Exception $e){}
     }
 }

@@ -69,7 +69,7 @@ class DownloadHandler
                                     // если обследование скачал пациент а не администратор- посчитаю скачивание
                                     Table_statistics::plusConclusionPrint($executionNumber);
                                     try {
-                                        Telegram::sendError("Кто-то распечатал заключение. За всё время заключений распечатано: " . Table_statistics::getTotalConclusionsPrintCount());
+                                        Telegram::sendDebug("Кто-то распечатал заключение. За всё время заключений распечатано: " . Table_statistics::getTotalConclusionsPrintCount());
                                     } catch (InvalidArgumentException $e) {
                                     } catch (Exception $e) {
                                     }
@@ -81,7 +81,7 @@ class DownloadHandler
                                     // если обследование скачал пациент а не администратор- посчитаю скачивание
                                     Table_statistics::plusConclusionDownload($executionNumber);
                                     try {
-                                        Telegram::sendError("Кто-то скачал заключение. За всё время заключений скачано: " . Table_statistics::getTotalConclusionsCount());
+                                        Telegram::sendDebug("Кто-то скачал заключение. За всё время заключений скачано: " . Table_statistics::getTotalConclusionsCount());
                                     } catch (InvalidArgumentException $e) {
                                     } catch (Exception $e) {
                                     }
@@ -124,7 +124,7 @@ class DownloadHandler
                         // запишу данные о скачивании
                         Table_statistics::plusExecutionDownload($executionNumber);
                         try {
-                            Telegram::sendError("Кто-то скачал файл обследования. За всё время обследований скачано: " . Table_statistics::getTotalExecutionsCount());
+                            Telegram::sendDebug("Кто-то скачал файл обследования. За всё время обследований скачано: " . Table_statistics::getTotalExecutionsCount());
                         } catch (InvalidArgumentException $e) {
                         } catch (Exception $e) {
                         }
