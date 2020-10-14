@@ -86,7 +86,7 @@ class ExecutionHandler extends Model
 
     public static function isAdditionalConclusions(string $username): int
     {
-        $searchPattern = '/' . $username . '-[0-9]+\.pdf/';
+        $searchPattern = '/' . $username . '[-\.][0-9]+\.pdf/';
         $existentFiles = scandir(Info::CONC_FOLDER);
         $addsQuantity = 0;
         foreach ($existentFiles as $existentFile) {
@@ -99,12 +99,13 @@ class ExecutionHandler extends Model
 
     public static function deleteAddConcs($id): void
     {
-        if (self::isAdditionalConclusions($id)) {
-            $searchPattern = '/' . $id . '-[0-9]+\.pdf/';
-            $existentFiles = scandir(Info::CONC_FOLDER);
-            foreach ($existentFiles as $existentFile) {
-                if (preg_match($searchPattern, $existentFile) && is_file($existentFile)) {
-                    unlink($existentFile);
+        $searchPattern = '/' . $id . '[-\.][0-9]+\.pdf/';
+        $existentFiles = scandir(Info::CONC_FOLDER);
+        foreach ($existentFiles as $existentFile) {
+            if (preg_match($searchPattern, $existentFile)) {
+                $path = Info::CONC_FOLDER . DIRECTORY_SEPARATOR . $existentFile;
+                if (is_file($path)) {
+                    unlink($path);
                 }
             }
         }
@@ -268,11 +269,10 @@ class ExecutionHandler extends Model
                             $changeTime = $stat['mtime'];
                             $existentFile->file_create_time = $changeTime;
                             $existentFile->save();
-                        }
-                        else{
+                        } else {
                             // иначе- отправляю файл на обработку
                             $newFilePath = FileUtils::handleFileUpload($path);
-                            if($newFilePath !== $path){
+                            if ($newFilePath !== $path) {
                                 unlink($path);
                             }
                         }
