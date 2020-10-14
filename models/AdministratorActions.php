@@ -117,8 +117,8 @@ class AdministratorActions extends Model
             $conclusionFile = Info::CONC_FOLDER . '\\' . $id . '.pdf';
             if(is_file($conclusionFile)){
                 unlink($conclusionFile);
-                ExecutionHandler::deleteAddConcs($execution->username);
             }
+            ExecutionHandler::deleteAddConcs($execution->username);
             $executionFile = Info::EXEC_FOLDER . '\\' . $id . '.zip';
             if(is_file($executionFile)){
                 unlink($executionFile);
