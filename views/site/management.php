@@ -28,6 +28,7 @@ $this->title = 'Всякие разные настройки';
     <li><a href="#reports" data-toggle="tab">Отчёты</a></li>
     <li><a href="#blacklist_actions" data-toggle="tab">Чёрный список</a></li>
     <li><a href="#telegram_actions" data-toggle="tab">Телеграм</a></li>
+    <li><a href="#existent_conclusions" data-toggle="tab">Файлы заключений</a></li>
 </ul>
 
 <div class="tab-content">
@@ -106,6 +107,24 @@ $this->title = 'Всякие разные настройки';
             /** @var ViberPersonalList $item */
             foreach ($data as $item) {
                 echo "<tr><td>{$item->id}</td><td>{$item->get_errors}</td></tr>";
+            }
+            echo "</table>";
+        }
+        else{
+            echo "<h2 class='text-center'>Empty</h2>";
+        }
+        ?>
+    </div>
+    <div class="tab-pane margened" id="existent_conclusions">
+        <?php
+        // получу список ip из чёрного списка
+        $files = array_slice(scandir(\app\priv\Info::CONC_FOLDER), 2);
+        if($files !== null && count($files) > 0){
+            echo "<table class='table table-striped table-hover'>";
+            foreach ($files as $item) {
+                $stat = stat(\app\priv\Info::CONC_FOLDER . DIRECTORY_SEPARATOR . $item);
+                $changeTime = $stat['mtime'];
+                echo "<tr><td>$item</td><td>" . TimeHandler::timestampToDate($changeTime) . "</td></tr>";
             }
             echo "</table>";
         }
