@@ -194,10 +194,10 @@ class AdministratorActions extends Model
         if($this->validate()){
             $execution = User::findByUsername($this->executionId);
             if($execution === null){
-                return ['status' => 3, 'message' => 'Обследование не найдено'];
+                return ['status' => 1, 'header' => 'Неудача', 'message' => 'Обследование не найдено'];
             }
             self::simpleDeleteItem($execution->username);
-            return ['status' => 1, 'message' => 'Обследование удалено'];
+            return ['status' => 1, 'message' => 'Обследование удалено<script>$("tr[data-id=\'' . $this->executionId . '\']").remove()</script>'];
         }
         return ['status' => 2, 'message' => $this->errors];
     }

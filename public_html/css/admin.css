@@ -11,103 +11,19 @@ html body {
     text-align: center;
 }
 
-body[data-theme="dark"] .field-success {
-    background-color: #06210a;
-    text-align: center;
-}
-
-body[data-theme="dark"] button.btn-default {
-    border-color: #b7b2b5;
-}
-
 .field-danger {
     background-color: antiquewhite;
     text-align: center;
-}
-
-body[data-theme="dark"] .field-danger {
-    background-color: #241725;
-    text-align: center;
-}
-
-.status-icon {
-    font-size: 20px;
-}
-
-.execution-id {
-    color: #4242cc;
-    font-weight: 600;
-    font-size: 18px;
 }
 
 .new-element {
     background-color: #b8e4e8 !important;
 }
 
-/*ночной режим*/
-
-.glyphicon {
-    font-size: 20px;
-}
-
-body[data-theme="dark"] .btn-default {
-    border-color: #ffffff;
-}
-
-body[data-theme="dark"] .table-hover > tbody > tr:hover {
-    background-color: #a8c0c5;
-}
-
-.btn {
-    display: inline-block;
-    font-weight: 400;
-    color: #212529;
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    background-color: transparent;
-    border: 1px solid transparent;
-    padding: .375rem .75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: .25rem;
-    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-}
-
-* .btn-success {
-    color: #fff;
-    background-color: #28a745;
-    border-color: #28a745;
-}
-
-* .btn-warning {
-    color: #fff;
-    background-color: #f0ad4e;
-    border-color: #eea236;
-}
-
-.form-control {
-    display: block;
-    width: 100%;
-    height: calc(1.5em + .75rem + 2px);
-    padding: .375rem .75rem;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: #495057;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: .25rem;
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-}
-
-body[data-theme="dark"] div.modal * {
-    background-color: #111111;
+.execution-id {
+    color: #4242cc;
+    font-weight: 600;
+    font-size: 18px;
 }
 
 footer {

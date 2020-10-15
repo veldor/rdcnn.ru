@@ -42,6 +42,7 @@ class AdministratorController extends Controller
                             'delete-unhandled-folder',
                             'rename-unhandled-folder',
                             'print-missed-conclusions-list',
+                            'register-next-patient',
                             'send-info-mail',
                             'test'
                         ],
@@ -161,5 +162,16 @@ class AdministratorController extends Controller
         Yii::$app->response->format = Response::FORMAT_JSON;
         // отправлю письмо с информацией, если есть адрес
         return MailHandler::sendInfoMail($id);
+    }
+
+    /**
+     * @param $center
+     * @return array
+     * @throws Exception
+     */
+    public function actionRegisterNextPatient($center): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return ExecutionHandler::registerNext($center);
     }
 }

@@ -67,6 +67,8 @@ if($name !== null){
         ?>
     </div>
     <?php
+
+    echo "<a target='_blank' href='/images/ИНСТРУКЦИЯ.pdf' class='btn btn-default btn-block margin with-wrap' role='button'>Как просмотреть архив обследования</a>";
     echo "<a id='clearDataBtn' class='btn btn-danger btn-block margin with-wrap' role='button'><span class='glyphicon glyphicon-trash'></span> Удалить данные</a>";
     echo Html::beginForm(['/site/logout'], 'post')
         . Html::submitButton(
@@ -77,7 +79,7 @@ if($name !== null){
     ?>
 </div>
 
-<div class="col-sm-12 col-md-6 col-md-offset-3 text-center">
+<div class="col-sm-12 col-md-6 col-md-offset-3 text-center margin">
     <div class="alert alert-success"><span class='glyphicon glyphicon-info-sign'></span> Если Вам необходима печать на
         заключение, обратитесь в центр, где Вы проходили
         исследование
@@ -86,9 +88,27 @@ if($name !== null){
     echo "<div id='removeReasonContainer' class='alert alert-info " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "'><span class='glyphicon glyphicon-info-sign'></span> Ограничение доступа к данным исследования по времени необходимо в целях обеспечения безопасности Ваших персональных данных</div>";
     ?>
 
-    <a href="tel:+78312020200" class="btn btn-default"><span
+    <a href="tel:+78312020200" class="btn btn-default margin"><span
                 class="glyphicon glyphicon-earphone text-success"></span><span
-                class="text-success"> +7(831)20-20-200</span></a>
+                class="text-success"> +7(831)20-20-200</span></a><br/>
+    <a target="_blank" href="http://мрт-кт.рф" class="btn btn-default"><span
+                class="glyphicon glyphicon-globe text-success"></span><span
+                class="text-success"> мрт-кт.рф</span></a>
 </div>
+
+<div class="col-sm-12 text-center">
+
+    <a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+        Нажмите, чтобы увидеть актуальные предложения
+    </a>
+    <div class="collapse" id="collapseExample">
+        <div class="well">
+            <a target="_blank" href="http://xn----ttbeqkc.xn--p1ai/nn/actions">
+                <img class="advice" alt="advice image" src="http://xn----ttbeqkc.xn--p1ai/actions.png"/>
+            </a>
+        </div>
+    </div>
+</div>
+
 
 

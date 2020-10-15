@@ -351,7 +351,6 @@ class ExecutionHandler extends Model
     /**
      * @param $name
      * @throws Exception
-     * @throws \yii\db\Exception
      */
     private static function checkUser($name): void
     {
@@ -359,7 +358,6 @@ class ExecutionHandler extends Model
         $user = User::findByUsername($name);
         if ($user === null) {
             $transaction = new DbTransaction();
-            echo "create user {$name}\n";
             self::createUser($name);
             $transaction->commitTransaction();
         }
@@ -441,6 +439,27 @@ class ExecutionHandler extends Model
                 $item->delete();
             }
         }
+    }
+
+    /**
+     * @param $center
+     * @return array
+     * @throws Exception
+     */
+    public static function registerNext($center): array
+    {
+        // сначала получу последнего зарегистрированного
+        $previousRegged = User::getLast($center);
+        // найду первый свободный номер после последнего зарегистрированного
+        $executionNumber = $previousRegged;
+        while (true){
+            $executionNumber = User::getNext($executionNumber);
+            if(User::findByUsername($executionNumber) === null){
+                break;
+            }
+        }
+        $pass = self::createUser($executionNumber);
+        return ['status' => 1, 'message' => ' <h2 class="text-center">Обследование №' . $executionNumber . '  зарегистрировано.</h2> Пароль для пациента: <b class="text-success">' . $pass . '</b> <button class="btn btn-default" id="copyPassBtn" data-password="' . $pass . '"><span class="text-success">Копировать пароль</span></button><script>var copyBtn = $("button#copyPassBtn");copyBtn.on("click.copy", function (){copyPass.call(this)});copyBtn.focus()</script>'];
     }
 
     public function scenarios(): array

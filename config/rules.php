@@ -22,6 +22,7 @@ return [
     'mail/change' => 'management/change-mail',
     'mail/delete' => 'management/delete-mail',
     'send-info-mail/<id:\d+>' => 'administrator/send-info-mail',
+    'next/<center:nv|aurora>' => 'administrator/register-next-patient',
     'delete/conclusions/<executionNumber:[0-9a-zA-Z]+>' => 'management/delete-conclusions',
     '/dicom-viewer' => 'site/dicom-viewer',
 ];

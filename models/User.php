@@ -94,6 +94,40 @@ class User extends ActiveRecord implements IdentityInterface
         return static::find()->where(['<>', 'username', self::ADMIN_NAME])->orderBy('created_at DESC')->all();
     }
 
+    public static function getLast($center)
+    {
+        $nextExecutionId = '';
+        // получу последнего зарегистрированного пациента
+        if($center === 'aurora'){
+            $last = self::find()->where(['like', 'username', 'A%', false])->orderBy('created_at DESC')->one();
+            if($last === null){
+                $nextExecutionId = 'A1';
+            }
+            else{
+                $nextExecutionId = $last->username;
+            }
+        }
+        else if($center === 'nv'){
+            $last = self::find()->where(['regexp', 'username', '^[0-9]'])->orderBy('created_at DESC')->one();
+            if($last === null){
+                $nextExecutionId = '1';
+            }
+            else{
+                $nextExecutionId = $last->username;
+            }
+        }
+        return $nextExecutionId;
+    }
+
+    public static function getNext($username)
+    {
+        if(strpos($username, 'A') === 0){
+            $num = substr($username, 1);
+            return 'A' . ++$num;
+        }
+        return ++$username;
+    }
+
     public function validatePassword($password): bool
     {
         return Yii::$app->security->validatePassword($password, $this->password_hash);

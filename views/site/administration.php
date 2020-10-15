@@ -58,10 +58,10 @@ foreach ($sort as $key => $value) {
     }
 }
 echo '<div class="col-xs-12 text-center margin">
-          <div class="custom-control custom-switch">
+          <!--<div class="custom-control custom-switch">
             <input type="checkbox" class="custom-control-input" id="darkSwitch">
             <label class="custom-control-label" for="darkSwitch">Ночной режим</label>
-          </div>
+          </div>-->
           <div class="pull-right"><a href="' . Url::toRoute('site/management') . '"><span class="glyphicon glyphicon-cog"></span></a></div>
         </div>';
 
@@ -81,6 +81,8 @@ try {
 }
 
 ActiveForm::end();
+
+echo "</div><div class='text-center col-sm-12 margin'><div class='btn-group'><button class='btn btn-info activator' data-action='/next/nv'>Добавить следующего пациента НВ</button><button class='btn btn-danger activator' data-action='/next/aurora'>Добавить следующего пациента Авроры</button></div>";
 
 echo "</div><div class='col-xs-12'>";
 
