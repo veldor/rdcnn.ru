@@ -438,9 +438,9 @@ class FileUtils
                     ]);
                     $item->save();
                     // отправлю оповещение о добавленном контенте, если указан адрес почты
-                    if (Emails::checkExistent($user->id)) {
+                    /*if (Emails::checkExistent($user->id)) {
                         Emails::sendEmail($item);
-                    }
+                    }*/
                 } else {
                     $info = Table_availability::findOne(['file_name' => $conclusionFile]);
                     $md5 = md5_file($path);

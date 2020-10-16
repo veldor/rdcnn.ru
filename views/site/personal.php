@@ -60,7 +60,7 @@ if($name !== null){
         <?php
         // если доступно заключение- дам ссылку на него
         if (ExecutionHandler::isExecution($execution->username)) {
-            echo "<a id='executionReadyBtn' href='" . Url::toRoute('/download/execution') . "' class='btn btn-primary  btn btn-block margin with-wrap hinted' data-href='/download/execution'>Загрузить архив обследования</a><br><a  href='" . Url::toRoute('/dicom-viewer') . "' class='btn btn-primary  btn btn-block margin with-wrap hinted'>Просмотр загруженных изображений</a>";
+            echo "<a id='executionReadyBtn' href='" . Url::toRoute('/download/execution') . "' class='btn btn-primary  btn btn-block margin with-wrap hinted' data-href='/download/execution'>Загрузить архив обследования</a>";
         } else {
             echo "<a id='executionNotReadyBtn' class='btn btn-primary btn-block margin with-wrap disabled' role='button'>Архив обследования подготавливается</a>";
         }

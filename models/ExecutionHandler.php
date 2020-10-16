@@ -202,7 +202,7 @@ class ExecutionHandler extends Model
                                 $existentFile->md5 = $md5;
                                 $existentFile->file_create_time = $changeTime;
                                 $existentFile->save();
-                                Viber::notifyExecutionLoaded($user->username);
+                                //Viber::notifyExecutionLoaded($user->username);
                             }
                         } else {
                             // внесу информацию о файле в базу
@@ -217,7 +217,7 @@ class ExecutionHandler extends Model
                                 'userId' => $user->username
                             ]))->save();
                             // оповещу мессенджеры о наличии файла
-                            Viber::notifyExecutionLoaded($user->username);
+                            //Viber::notifyExecutionLoaded($user->username);
                         }
 //                        else {
 //                            $stat = stat($path);

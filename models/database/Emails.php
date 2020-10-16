@@ -8,6 +8,7 @@ use app\models\Table_availability;
 use app\models\User;
 use app\models\utils\MailSettings;
 use Yii;
+use yii\base\Exception;
 use yii\db\ActiveRecord;
 use yii\helpers\Url;
 
@@ -24,7 +25,11 @@ class Emails extends ActiveRecord
         return self::find()->where(['patient_id' => $patient_id])->count();
     }
 
-    public static function sendEmail(Table_availability $item)
+    /**
+     * @param Table_availability $item
+     * @throws Exception
+     */
+    public static function sendEmail(Table_availability $item): void
     {
         // получу адрес
         $user = User::findByUsername($item->userId);
