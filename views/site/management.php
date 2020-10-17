@@ -137,12 +137,11 @@ $this->title = 'Всякие разные настройки';
     </div>
     <div class="tab-pane margened" id="existent_executions">
         <?php
-        // получу список ip из чёрного списка
         $files = array_slice(scandir(Info::EXEC_FOLDER), 2);
         if($files !== null && count($files) > 0){
             echo "<table class='table table-striped table-hover'>";
             foreach ($files as $item) {
-                $path = Info::CONC_FOLDER . DIRECTORY_SEPARATOR . $item;
+                $path = Info::EXEC_FOLDER . DIRECTORY_SEPARATOR . $item;
                 $stat = stat($path);
                 $changeTime = $stat['mtime'];
                 $type = is_dir($path) ? "<span class='glyphicon glyphicon-folder-close text-info'></span>": "<span class='glyphicon glyphicon-file text-success'></span>";
