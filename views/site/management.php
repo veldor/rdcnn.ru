@@ -3,6 +3,7 @@
 use app\assets\ManagementAsset;
 use app\models\database\ViberPersonalList;
 use app\models\FileUtils;
+use app\priv\Info;
 use app\models\Table_blacklist;
 use app\models\utils\TimeHandler;
 use nirvana\showloading\ShowLoadingAsset;
@@ -29,6 +30,7 @@ $this->title = 'Всякие разные настройки';
     <li><a href="#blacklist_actions" data-toggle="tab">Чёрный список</a></li>
     <li><a href="#telegram_actions" data-toggle="tab">Телеграм</a></li>
     <li><a href="#existent_conclusions" data-toggle="tab">Файлы заключений</a></li>
+    <li><a href="#existent_executions" data-toggle="tab">Обследования</a></li>
 </ul>
 
 <div class="tab-content">
@@ -118,13 +120,33 @@ $this->title = 'Всякие разные настройки';
     <div class="tab-pane margened" id="existent_conclusions">
         <?php
         // получу список ip из чёрного списка
-        $files = array_slice(scandir(\app\priv\Info::CONC_FOLDER), 2);
+        $files = array_slice(scandir(Info::CONC_FOLDER), 2);
         if($files !== null && count($files) > 0){
             echo "<table class='table table-striped table-hover'>";
             foreach ($files as $item) {
-                $stat = stat(\app\priv\Info::CONC_FOLDER . DIRECTORY_SEPARATOR . $item);
+                $stat = stat(Info::CONC_FOLDER . DIRECTORY_SEPARATOR . $item);
                 $changeTime = $stat['mtime'];
                 echo "<tr><td>$item</td><td>" . TimeHandler::timestampToDate($changeTime) . "</td></tr>";
+            }
+            echo "</table>";
+        }
+        else{
+            echo "<h2 class='text-center'>Empty</h2>";
+        }
+        ?>
+    </div>
+    <div class="tab-pane margened" id="existent_executions">
+        <?php
+        // получу список ip из чёрного списка
+        $files = array_slice(scandir(Info::EXEC_FOLDER), 2);
+        if($files !== null && count($files) > 0){
+            echo "<table class='table table-striped table-hover'>";
+            foreach ($files as $item) {
+                $path = Info::CONC_FOLDER . DIRECTORY_SEPARATOR . $item;
+                $stat = stat($path);
+                $changeTime = $stat['mtime'];
+                $type = is_dir($path) ? "<span class='glyphicon glyphicon-folder-close text-info'></span>": "<span class='glyphicon glyphicon-file text-success'></span>";
+                echo "<tr><td>$item</td><td>{$type}</td><td>" . TimeHandler::timestampToDate($changeTime) . "</td></tr>";
             }
             echo "</table>";
         }
