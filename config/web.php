@@ -1,5 +1,6 @@
 <?php
 
+use yii\web\JsonParser;
 use yii\caching\FileCache;
 use app\models\User;
 use yii\rbac\DbManager;
@@ -33,6 +34,9 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'gxkNeMijVac31ZSkIruoBDLZThktrOJr',
+            'parsers' => [
+                'application/json' => JsonParser::class
+            ]
         ],
         'cache' => [
             'class' => FileCache::class,

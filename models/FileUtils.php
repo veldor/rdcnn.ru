@@ -353,7 +353,6 @@ class FileUtils
             if (is_file($handler) && is_file($loadedFile) && is_dir($conclusionsDir)) {
                 $command = "\"$existentJavaPath\" -jar $handler \"$loadedFile\" \"$conclusionsDir\"";
                 exec($command, $result);
-                echo GrammarHandler::convertToUTF($result[0]);
                 if (!empty($result) && count($result) === 4) {
                     // получу вторую строку результата
                     $fileName = $result[1];

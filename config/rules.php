@@ -25,4 +25,5 @@ return [
     'next/<center:nv|aurora>' => 'administrator/register-next-patient',
     'delete/conclusions/<executionNumber:[0-9a-zA-Z]+>' => 'management/delete-conclusions',
     '/dicom-viewer' => 'site/dicom-viewer',
+    'api' => 'api/do'
 ];

@@ -53,9 +53,9 @@ class User extends ActiveRecord implements IdentityInterface
      * Null should be returned if such an identity cannot be found
      * or the identity is not in an active state (disabled, deleted, etc.)
      */
-    public static function findIdentityByAccessToken($token, $type = null) :User
+    public static function findIdentityByAccessToken($token, $type = null) :?User
     {
-        return static::find()->where(['accessToken' => $token])->one();
+        return self::find()->where(['access_token' => $token])->one();
     }
 
     /**

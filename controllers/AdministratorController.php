@@ -7,6 +7,7 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
+use app\models\User;
 use app\models\utils\MailHandler;
 use app\models\utils\Management;
 use Throwable;
@@ -154,7 +155,7 @@ class AdministratorController extends Controller
      */
     public function actionTest()
     {
-        return $this->renderPartial('/site/mail-template', ['text' => 'hello']);
+        User::findIdentityByAccessToken("test");
     }
 
     public function actionSendInfoMail($id): array
