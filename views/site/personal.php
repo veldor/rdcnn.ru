@@ -27,7 +27,7 @@ $this->title = 'РДЦ, обследование ' . $execution->username;
 
 <?php
 $name = Table_availability::getPatientName($execution->username);
-if($name !== null){
+if ($name !== null) {
     echo "<h2 class='text-center'>{$name}</h2>";
 }
 ?>
@@ -60,7 +60,7 @@ if($name !== null){
         <?php
         // если доступно заключение- дам ссылку на него
         if (ExecutionHandler::isExecution($execution->username)) {
-            echo "<a id='executionReadyBtn' href='" . Url::toRoute('/download/execution') . "' class='btn btn-primary  btn btn-block margin with-wrap hinted' data-href='/download/execution'>Загрузить архив обследования</a>";
+            echo "<a id='executionReadyBtn' href='" . Url::toRoute('/download/execution') . "' class='btn btn-primary  btn btn-block margin with-wrap hinted' data-href='/download/execution'>Загрузить архив обследования</a><br/><a target='_blank' href='https://www.youtube.com/watch?v=FW4MCyQQoO4&feature=share' class='btn btn-default'>Как просмотреть архив обследования(видео)</a><a target='_blank' href='/images/ИНСТРУКЦИЯ.pdf' class='btn btn-default btn-block margin with-wrap' role='button'>Как просмотреть архив обследования</a>";
         } else {
             echo "<a id='executionNotReadyBtn' class='btn btn-primary btn-block margin with-wrap disabled' role='button'>Архив обследования подготавливается</a>";
         }
@@ -68,7 +68,6 @@ if($name !== null){
     </div>
     <?php
 
-    echo "<a target='_blank' href='/images/ИНСТРУКЦИЯ.pdf' class='btn btn-default btn-block margin with-wrap' role='button'>Как просмотреть архив обследования</a>";
     echo "<a id='clearDataBtn' class='btn btn-danger btn-block margin with-wrap' role='button'><span class='glyphicon glyphicon-trash'></span> Удалить данные</a>";
     echo Html::beginForm(['/site/logout'], 'post')
         . Html::submitButton(
@@ -98,7 +97,8 @@ if($name !== null){
 
 <div class="col-sm-12 text-center">
 
-    <a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+    <a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false"
+       aria-controls="collapseExample">
         Нажмите, чтобы увидеть актуальные предложения
     </a>
     <div class="collapse" id="collapseExample">

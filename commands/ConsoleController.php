@@ -9,6 +9,7 @@ namespace app\commands;
 
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
+use app\models\Telegram;
 use app\models\utils\Gdrive;
 use app\models\utils\MyErrorHandler;
 use app\models\utils\TimeHandler;
@@ -85,6 +86,11 @@ class ConsoleController extends Controller
     public function actionHandlePdf($fileDestination): int
     {
         FileUtils::addBackgroundToPDF($fileDestination);
+        return ExitCode::OK;
+    }
+    public function actionHandleZip($fileId, $clientId): int
+    {
+        Telegram::downloadZip($fileId, $clientId);
         return ExitCode::OK;
     }
 }

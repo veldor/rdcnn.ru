@@ -69,6 +69,7 @@ class Api
                             return ['status' => 'success', 'path' => $path];
                         }
                     } catch (Exception $e) {
+                        return ['status' => 'failed', 'message' => $e->getMessage()];
                     }
                 }
                 return ['status' => 'failed'];

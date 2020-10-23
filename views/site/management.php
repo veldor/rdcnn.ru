@@ -3,6 +3,7 @@
 use app\assets\ManagementAsset;
 use app\models\database\ViberPersonalList;
 use app\models\FileUtils;
+use app\models\utils\GrammarHandler;
 use app\priv\Info;
 use app\models\Table_blacklist;
 use app\models\utils\TimeHandler;
@@ -60,7 +61,7 @@ $this->title = 'Всякие разные настройки';
             </div>
             <div class="col-sm-4">
                 <h3 class="text-center">Errors log</h3>
-                <?=str_replace("\n", '<br/>', $errorsInfo)?>
+                <?=str_replace("\n", '<br/>', GrammarHandler::convertToUTF($errorsInfo))?>
             </div>
         </div>
         <div class="col-sm-12">

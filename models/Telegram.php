@@ -5,6 +5,7 @@ namespace app\models;
 
 
 use app\models\database\ViberPersonalList;
+use app\models\utils\ComHandler;
 use app\models\utils\FilesHandler;
 use app\models\utils\GrammarHandler;
 use app\models\utils\Management;
@@ -17,6 +18,7 @@ use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\InvalidJsonException;
 use TelegramBot\Api\Types\Message;
 use TelegramBot\Api\Types\Update;
+use Yii;
 
 class Telegram
 {
@@ -185,19 +187,12 @@ class Telegram
                             }
                             else if($mime === 'application/zip'){
                                 $bot->sendMessage($message->getChat()->getId(), 'Разбираю архив');
-                                $file = $bot->getFile($document->getFileId());
-                                $downloadedFile = $bot->downloadFile($file->getFileId());
-                                $bot->sendMessage($message->getChat()->getId(), 'Архив скачан');
-                                $path = FileUtils::saveTempFile($downloadedFile, '.zip');
-                                if(is_file($path)){
-                                    // сохраню файл
-                                    $num = FilesHandler::unzip($path);
-                                    if($num !== null){
-                                        $bot->sendMessage($message->getChat()->getId(), 'Добавлены файлы сканирования обследования ' . $num);
-                                    }
-                                    else{
-                                        $bot->sendMessage($message->getChat()->getId(), 'Не смог обработать архив');
-                                    }
+                                $dlFile = $bot->getFile($document->getFileId());
+                                // скачаю файл в фоновом режиме
+                                $file = Yii::$app->basePath . '\\yii.bat';
+                                if (is_file($file)) {
+                                    $command = "$file console/handle-zip " . $dlFile->getFileId() . ' ' . $message->getChat()->getId();
+                                    ComHandler::runCommand($command);
                                 }
                             }
                             else{
@@ -296,5 +291,31 @@ class Telegram
             }
         }
         catch (Exception $e){}
+    }
+
+    public static function downloadZip(string $fileId, $clientId): void
+    {
+        try{
+            $token = Info::TG_BOT_TOKEN;
+            /** @var BotApi|Client $bot */
+            $bot = new Client($token);
+            $file = $bot->getFile($fileId);
+            $downloadedFile = $bot->downloadFile($file->getFileId());
+            $bot->sendMessage($clientId, 'Архив скачан');
+            $path = FileUtils::saveTempFile($downloadedFile, '.zip');
+            if(is_file($path)){
+                // сохраню файл
+                $num = FilesHandler::unzip($path);
+                if($num !== null){
+                    $bot->sendMessage($clientId, 'Добавлены файлы сканирования обследования ' . $num);
+                }
+                else{
+                    $bot->sendMessage($clientId, 'Не смог обработать архив');
+                }
+            }
+        }
+        catch (Exception $e){
+            self::sendDebug("Ошибка при обработке команды: " . $e->getMessage());
+        }
     }
 }
