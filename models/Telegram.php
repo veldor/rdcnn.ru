@@ -48,6 +48,7 @@ class Telegram
 /help - вывод справки
 /cbl - очистить чёрный список IP
 /upd - обновить ПО сервера
+/v - текущая версия ПО
 /conc - список незагруженных заключений
 /exec - список незагруженных обследований';
                     }
@@ -71,6 +72,18 @@ class Telegram
                     /** @var Message $message */
                     $bot->sendMessage($message->getChat()->getId(),'Чёрный список вычищен');
                 }
+            });
+// команда для отображения версии сервера
+            $bot->command('v', static function ($message) use ($bot) {
+                /** @var Message $message */
+                    /** @var Message $message */
+                    $versionFile = Yii::$app->basePath . '\\version.info';
+                    if(is_file($versionFile)){
+                        $bot->sendMessage($message->getChat()->getId(),'Текущая версия: ' . file_get_contents($versionFile));
+                    }
+                    else{
+                        $bot->sendMessage($message->getChat()->getId(),'Файл с версией сервера не обнаружен');
+                    }
             });
 // команда для обновления ПО сервера
             $bot->command('upd', static function ($message) use ($bot) {
