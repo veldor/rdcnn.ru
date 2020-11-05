@@ -152,7 +152,13 @@ class ExecutionHandler extends Model
                         // проверю, что папка не пуста
                         if (count(scandir($path)) > 2) {
                             // папка не пуста
-                            FilesHandler::handleDicomDir($path);
+                            try{
+                                FilesHandler::handleDicomDir($path);
+                            }
+                            catch (\Exception $e){
+                                echo "У нас ошибка обработки " . $e->getMessage();
+                                continue;
+                            }
                         } else {
                             // удалю папку
                             try {
