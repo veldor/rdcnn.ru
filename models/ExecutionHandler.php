@@ -152,7 +152,13 @@ class ExecutionHandler extends Model
                         // проверю, что папка не пуста
                         if (count(scandir($path)) > 2) {
                             // папка не пуста
-                            FilesHandler::handleDicomDir($path);
+                            try{
+                                FilesHandler::handleDicomDir($path);
+                            }
+                            catch (\Exception $e){
+                                echo "У нас ошибка обработки " . $e->getMessage();
+                                continue;
+                            }
                         } else {
                             // удалю папку
                             try {
@@ -169,7 +175,13 @@ class ExecutionHandler extends Model
                 } else if (is_file($path) && GrammarHandler::endsWith($path, '.zip') && !array_key_exists($entity, $availData)) {
                     // если обнаружен .zip - проверю, зарегистрирован ли он, если нет- проверю, содержит ли DICOM
                     echo "handle unregistered zip $entity \n";
-                    $result = FilesHandler::unzip($path);
+                    try{
+                        $result = FilesHandler::unzip($path);
+                    }
+                    catch (\Exception $e){
+                        echo "У нас ошибка распаковки " . $e->getMessage();
+                        continue;
+                    }
                     if ($result !== null) {
                         echo "added zip $result \n";
                     }

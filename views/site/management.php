@@ -41,6 +41,7 @@ $this->title = 'Всякие разные настройки';
             <div class="col-sm-12">
                 <div class="btn-group-vertical">
                     <button class="btn btn-default activator" data-action="/management/check-update"><span>Check update</span></button>
+                    <button class="btn btn-default activator" data-action="/management/check-changes"><span>Check changes</span></button>
                     <button class="btn btn-default activator" data-action="/management/update-dependencies"><span>Updating dependencies</span></button>
                     <button class="btn btn-default activator" data-action="/management/restart-server"><span>Restart server</span></button>
                     <button class="btn btn-default activator" data-action="/management/send-mail"><span>Send test mail</span></button>

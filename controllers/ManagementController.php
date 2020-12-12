@@ -35,6 +35,7 @@ class ManagementController extends Controller
                         'allow' => true,
                         'actions' => [
                             'check-update',
+                            'check-changes',
                             'update-dependencies',
                             'restart-server',
                             'send-mail',
@@ -81,6 +82,14 @@ class ManagementController extends Controller
     public function actionResetChangeCheckCounter(): void
     {
         FileUtils::setUpdateFinished();
+    }
+
+    public function actionCheckChanges(): void
+    {
+        try{ExecutionHandler::check();}
+        catch (Exception $e){
+            echo "error: " . $e->getMessage();
+        }
     }
 
     public function actionRestartServer(): array
