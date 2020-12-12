@@ -303,12 +303,12 @@ class ExecutionHandler extends Model
         $new->created_at = time();
         $new->save();
         // выдам пользователю права на чтение
-        $auth = Yii::$app->authManager;
-        if ($auth !== null) {
-            $readerRole = $auth->getRole('reader');
-            $auth->assign($readerRole, $new->getId());
-            return $password;
-        }
+            $auth = Yii::$app->authManager;
+            if ($auth !== null) {
+                $readerRole = $auth->getRole('reader');
+                $auth->assign($readerRole, $new->getId());
+                return $password;
+            }
 // Добавлю вручную
         (new AuthAssignment(['user_id' => $new->id, 'item_name' => 'reader', 'created_at' => time()]))->save();
         return $password;

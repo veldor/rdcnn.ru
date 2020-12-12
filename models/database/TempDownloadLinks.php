@@ -47,4 +47,9 @@ class TempDownloadLinks extends ActiveRecord
         return null;
     }
 
+    public static function executionLinkExists(string $username)
+    {
+        return self::find()->where(['file_type' => 'execution', 'execution_id' => $username])->count();
+    }
+
 }

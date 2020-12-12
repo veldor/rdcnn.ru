@@ -1,6 +1,7 @@
 <?php
 
 use app\assets\PersonalAsset;
+use app\models\database\TempDownloadLinks;
 use app\models\ExecutionHandler;
 use app\models\Table_availability;
 use app\models\User;
@@ -60,6 +61,14 @@ if ($name !== null) {
         <?php
         // если доступно заключение- дам ссылку на него
         if (ExecutionHandler::isExecution($execution->username)) {
+            // проверю, создана ли внешняя ссылка на обследование. Если она есть- добавлю кнопку "скопировать ссылку" и "удалить сылку".
+            // Если нет- добавлю кнопку создания ссылки
+            if(TempDownloadLinks::executionLinkExists($execution->username)){
+                $downloadLinkText = '';
+            }
+            else{
+                $downloadLinkText = '<button class="btn btn-default"><span class="text-success">Создать ссылку общего доступа</span></button>';
+            }
             echo "<a id='executionReadyBtn' href='" . Url::toRoute('/download/execution') . "' class='btn btn-primary  btn btn-block margin with-wrap hinted' data-href='/download/execution'>Загрузить архив обследования</a><br/><a target='_blank' href='https://www.youtube.com/watch?v=FW4MCyQQoO4&feature=share' class='btn btn-default'>Как просмотреть архив обследования(видео)</a><a target='_blank' href='/images/ИНСТРУКЦИЯ.pdf' class='btn btn-default btn-block margin with-wrap' role='button'>Как просмотреть архив обследования</a>";
         } else {
             echo "<a id='executionNotReadyBtn' class='btn btn-primary btn-block margin with-wrap disabled' role='button'>Архив обследования подготавливается</a>";
