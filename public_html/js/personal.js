@@ -62,6 +62,38 @@ function colorize(elem, stars) {
     });
 }
 
+function sendRate(elem) {
+    let rate = elem.attr('data-rate');
+    sendAjax('post',
+        '/rate',
+        function () {
+            // скрою оценку
+            $('ul#rateList').hide();
+            let message;
+            switch (rate){
+                case '1':
+                case '2':
+                    message = 'Нам очень жаль, что у вас остались неприятные впечатления от похода в наш центр. Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
+                    break;
+                case '3':
+                    message = 'Спасибо за отзыв! Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
+                    break;
+                case '4':
+                    message = 'Обидно, что чуть-чуть не дотянули до высшей оценки :) . Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
+                    break;
+                case '5':
+                    message = 'Мы очень рады, что вам всё понравилось! Если у вас есть какие-то предложения или замечания- напишите нам, мы обязательно прочитаем :)';
+                    break;
+            }
+            makeInformerModal('Спасибо',
+                message,
+                 function (){}
+            )
+        },
+        {'rate' : rate}
+        )
+}
+
 $(function () {
     // повешу отслеживание наведения фокуса на вкладку (для нотификации новых данных)
     $(window).on('focus.stopTimer', function () {
@@ -196,40 +228,18 @@ $(function () {
     });
 
     let stars = $('li.star');
+    let starChild = $('li.star span');
+
     if(getCookie("rate_received")){
         $('ul#rateList').hide();
     }
-    stars.on('click.sendRate', function () {
-        console.log('click')
-        let rate = $(this).attr('data-rate');
-        sendAjax('post',
-            '/rate',
-            function () {
-                // скрою оценку
-                $('ul#rateList').hide();
-                let message;
-                switch (rate){
-                    case '1':
-                    case '2':
-                        message = 'Нам очень жаль, что у вас остались неприятные впечатления от похода в наш центр. Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
-                        break;
-                    case '3':
-                        message = 'Спасибо за отзыв! Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
-                        break;
-                    case '4':
-                        message = 'Обидно, что чуть-чуть не дотянули до высшей оценки :) . Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
-                        break;
-                    case '5':
-                        message = 'Мы очень рады, что вам всё понравилось! Если у вас есть какие-то предложения или замечания- напишите нам, мы обязательно прочитаем :)';
-                        break;
-                }
-                makeInformerModal('Спасибо',
-                    message,
-                     function (){}
-                )
-            },
-            {'rate' : rate}
-            )
+
+    starChild.on('mousedown.sendRate, touchstart.do', function () {
+        sendRate($(this));
+    });
+
+    stars.on('mousedown.sendRate, touchstart.do', function () {
+        sendRate($(this));
     });
     stars.on('mouseenter.fire', function () {
         colorize($(this), stars);

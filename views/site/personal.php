@@ -98,11 +98,11 @@ if ($name !== null) {
         if(!$cookies->has("rate_received")){
             ?>
             <ul id="rateList" class="list-inline">
-                <li class="star" data-rate="1"><span class="glyphicon glyphicon-star-empty"></span></li>
-                <li class="star" data-rate="2"><span class="glyphicon glyphicon-star-empty"></span></li>
-                <li class="star" data-rate="3"><span class="glyphicon glyphicon-star-empty"></span></li>
-                <li class="star" data-rate="4"><span class="glyphicon glyphicon-star-empty"></span></li>
-                <li class="star" data-rate="5"><span class="glyphicon glyphicon-star-empty"></span></li>
+                <li class="star" data-rate="1"><span class="glyphicon glyphicon-star-empty" data-rate="1"></span></li>
+                <li class="star" data-rate="2"><span class="glyphicon glyphicon-star-empty" data-rate="2"></span></li>
+                <li class="star" data-rate="3"><span class="glyphicon glyphicon-star-empty" data-rate="3"></span></li>
+                <li class="star" data-rate="4"><span class="glyphicon glyphicon-star-empty" data-rate="4"></span></li>
+                <li class="star" data-rate="5"><span class="glyphicon glyphicon-star-empty" data-rate="5"></span></li>
             </ul>
             <?php
         }
