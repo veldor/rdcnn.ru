@@ -17,6 +17,7 @@ ShowLoadingAsset::register($this);
 /* @var $this View */
 /* @var $execution User */
 
+
 $this->title = 'РДЦ, обследование ' . $execution->username;
 
 ?>
@@ -63,10 +64,9 @@ if ($name !== null) {
         if (ExecutionHandler::isExecution($execution->username)) {
             // проверю, создана ли внешняя ссылка на обследование. Если она есть- добавлю кнопку "скопировать ссылку" и "удалить сылку".
             // Если нет- добавлю кнопку создания ссылки
-            if(TempDownloadLinks::executionLinkExists($execution->username)){
+            if (TempDownloadLinks::executionLinkExists($execution->username)) {
                 $downloadLinkText = '';
-            }
-            else{
+            } else {
                 $downloadLinkText = '<button class="btn btn-default"><span class="text-success">Создать ссылку общего доступа</span></button>';
             }
             echo "<a id='executionReadyBtn' href='" . Url::toRoute('/download/execution') . "' class='btn btn-primary  btn btn-block margin with-wrap hinted' data-href='/download/execution'>Загрузить архив обследования</a><br/><a target='_blank' href='https://www.youtube.com/watch?v=FW4MCyQQoO4&feature=share' class='btn btn-default'>Как просмотреть архив обследования(видео)</a><a target='_blank' href='/images/ИНСТРУКЦИЯ.pdf' class='btn btn-default btn-block margin with-wrap' role='button'>Как просмотреть архив обследования</a>";
@@ -91,6 +91,33 @@ if ($name !== null) {
     <div class="alert alert-success"><span class='glyphicon glyphicon-info-sign'></span> Если Вам необходима печать на
         заключение, обратитесь в центр, где Вы проходили
         исследование
+    </div>
+    <div id="rateBlock" class="text-center">
+        <?php
+        $cookies = Yii::$app->request->cookies;
+        if(!$cookies->has("rate_received")){
+            ?>
+            <ul id="rateList" class="list-inline">
+                <li class="star" data-rate="1"><span class="glyphicon glyphicon-star-empty"></span></li>
+                <li class="star" data-rate="2"><span class="glyphicon glyphicon-star-empty"></span></li>
+                <li class="star" data-rate="3"><span class="glyphicon glyphicon-star-empty"></span></li>
+                <li class="star" data-rate="4"><span class="glyphicon glyphicon-star-empty"></span></li>
+                <li class="star" data-rate="5"><span class="glyphicon glyphicon-star-empty"></span></li>
+            </ul>
+            <?php
+        }
+        if(!$cookies->has("reviewed")){
+        ?>
+        <form id="reviewForm">
+            <div class="form-group">
+                <label for="review">Ваш отзыв</label>
+                <textarea name="reviewArea" class="form-control" id="review" rows="3"></textarea>
+            </div>
+            <button class="btn btn-success">Отправить</button>
+        </form>
+        <?php
+        }
+        ?>
     </div>
     <?php
     echo "<div id='removeReasonContainer' class='alert alert-info " . (ExecutionHandler::isConclusion($execution->username) ? '' : 'hidden') . "'><span class='glyphicon glyphicon-info-sign'></span> Ограничение доступа к данным исследования по времени необходимо в целях обеспечения безопасности Ваших персональных данных</div>";

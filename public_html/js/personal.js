@@ -36,6 +36,32 @@ function startTitleNotificator() {
     }
 }
 
+function colorize(elem, stars) {
+    let rate = elem.attr('data-rate');
+    let color;
+    switch (rate){
+        case '1':
+            color = 'text-danger';
+            break;
+        case '2':
+            color = 'text-warning';
+            break;
+        case '3':
+            color = 'text-info';
+            break;
+        case '4':
+            color = 'text-success';
+            break;
+        case '5':
+            color = 'text-success';
+            break;
+    }
+    let slice = stars.slice(0, rate);
+    slice.each(function (){
+        $(this).html('<span class="' + color + ' glyphicon glyphicon-star"></span>');
+    });
+}
+
 $(function () {
     // повешу отслеживание наведения фокуса на вкладку (для нотификации новых данных)
     $(window).on('focus.stopTimer', function () {
@@ -169,12 +195,85 @@ $(function () {
         makeInstruction();
     });
 
+    let stars = $('li.star');
+    if(getCookie("rate_received")){
+        $('ul#rateList').hide();
+    }
+    stars.on('click.sendRate', function () {
+        console.log('click')
+        let rate = $(this).attr('data-rate');
+        sendAjax('post',
+            '/rate',
+            function () {
+                // скрою оценку
+                $('ul#rateList').hide();
+                let message;
+                switch (rate){
+                    case '1':
+                    case '2':
+                        message = 'Нам очень жаль, что у вас остались неприятные впечатления от похода в наш центр. Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
+                        break;
+                    case '3':
+                        message = 'Спасибо за отзыв! Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
+                        break;
+                    case '4':
+                        message = 'Обидно, что чуть-чуть не дотянули до высшей оценки :) . Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
+                        break;
+                    case '5':
+                        message = 'Мы очень рады, что вам всё понравилось! Если у вас есть какие-то предложения или замечания- напишите нам, мы обязательно прочитаем :)';
+                        break;
+                }
+                makeInformerModal('Спасибо',
+                    message,
+                     function (){}
+                )
+            },
+            {'rate' : rate}
+            )
+    });
+    stars.on('mouseenter.fire', function () {
+        colorize($(this), stars);
+    });
+    stars.on('mouseleave.fire', function () {
+        stars.html('<span class="glyphicon glyphicon-star-empty"></span>');
+    });
+
+
+    let reviewForm = $('form#reviewForm');
+
+
+    if(getCookie("reviewed")){
+        reviewForm.hide();
+    }
+    reviewForm.on('submit.send', function (e){
+        e.preventDefault();
+        sendAjax(
+            'post',
+            '/review',
+            function () {
+                $('form#reviewForm').hide();
+                makeInformerModal('Спасибо',
+                    "Благодарим за отыв!",
+                    function (){}
+                )
+            },
+            reviewForm,
+            true
+        )
+    })
+
     if(!getCookie("rated")){
         $('.hinted').on('click.showRatingMessage', function () {
             if(!hintedYet){
-                makeModal("<h2 class='text-center'>Оцените нашу работу</h2>", "<p>Спасибо за то, что вы пользуетесь нашими услугами.<br/>Мы будем счастливы, если вы найдёте минутку и оставите нам отзыв.<br/>Кликните по названию сайта ниже, чтобы перейти на сайт и заполнить форму отзыва</p> <div class='text-center margin'><a class='btn btn-info' target='_blank' href='https://prodoctorov.ru/new/rate/lpu/48447/'>Оставить отзыв на ПроДокторов</a></div><div class='text-center margin'><a target='_blank' class='btn btn-info' href='https://search.google.com/local/writereview?placeid=ChIJHXcPvNHVUUER5IWxpxP1DfM'>Оставить отзыв на Google</a></div><div class='text-center margin'><a class='btn btn-info' target='_blank' href='https://yandex.ru/maps/47/nizhny-novgorod/?add-review=true&ll=43.957299%2C56.325628&mode=search&oid=1122933423&ol=biz&z=14'>Оставить отзыв на Яндекс</div>", false, true, 1000);
+                makeModal("<h2 class='text-center'>Оцените нашу работу</h2>", "<p>Спасибо за то, что вы пользуетесь нашими услугами.<br/>Мы будем счастливы, если вы найдёте минутку и оставите нам отзыв.<br/>Кликните по названию сайта ниже, чтобы перейти на сайт и заполнить форму отзыва</p> <div class='text-center margin'><a data-type='pd' class='btn btn-info rate-link' target='_blank' href='https://prodoctorov.ru/new/rate/lpu/48447/'>Оставить отзыв на ПроДокторов</a></div><div class='text-center margin'><a target='_blank' data-type='google' class='btn btn-info rate-link' href='https://search.google.com/local/writereview?placeid=ChIJHXcPvNHVUUER5IWxpxP1DfM'>Оставить отзыв на Google</a></div><div class='text-center margin'><a class='btn btn-info rate-link' data-type='ya' target='_blank' href='https://yandex.ru/maps/47/nizhny-novgorod/?add-review=true&ll=43.957299%2C56.325628&mode=search&oid=1122933423&ol=biz&z=14'>Оставить отзыв на Яндекс</div>", false, true, 1000);
                 setCookie("rated", 1, 365);
                 hintedYet = true;
+                $('a.rate-link').on('click.rate', function (){
+                    sendSilentAjax('post',
+                        '/rated',
+                        function (){},
+                        {'type' : $(this).attr('data-type')});
+                });
             }
         });
     }

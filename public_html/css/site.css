@@ -209,3 +209,8 @@ body.background {
     white-space: normal;
     padding: 5px;
 }
+
+li.star{
+    cursor: pointer;
+    font-size: 50px;
+}
