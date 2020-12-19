@@ -210,7 +210,7 @@ body.background {
     padding: 5px;
 }
 
-li.star{
+.star{
     cursor: pointer;
     font-size: 15mm;
 }

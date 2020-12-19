@@ -95,27 +95,27 @@ if ($name !== null) {
     <div id="rateBlock" class="text-center">
         <?php
         $cookies = Yii::$app->request->cookies;
-        if(!$cookies->has("rate_received")){
+        if (!$cookies->has("rate_received")) {
             ?>
-            <ul id="rateList" class="list-inline">
-                <li class="star" data-rate="1"><span class="glyphicon glyphicon-star-empty" data-rate="1"></span></li>
-                <li class="star" data-rate="2"><span class="glyphicon glyphicon-star-empty" data-rate="2"></span></li>
-                <li class="star" data-rate="3"><span class="glyphicon glyphicon-star-empty" data-rate="3"></span></li>
-                <li class="star" data-rate="4"><span class="glyphicon glyphicon-star-empty" data-rate="4"></span></li>
-                <li class="star" data-rate="5"><span class="glyphicon glyphicon-star-empty" data-rate="5"></span></li>
-            </ul>
+            <div id="rateList">
+                <span class="glyphicon glyphicon-star-empty star" data-rate="1"></span>
+                <span class="glyphicon glyphicon-star-empty star" data-rate="2"></span>
+                <span class="glyphicon glyphicon-star-empty star" data-rate="3"></span>
+                <span class="glyphicon glyphicon-star-empty star" data-rate="4"></span>
+                <span class="glyphicon glyphicon-star-empty star" data-rate="5"></span>
+            </div>
             <?php
         }
-        if(!$cookies->has("reviewed")){
-        ?>
-        <form id="reviewForm">
-            <div class="form-group">
-                <label for="review">Ваш отзыв</label>
-                <textarea name="reviewArea" class="form-control" id="review" rows="3"></textarea>
-            </div>
-            <button class="btn btn-success">Отправить</button>
-        </form>
-        <?php
+        if (!$cookies->has("reviewed")) {
+            ?>
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label for="review">Ваш отзыв</label>
+                    <textarea name="reviewArea" class="form-control" id="review" rows="3"></textarea>
+                </div>
+                <button class="btn btn-success">Отправить</button>
+            </form>
+            <?php
         }
         ?>
     </div>

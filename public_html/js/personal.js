@@ -59,7 +59,7 @@ function colorize(elem, stars) {
     }
     let slice = stars.slice(0, rate);
     slice.each(function (){
-        $(this).html('<span class="' + color + ' glyphicon glyphicon-star"></span>');
+        $(this).addClass(color);
     });
 }
 
@@ -231,26 +231,23 @@ $(function () {
         makeInstruction();
     });
 
-    let stars = $('li.star');
-    let starChild = $('li.star span');
+    let stars = $('span.star');
 
     if(getCookie("rate_received")){
-        $('ul#rateList').hide();
+        $('div#rateList').hide();
     }
 
-    starChild.on('mousedown.sendRate, touchstart.do', function (e) {
-        e.stopPropagation();
-        sendRate($(this));
-    });
-
-    stars.on('mousedown.sendRate, touchstart.do', function () {
+    stars.on('click.sendRate, touchstart.do', function () {
         sendRate($(this));
     });
     stars.on('mouseenter.fire', function () {
         colorize($(this), stars);
     });
     stars.on('mouseleave.fire', function () {
-        stars.html('<span class="glyphicon glyphicon-star-empty"></span>');
+        stars.removeClass("text-danger");
+        stars.removeClass("text-success");
+        stars.removeClass("text-info");
+        stars.removeClass("text-warning");
     });
 
 
