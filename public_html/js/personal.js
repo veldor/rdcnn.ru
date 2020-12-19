@@ -70,7 +70,7 @@ function sendRate(elem) {
             '/rate',
             function () {
                 // скрою оценку
-                $('ul#rateList').hide();
+                $('div#rateList').hide();
                 let message;
                 switch (rate){
                     case '1':
