@@ -4,7 +4,7 @@
 namespace app\models;
 
 
-use app\models\utils\MailHandler;
+use app\models\utils\MailSettings;
 use Yii;
 
 class Rate
@@ -26,23 +26,21 @@ class Rate
 
     }
 
-    private static function sendRate($text){
+    private static function sendRate($text): void
+    {
         // получу настройки почты
         $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
-        if (is_file($settingsFile)) {
-            // получу данные
-            $content = file_get_contents($settingsFile);
-            $settingsArray = mb_split("\n", $content);
-            if (count($settingsArray) === 3) {
-                    // отправлю письмо
-                    $mail = Yii::$app->mailer->compose()
-                        ->setFrom([$settingsArray[0] => 'РДЦ Отзывы'])
-                        ->setSubject('Получен новый отзыв')
-                        ->setHtmlBody($text)
-                        ->setTo(['eldorianwin@gmail.com' => 'Мне']);
-                    // попробую отправить письмо, в случае ошибки- вызову исключение
-                    $mail->send();
-            }
+        $content = file_get_contents($settingsFile);
+        $settingsArray = mb_split("\n", $content);
+        if (count($settingsArray) === 3) {
+            // отправлю письмо
+            $mail = Yii::$app->mailer->compose()
+                ->setFrom([MailSettings::getInstance()->address => 'Наши оценки'])
+                ->setSubject('Получен новый отзыв')
+                ->setHtmlBody($text)
+                ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
+            // попробую отправить письмо, в случае ошибки- вызову исключение
+            $mail->send();
         }
     }
 }
