@@ -5,6 +5,7 @@ let isExecutionLoaded;
 let activeNotificator;
 let originalTitle;
 let hintedYet = false;
+let starred = false;
 
 function makeInstruction() {
     let text = '<h2 class="text-center">Выберите операционную систему</h2>' +
@@ -63,35 +64,38 @@ function colorize(elem, stars) {
 }
 
 function sendRate(elem) {
-    let rate = elem.attr('data-rate');
-    sendAjax('post',
-        '/rate',
-        function () {
-            // скрою оценку
-            $('ul#rateList').hide();
-            let message;
-            switch (rate){
-                case '1':
-                case '2':
-                    message = 'Нам очень жаль, что у вас остались неприятные впечатления от похода в наш центр. Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
-                    break;
-                case '3':
-                    message = 'Спасибо за отзыв! Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
-                    break;
-                case '4':
-                    message = 'Обидно, что чуть-чуть не дотянули до высшей оценки :) . Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
-                    break;
-                case '5':
-                    message = 'Мы очень рады, что вам всё понравилось! Если у вас есть какие-то предложения или замечания- напишите нам, мы обязательно прочитаем :)';
-                    break;
-            }
-            makeInformerModal('Спасибо',
-                message,
-                 function (){}
-            )
-        },
-        {'rate' : rate}
+    if(!starred){
+        let rate = elem.attr('data-rate');
+        sendAjax('post',
+            '/rate',
+            function () {
+                // скрою оценку
+                $('ul#rateList').hide();
+                let message;
+                switch (rate){
+                    case '1':
+                    case '2':
+                        message = 'Нам очень жаль, что у вас остались неприятные впечатления от похода в наш центр. Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
+                        break;
+                    case '3':
+                        message = 'Спасибо за отзыв! Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
+                        break;
+                    case '4':
+                        message = 'Обидно, что чуть-чуть не дотянули до высшей оценки :) . Если вы напишете, что именно вас не устроило, это поможет нам стать лучше и в дальнейшем не допустить такой ситуации';
+                        break;
+                    case '5':
+                        message = 'Мы очень рады, что вам всё понравилось! Если у вас есть какие-то предложения или замечания- напишите нам, мы обязательно прочитаем :)';
+                        break;
+                }
+                makeInformerModal('Спасибо',
+                    message,
+                    function (){}
+                )
+            },
+            {'rate' : rate}
         )
+    }
+    starred = true;
 }
 
 $(function () {
@@ -234,7 +238,8 @@ $(function () {
         $('ul#rateList').hide();
     }
 
-    starChild.on('mousedown.sendRate, touchstart.do', function () {
+    starChild.on('mousedown.sendRate, touchstart.do', function (e) {
+        e.stopPropagation();
         sendRate($(this));
     });
 
