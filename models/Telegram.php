@@ -156,10 +156,7 @@ class Telegram
                                         $fileName = GrammarHandler::getFileName($answer);
                                         $availItem = Table_availability::findOne(['file_name' => $fileName]);
                                         if($availItem !== null){
-                                            $bot->sendMessage($message->getChat()->getId(), "Обработано заключение\n
-                                        Имя пациента: {$availItem->patient_name}\n
-                                        Область обследования:{$availItem->execution_area}\n
-                                        Номер обследования: {$availItem->userId}");
+                                            $bot->sendMessage($message->getChat()->getId(), "Обработано заключение\nИмя пациента: {$availItem->patient_name}\nОбласть обследования:{$availItem->execution_area}\nНомер обследования:{$availItem->userId}");
                                         }
                                         $file = new CURLFile($answer, 'application/pdf', $fileName);
                                         if(is_file($answer)){
