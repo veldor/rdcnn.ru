@@ -23,6 +23,27 @@ function handleLoader(element) {
     });
 }
 
+function handlePrint(element) {
+    let printer = $(element).find('.printer');
+    printer.off('click.print');
+    printer.on('click.print', function (e) {
+        e.preventDefault();
+        let addresses = $(this).attr('data-names');
+        let names = addresses.split(" ");
+        console.log(names)
+        if (names.length > 0) {
+            let counter = 0;
+            while (names[counter]) {
+                console.log(names[counter])
+                // Открою новое окно и в нём загружу на печать файл
+                let url = '/auto-print/' + names[counter];
+                window.open(url);
+                counter++;
+            }
+        }
+    });
+}
+
 function copyPass() {
     let pass = $(this).attr('data-password');
     copyPassTextarea.removeClass('hidden');
@@ -268,6 +289,11 @@ $(function () {
     handleDragDrop();
 
     enableTooltips();
+
+    let patients = $('tr.patient');
+    patients.each(function (){
+        handlePrint(this);
+    });
 });
 
 function checkPatientDataFilling() {
@@ -379,15 +405,20 @@ function checkPatientDataFilling() {
                             if (conclusionContainer.length) {
                                 if (item['conclusionsCount'] > 0) {
                                     conclusionContainer.addClass('field-success').removeClass('field-danger');
+                                    let cText = '';
+                                    if(item['conclusion_text']){
+                                        cText = item['conclusion_text'];
+                                    }
                                     if (item['conclusion_areas']) {
                                         let areasText = '';
                                         for (let i = 0; item['conclusion_areas'][i]; i++) {
                                             areasText += item['conclusion_areas'][i] + " <br/>\n";
                                         }
-                                        conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon tooltip-enabled' data-html='true' data-toggle='tooltip' data-placement='auto' title='" + areasText + "'></span><b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button>");
+                                        conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon tooltip-enabled' data-html='true' data-toggle='tooltip' data-placement='auto' title='" + areasText + "'></span><b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button><button class='btn btn-default tooltip-enabled printer'  data-toggle='tooltip' data-placement='auto' title='Распечатать копию' data-names='" + cText + "'><span class='text-info glyphicon glyphicon-print'></span></button>");
                                     } else {
-                                        conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span><b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button>");
+                                        conclusionContainer.html("<span class='glyphicon glyphicon-ok text-success status-icon'></span><b>(" + item['conclusionsCount'] + ")</b><button class='btn btn-default activator tooltip-enabled' data-action='/delete/conclusions/" + item['id'] + "' data-toggle='tooltip' data-placement='auto' title='Удалить все заключения по обследованию'><span class='glyphicon glyphicon-trash text-danger'></span></button><button class='btn btn-default tooltip-enabled printer'  data-toggle='tooltip' data-placement='auto' title='Распечатать копию' data-names='\" + cText + \"'><span class='text-info glyphicon glyphicon-print'></span></button>");
                                     }
+                                    handlePrint(conclusionContainer);
                                 } else {
                                     conclusionContainer.removeClass('field-success').addClass('field-danger');
                                     conclusionContainer.html("<span class='glyphicon glyphicon-remove text-danger status-icon'></span>").addClass('field-danger').removeClass('field-success');

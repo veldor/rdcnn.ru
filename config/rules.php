@@ -10,6 +10,7 @@ return [
     'patients/check' => 'administrator/patients-check',
     'check/files/<executionNumber:[0-9a-zA-Z]+>' => 'administrator/files-check',
     'conclusion/<href:A?\d+-?\d*\.pdf>' => 'download/conclusion',
+    'auto-print/<fileName:A?\d+-?\d*\.pdf>' => 'administrator/auto-print',
     'print-conclusion/<href:A?\d+-?\d*\.pdf>' => 'download/print-conclusion',
     'check' => 'site/check',
     'delete-unhandled-folder' => 'administrator/delete-unhandled-folder',

@@ -45,6 +45,7 @@ class AdministratorController extends Controller
                             'print-missed-conclusions-list',
                             'register-next-patient',
                             'send-info-mail',
+                            'auto-print',
                             'test'
                         ],
                         'roles' => [
@@ -174,5 +175,12 @@ class AdministratorController extends Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return ExecutionHandler::registerNext($center);
+    }
+
+    public function actionAutoPrint($fileName){
+        $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $fileName;
+        if(is_file($file)){
+            Yii::$app->response->sendFile($file, 'заключение', ['inline' => true]);
+        }
     }
 }

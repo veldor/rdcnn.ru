@@ -59,6 +59,7 @@ class AdministratorActions extends Model
                     $patientInfo['execution'] = ExecutionHandler::isExecution($item->username);
                     $patientInfo['conclusionsCount'] = ExecutionHandler::countConclusions($item->username);
                     if($patientInfo['conclusionsCount'] > 0){
+                        $patientInfo['conclusion_text'] = ExecutionHandler::getConclusionText($item->username);
                         // попробую найти имя пациента
                         $availItems = Table_availability::findAll(['userId' => $item->username, 'is_conclusion' => 1]);
                         if($availItems !== null && count($availItems) > 0){

@@ -474,6 +474,18 @@ class ExecutionHandler extends Model
         return ['status' => 1, 'message' => ' <h2 class="text-center">Обследование №' . $executionNumber . '  зарегистрировано.</h2> Пароль для пациента: <b class="text-success">' . $pass . '</b> <button class="btn btn-default" id="copyPassBtn" data-password="' . $pass . '"><span class="text-success">Копировать пароль</span></button><script>var copyBtn = $("button#copyPassBtn");copyBtn.on("click.copy", function (){copyPass.call(this)});copyBtn.focus()</script>'];
     }
 
+    public static function getConclusionText(string $username):string
+    {
+        $answer = '';
+        $avail = Table_availability::find()->where(['is_conclusion' => 1, 'userId' => $username])->all();
+        if(!empty($avail)){
+            foreach ($avail as $item){
+                $answer .= "{$item->file_name} ";
+            }
+        }
+        return $answer;
+    }
+
     public function scenarios(): array
     {
         return [
