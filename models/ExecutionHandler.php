@@ -260,6 +260,9 @@ class ExecutionHandler extends Model
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
             $files = array_slice(scandir($conclusionsDir), 2);
             foreach ($files as $file) {
+                if(str_starts_with($file, 'nb_')){
+                    continue;
+                }
                 try {
                     $path = Info::CONC_FOLDER . '\\' . $file;
                     if (is_file($path) && (GrammarHandler::endsWith($file, '.pdf') || GrammarHandler::endsWith($file, '.doc') || GrammarHandler::endsWith($file, '.docx'))) {
