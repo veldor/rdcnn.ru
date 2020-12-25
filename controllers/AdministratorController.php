@@ -177,9 +177,14 @@ class AdministratorController extends Controller
         return ExecutionHandler::registerNext($center);
     }
 
-    public function actionAutoPrint($fileName){
-        $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $fileName;
+    public function actionAutoPrint($fileName): void
+    {
+        $file = Yii::getAlias('@conclusionsDirectory') . '\\' . 'nb_' . $fileName;
         if(is_file($file)){
+            Yii::$app->response->sendFile($file, 'заключение', ['inline' => true]);
+        }
+        else{
+            $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $fileName;
             Yii::$app->response->sendFile($file, 'заключение', ['inline' => true]);
         }
     }

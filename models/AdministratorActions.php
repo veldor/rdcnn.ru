@@ -116,6 +116,11 @@ class AdministratorActions extends Model
         $conclusionFile = Info::CONC_FOLDER . '\\' . $id . '.pdf';
         if(is_file($conclusionFile)){
             unlink($conclusionFile);
+            // удалю также версию без фона, если она есть
+            $conclusionFile = Info::CONC_FOLDER . '\\nb_' . $id . '.pdf';
+            if(is_file($conclusionFile)) {
+                unlink($conclusionFile);
+            }
         }
         $executionFile = Info::EXEC_FOLDER . '\\' . $id . '.zip';
         if(is_file($executionFile)){

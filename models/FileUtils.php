@@ -280,15 +280,17 @@ class FileUtils
         return 0;
     }
 
-    public static function addBackgroundToPDF($file): void
+    public static function addBackgroundToPDF($file, $fileName): void
     {
-        $pdfBackgoundImage = Yii::$app->basePath . '\\design\\back.jpg';
-        if (is_file($file) && is_file($pdfBackgoundImage)) {
+        // сохраню копию файла без фона
+        self::copyWithoutBackground($file, $fileName);
+        $pdfBackgroundImage = Yii::$app->basePath . '\\design\\back.jpg';
+        if (is_file($file) && is_file($pdfBackgroundImage)) {
             $pdf = new Fpdi();
 
             $pdf->AddPage();
 
-            $pdf->Image($pdfBackgoundImage, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight());
+            $pdf->Image($pdfBackgroundImage, 0, 0, $pdf->GetPageWidth(), $pdf->GetPageHeight());
             try {
                 $pdf->setSourceFile($file);
                 $tplIdx = $pdf->importPage(1);
@@ -414,7 +416,7 @@ class FileUtils
             $conclusionFile = $actionResult['filename'];
             $path = Info::CONC_FOLDER . '\\' . $conclusionFile;
             if (is_file($path)) {
-                self::addBackgroundToPDF($path);
+                self::addBackgroundToPDF($path, $conclusionFile);
                 // если создан новый файл- зарегистрирую его доступность
                 $user = User::findByUsername(GrammarHandler::getBaseFileName($conclusionFile));
                 if ($user === null) {
@@ -457,5 +459,12 @@ class FileUtils
             }
         }
         return $actionResult['action_status'];
+    }
+
+    private static function copyWithoutBackground($file, $fileName): void
+    {
+        // получу новое имя файла
+        $newFileName = 'nb_' . $fileName;
+        copy($file, Info::CONC_FOLDER . '\\' . $newFileName);
     }
 }

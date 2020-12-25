@@ -99,7 +99,7 @@ class ExecutionHandler extends Model
 
     public static function deleteAddConcs($id): void
     {
-        $searchPattern = '/' . $id . '[-\.][0-9]+\.pdf/';
+        $searchPattern = '/[nb_]?' . $id . '[-\.][0-9]+\.pdf/';
         $existentFiles = scandir(Info::CONC_FOLDER);
         foreach ($existentFiles as $existentFile) {
             if (preg_match($searchPattern, $existentFile)) {
