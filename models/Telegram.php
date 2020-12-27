@@ -49,6 +49,8 @@ class Telegram
 /cbl - очистить чёрный список IP
 /upd - обновить ПО сервера
 /v - текущая версия ПО
+/avr_today - не загружено сегодня в Авроре
+/nv_today - не загружено сегодня на НВ
 /conc - список незагруженных заключений
 /exec - список незагруженных обследований';
                     }
@@ -129,6 +131,7 @@ class Telegram
             });
 // команда для отображения версии сервера
             $bot->command('v', static function ($message) use ($bot) {
+                self::saveLastHandledMessage(time() . " проверка версии ПО");
                 /** @var Message $message */
                     /** @var Message $message */
                     $versionFile = Yii::$app->basePath . '\\version.info';
@@ -381,5 +384,14 @@ class Telegram
         catch (Exception $e){
             self::sendDebug("Ошибка при обработке команды: " . $e->getMessage());
         }
+    }
+
+    /**
+     * @param string $message
+     */
+    private static function saveLastHandledMessage(string $message): void
+    {
+        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/last_tg_message.log';
+        file_put_contents($file, $message);
     }
 }
