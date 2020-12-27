@@ -477,11 +477,26 @@ class FileUtils
         }
         return null;
     }
+
     public static function getLastTgMessage()
     {
 
         $versionFile = Yii::$app->basePath . '\\logs\\last_tg_message.log';
         if (is_file($versionFile)) {
+            return file_get_contents($versionFile);
+        }
+        return null;
+    }
+
+    public static function setTelegramLog(string $message): void
+    {
+        $versionFile = Yii::$app->basePath . '\\logs\\last_tg_state.log';
+        file_put_contents($versionFile, $message);
+    }
+
+    public static function getLastTelegramLog(){
+        $versionFile = Yii::$app->basePath . '\\logs\\last_tg_state.log';
+        if(is_file($versionFile)){
             return file_get_contents($versionFile);
         }
         return null;

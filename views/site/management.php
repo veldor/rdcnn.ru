@@ -26,6 +26,7 @@ $this->title = 'Всякие разные настройки';
 ?>
 
 <div class="text-center">
+    <div class="float-left"><a href="/"><span class="glyphicon glyphicon-chevron-left"></span></a></div>
     <span>Весия ПО: <b class="text-success"><?=FileUtils::getSoftwareVersion()?></b></span>
 </div>
 
@@ -61,8 +62,8 @@ $this->title = 'Всякие разные настройки';
                 <?=FileUtils::getLastTgMessage()?>
             </div>
             <div class="col-sm-4">
-                <h3 class="text-center">Update log</h3>
-                <?=str_replace("\n", '<br/>', $updateInfo)?>
+                <h3 class="text-center">Last TG state</h3>
+                <?=FileUtils::getLastTelegramLog()?>
             </div>
             <div class="col-sm-4">
                 <h3 class="text-center">Action log</h3>

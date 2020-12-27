@@ -64,7 +64,7 @@ foreach ($sort as $key => $value) {
         $sort[$key] = '';
     }
 }
-echo '<div class="col-xs-12 text-center margin">
+echo '<div class="row"><div class="col-xs-12 text-center margin">
           <!--<div class="custom-control custom-switch">
             <input type="checkbox" class="custom-control-input" id="darkSwitch">
             <label class="custom-control-label" for="darkSwitch">Ночной режим</label>
@@ -89,7 +89,13 @@ try {
 
 ActiveForm::end();
 
-echo "</div><div class='text-center col-sm-12 margin'><div class='btn-group'><button class='btn btn-info activator' data-action='/next/nv'>Добавить следующего пациента НВ</button><button class='btn btn-danger activator' data-action='/next/aurora'>Добавить следующего пациента Авроры</button></div>";
+echo "</div>
+<div class='text-center col-xs-12 margin visible-lg visible-md'>
+<div class='btn-group'><button class='btn btn-info activator' data-action='/next/nv'>Добавить следующего пациента НВ</button><button class='btn btn-danger activator' data-action='/next/aurora'>Добавить следующего пациента Авроры</button></div>
+</div>
+<div class='text-center col-xs-12 margin visible-sm visible-xs'>
+<div class='btn-group-vertical'><button class='btn btn-info activator' data-action='/next/nv'>Добавить следующего пациента НВ</button><button class='btn btn-danger activator' data-action='/next/aurora'>Добавить следующего пациента Авроры</button></div>
+";
 
 echo "</div><div class='col-xs-12'>";
 
@@ -114,7 +120,14 @@ echo "
 $executionsCounter = 0;
 
 if (!empty($executions)) {
-    echo "<table class='table-hover table'><thead><tr><th>Номер обследования</th><th>Действия</th><th>Загружено заключение</th><th>Загружены файлы</th></tr></thead><tbody id='executionsBody'>";
+    echo "<table class='table-hover table'>
+<thead>
+<tr>
+<th><span class='visible-md visible-lg'>Номер обследования</span><span class='visible-xs visible-sm'>№</span></th>
+<th><span class='visible-md visible-lg'>Действия</span><span class='visible-xs visible-sm'></span></th>
+<th><span class='visible-md visible-lg'>Загружено заключение</span><span class='visible-xs visible-sm glyphicon glyphicon-file'></span></th>
+<th><span class='visible-md visible-lg'>Загружены файлы</span><span class='visible-xs visible-sm glyphicon glyphicon-folder-close'></span></th>
+</tr></thead><tbody id='executionsBody'>";
     foreach ($executions as $execution) {
         // проверю, если включена фильтрация по центру- выведу только те обследования, которые проведены в этом центре
         if (Utils::isCenterFiltered() && Utils::isFiltered($execution)) {
@@ -177,6 +190,7 @@ echo "<div class='col-xs-12 text-center'>";
 
 echo '</div>';
 ?>
+</div>
 
 <label><textarea class="hidden" id="forPasswordCopy"></textarea></label>
 
