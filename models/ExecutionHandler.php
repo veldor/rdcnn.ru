@@ -152,10 +152,9 @@ class ExecutionHandler extends Model
                         // проверю, что папка не пуста
                         if (count(scandir($path)) > 2) {
                             // папка не пуста
-                            try{
+                            try {
                                 FilesHandler::handleDicomDir($path);
-                            }
-                            catch (\Exception $e){
+                            } catch (\Exception $e) {
                                 echo "У нас ошибка обработки " . $e->getMessage();
                                 continue;
                             }
@@ -175,10 +174,9 @@ class ExecutionHandler extends Model
                 } else if (is_file($path) && GrammarHandler::endsWith($path, '.zip') && !array_key_exists($entity, $availData)) {
                     // если обнаружен .zip - проверю, зарегистрирован ли он, если нет- проверю, содержит ли DICOM
                     echo "handle unregistered zip $entity \n";
-                    try{
+                    try {
                         $result = FilesHandler::unzip($path);
-                    }
-                    catch (\Exception $e){
+                    } catch (\Exception $e) {
                         echo "У нас ошибка распаковки " . $e->getMessage();
                         continue;
                     }
@@ -260,7 +258,7 @@ class ExecutionHandler extends Model
         if (!empty($conclusionsDir) && is_dir($conclusionsDir)) {
             $files = array_slice(scandir($conclusionsDir), 2);
             foreach ($files as $file) {
-                if(str_starts_with($file, 'nb_')){
+                if (strpos($file, 'nb_') === 0) {
                     continue;
                 }
                 try {
@@ -318,12 +316,12 @@ class ExecutionHandler extends Model
         $new->created_at = time();
         $new->save();
         // выдам пользователю права на чтение
-            $auth = Yii::$app->authManager;
-            if ($auth !== null) {
-                $readerRole = $auth->getRole('reader');
-                $auth->assign($readerRole, $new->getId());
-                return $password;
-            }
+        $auth = Yii::$app->authManager;
+        if ($auth !== null) {
+            $readerRole = $auth->getRole('reader');
+            $auth->assign($readerRole, $new->getId());
+            return $password;
+        }
 // Добавлю вручную
         (new AuthAssignment(['user_id' => $new->id, 'item_name' => 'reader', 'created_at' => time()]))->save();
         return $password;
@@ -467,9 +465,9 @@ class ExecutionHandler extends Model
         $previousRegged = User::getLast($center);
         // найду первый свободный номер после последнего зарегистрированного
         $executionNumber = $previousRegged;
-        while (true){
+        while (true) {
             $executionNumber = User::getNext($executionNumber);
-            if(User::findByUsername($executionNumber) === null){
+            if (User::findByUsername($executionNumber) === null) {
                 break;
             }
         }
@@ -477,12 +475,12 @@ class ExecutionHandler extends Model
         return ['status' => 1, 'message' => ' <h2 class="text-center">Обследование №' . $executionNumber . '  зарегистрировано.</h2> Пароль для пациента: <b class="text-success">' . $pass . '</b> <button class="btn btn-default" id="copyPassBtn" data-password="' . $pass . '"><span class="text-success">Копировать пароль</span></button><script>var copyBtn = $("button#copyPassBtn");copyBtn.on("click.copy", function (){copyPass.call(this)});copyBtn.focus()</script>'];
     }
 
-    public static function getConclusionText(string $username):string
+    public static function getConclusionText(string $username): string
     {
         $answer = '';
         $avail = Table_availability::find()->where(['is_conclusion' => 1, 'userId' => $username])->all();
-        if(!empty($avail)){
-            foreach ($avail as $item){
+        if (!empty($avail)) {
+            foreach ($avail as $item) {
                 $answer .= "{$item->file_name} ";
             }
         }
