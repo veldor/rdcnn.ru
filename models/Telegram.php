@@ -136,7 +136,8 @@ class Telegram
                     /** @var Message $message */
                     $versionFile = Yii::$app->basePath . '\\version.info';
                     if(is_file($versionFile)){
-                        $bot->sendMessage($message->getChat()->getId(),'Текущая версия: ' . file_get_contents($versionFile));
+                        $result = $bot->sendMessage($message->getChat()->getId(),'Текущая версия: ' . file_get_contents($versionFile));
+                        FileUtils::setTelegramLog('Результат отправки : ' . serialize($result));
                     }
                     else{
                         $bot->sendMessage($message->getChat()->getId(),'Файл с версией сервера не обнаружен');
