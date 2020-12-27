@@ -23,6 +23,14 @@ function handleLoader(element) {
     });
 }
 
+function unflagNewElement(){
+    let elements = $('.new-element');
+    elements.off('mouseleave.drop');
+    elements.on('mouseleave.drop', function (){
+       $('this').removeClass('new-element');
+    });
+}
+
 function handlePrint(element) {
     let printer = $(element).find('.printer');
     printer.off('click.print');
@@ -442,6 +450,7 @@ function checkPatientDataFilling() {
                             ++withoutConclusionsCounter;
                         }
                     }
+                    unflagNewElement();
                     handleAjaxActivators();
                     enableTooltips();
                     withoutConclusions.text(withoutConclusionsCounter);
