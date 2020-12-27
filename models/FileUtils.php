@@ -467,4 +467,23 @@ class FileUtils
         $newFileName = 'nb_' . $fileName;
         copy($file, Info::CONC_FOLDER . '\\' . $newFileName);
     }
+
+    public static function getSoftwareVersion()
+    {
+
+        $versionFile = Yii::$app->basePath . '\\version.info';
+        if (is_file($versionFile)) {
+            return file_get_contents($versionFile);
+        }
+        return null;
+    }
+    public static function getLastTgMessage()
+    {
+
+        $versionFile = Yii::$app->basePath . '\\logs\\last_tg_message.log';
+        if (is_file($versionFile)) {
+            return file_get_contents($versionFile);
+        }
+        return null;
+    }
 }

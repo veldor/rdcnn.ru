@@ -9,6 +9,7 @@ use app\models\utils\ComHandler;
 use app\models\utils\FilesHandler;
 use app\models\utils\GrammarHandler;
 use app\models\utils\Management;
+use app\models\utils\TimeHandler;
 use app\priv\Info;
 use CURLFile;
 use Exception;
@@ -33,6 +34,7 @@ class Telegram
             $bot->command(/**
              * @param $message Message
              */ 'start', static function ($message) use ($bot) {
+                 self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос на подключение к боту');
                 $answer = 'Добро пожаловать! /help для вывода команд';
                 /** @var Message $message */
                 $bot->sendMessage($message->getChat()->getId(), $answer);
@@ -40,6 +42,7 @@ class Telegram
 
 // команда для помощи
             $bot->command('help', static function ($message) use ($bot) {
+                self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос на вывод help');
                 try{
                     /** @var Message $message */
                     // проверю, зарегистрирован ли пользователь как работающий у нас
@@ -67,6 +70,7 @@ class Telegram
             });
 // команда для очистки чёрного списка
             $bot->command('cbl', static function ($message) use ($bot) {
+                self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос на очистку чёрного списка');
                 /** @var Message $message */
                 // проверю, зарегистрирован ли пользователь как работающий у нас
                 if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
@@ -77,6 +81,7 @@ class Telegram
             });
 // команда получения списка незагруженных материалов для конкретного центра за конкретный день
             $bot->command('avr_today', static function ($message) use ($bot) {
+                self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос на просмотрт незагруженного по Авроре сегодня');
                 /** @var Message $message */
                 // проверю, зарегистрирован ли пользователь как работающий у нас
                 if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
@@ -104,6 +109,7 @@ class Telegram
             });
 // команда получения списка незагруженных материалов для конкретного центра за конкретный день
             $bot->command('nv_today', static function ($message) use ($bot) {
+                self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос на просмотр незагруженного по НВ за сегодня');
                 /** @var Message $message */
                 // проверю, зарегистрирован ли пользователь как работающий у нас
                 if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
@@ -131,11 +137,12 @@ class Telegram
             });
 // команда для отображения версии сервера
             $bot->command('v', static function ($message) use ($bot) {
+                self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос на просмотр версии ПО');
                 /** @var Message $message */
                     /** @var Message $message */
-                    $versionFile = Yii::$app->basePath . '\\version.info';
-                    if(is_file($versionFile)){
-                        $bot->sendMessage($message->getChat()->getId(),'Текущая версия: ' . file_get_contents($versionFile));
+                    $version = FileUtils::getSoftwareVersion();
+                    if($version !== null){
+                        $bot->sendMessage($message->getChat()->getId(),'Текущая версия: ' . $version);
                     }
                     else{
                         $bot->sendMessage($message->getChat()->getId(),'Файл с версией сервера не обнаружен');
@@ -143,6 +150,7 @@ class Telegram
             });
 // команда для обновления ПО сервера
             $bot->command('upd', static function ($message) use ($bot) {
+                self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос на обновление системы');
                 /** @var Message $message */
                 // проверю, зарегистрирован ли пользователь как работающий у нас
                 if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
@@ -153,6 +161,7 @@ class Telegram
             });
 // команда для вывода незагруженных заключений
             $bot->command('conc', static function ($message) use ($bot) {
+                self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос на просмотр незагруженных заключений');
                 /** @var Message $message */
                 // проверю, зарегистрирован ли пользователь как работающий у нас
                 if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
@@ -169,6 +178,7 @@ class Telegram
             });
 // команда для вывода незагруженных обследований
             $bot->command('exec', static function ($message) use ($bot) {
+                self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос на просмотр незагруженных снимков');
                 /** @var Message $message */
                 // проверю, зарегистрирован ли пользователь как работающий у нас
                 if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
@@ -303,6 +313,7 @@ class Telegram
 
     private static function handleSimpleText(string $msg_text, Message $message):string
     {
+        self::saveLastHandledMessage(TimeHandler::timestampToDate(time()) . ' : получен запрос ' . $msg_text);
         switch ($msg_text){
             // если введён токен доступа- уведомлю пользователя об успешном входе в систему
             case Info::VIBER_SECRET:
@@ -383,5 +394,14 @@ class Telegram
         catch (Exception $e){
             self::sendDebug("Ошибка при обработке команды: " . $e->getMessage());
         }
+    }
+
+    /**
+     * @param string $message
+     */
+    private static function saveLastHandledMessage(string $message): void
+    {
+        $file = dirname($_SERVER['DOCUMENT_ROOT'] . './/') . '/logs/last_tg_message.log';
+        file_put_contents($file, $message);
     }
 }

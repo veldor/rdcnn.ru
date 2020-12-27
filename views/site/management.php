@@ -25,6 +25,10 @@ $this->title = 'Всякие разные настройки';
 /* @var $telegramInfo array */
 ?>
 
+<div class="text-center">
+    <span>Весия ПО: <b class="text-success"><?=FileUtils::getSoftwareVersion()?></b></span>
+</div>
+
 <ul class="nav nav-tabs">
     <li id="bank_set_li" class="active"><a href="#global_actions" data-toggle="tab" class="active">Обшие действия</a></li>
     <li><a href="#reports" data-toggle="tab">Отчёты</a></li>
@@ -52,6 +56,10 @@ $this->title = 'Всякие разные настройки';
     <div class="tab-pane margened" id="reports">
 
         <div class="col-sm-12">
+            <div class="col-sm-4">
+                <h3 class="text-center">Last TG message</h3>
+                <?=FileUtils::getLastTgMessage()?>
+            </div>
             <div class="col-sm-4">
                 <h3 class="text-center">Update log</h3>
                 <?=str_replace("\n", '<br/>', $updateInfo)?>
