@@ -7,6 +7,8 @@ let waitingFoldersList;
 let patientsCount;
 let withoutExecutions;
 let withoutConclusions;
+let lastCheckResult;
+let showChanges = false;
 
 function handleLoader(element) {
 
@@ -27,7 +29,7 @@ function unflagNewElement(){
     let elements = $('.new-element');
     elements.off('mouseleave.drop');
     elements.on('mouseleave.drop', function (){
-       $('this').removeClass('new-element');
+       $(this).removeClass('new-element');
     });
 }
 
@@ -249,6 +251,17 @@ function handleDragDrop() {
 }
 
 $(function () {
+    let infoSwitcher = $('#showChangesSwitcher');
+    infoSwitcher.on('change.switchInfoShow', function (){
+        if($(this).prop('checked')){
+            makeInformer('info', 'Успешно', 'Вы отслеживаете изменения');
+            showChanges = true;
+        }
+        else{
+            makeInformer('danger', 'Успешно', 'Вы не отслеживаете изменения');
+            showChanges = false;
+        }
+    });
     copyPassTextarea = $('textarea#forPasswordCopy');
     unhandledFoldersContainer = $('div#unhandledFoldersContainer');
     unhandledFoldersList = $('tbody#unhandledFoldersList');
@@ -303,6 +316,23 @@ $(function () {
         handlePrint(this);
     });
 });
+
+function saveCopy(answer) {
+    let namedList = [];
+    let counter;
+    if(answer.hasOwnProperty('patientList')){
+        let list = answer.patientList;
+        if(list){
+            for(counter in list){
+                let patient = list[counter];
+                if(patient){
+                    namedList[patient.id] = patient;
+                }
+            }
+        }
+    }
+    return namedList;
+}
 
 function checkPatientDataFilling() {
     sendSilentAjax('get', '/patients/check', function (answer) {
@@ -450,7 +480,6 @@ function checkPatientDataFilling() {
                             ++withoutConclusionsCounter;
                         }
                     }
-                    unflagNewElement();
                     handleAjaxActivators();
                     enableTooltips();
                     withoutConclusions.text(withoutConclusionsCounter);
@@ -477,6 +506,47 @@ function checkPatientDataFilling() {
                     }
                 }
             }
+        }
+
+        unflagNewElement();
+        if(showChanges){
+            // сравню новый и старый списки
+            let newList = saveCopy(answer);
+            if(lastCheckResult){
+                // сравню новых и старых пациентов
+                for(let key in newList){
+                    if(key && newList.hasOwnProperty(key)){
+                        let newPatientInfo = newList[key];
+                        if(lastCheckResult.hasOwnProperty(key)){
+                            let oldPatientInfo = lastCheckResult[key];
+                            // проверю старое и новое состояние
+                            // проверю, не добавились ли данные пациента
+                            if(!oldPatientInfo.patient_name && newPatientInfo.patient_name){
+                                // добавлено ФИО и, вероятно, область обследования, сообщу об этом
+                                makeInformer('info', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> ФИО: ' + newPatientInfo.patient_name + '<br/>Область обследования: ' + newPatientInfo.conclusion_areas)
+                            }
+                            // проверю, не добавилось ли обследование пациента
+                            if(!oldPatientInfo.execution && newPatientInfo.execution){
+                                makeInformer('success', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> Добавлены снимки')
+                            }
+                            // проверю, не добавилась ли почта пациента
+                            if(!oldPatientInfo.hasMail && newPatientInfo.hasMail){
+                                makeInformer('success', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> Добавлен адрес почты пациента')
+                            }
+                            if(oldPatientInfo.conclusionsCount < newPatientInfo.conclusionsCount){
+                                // добавлено заключение по пациенту
+                                let informer = makeInformer('success', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> Добавлено заключение врача<br/><a href="#" class="printer" data-names="' + conclusion_text + '">Распечатать заключения</a>')
+                                handlePrint(informer);
+                            }
+                        }
+                        else{
+                            makeInformer('info', 'Новый пациент', 'Зарегистрирован новый пациент: <a target="_blank" href="/person/' + key + '">' + key + '</a>')
+                        }
+                    }
+                }
+            }
+            // сохраню предыдущую копию
+            lastCheckResult = newList;
         }
     });
 }

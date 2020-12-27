@@ -295,6 +295,7 @@ function makeInformer(type, header, body) {
     });
     container.append(informer);
     showAlert(informer)
+    return informer;
 }
 
 // ПОКАЗЫВАЮ ИНФОРМЕР

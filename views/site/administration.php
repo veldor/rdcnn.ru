@@ -113,6 +113,9 @@ echo Html::endForm();
 echo '</div>';
 
 
+
+echo "<div class='col-xs-12 margin'><label>Отслеживать изменения <input type='checkbox' id='showChangesSwitcher'></label></div>";
+
 echo "
     <div class='col-xs-12 margin'> <div class='col-xs-4 text-center'>Всего обследований: <b class='text-info'><span id='patientsCount'>0</span></b></div><div class='col-xs-4 text-center'>Без заключений: <b class='text-danger'><span id='withoutConclusions'>0</span></b></div><div class='col-xs-4 text-danger text-center'>Без файлов: <b class='text-danger'><span id='withoutExecutions'>0</span></b></div></div>
 ";
