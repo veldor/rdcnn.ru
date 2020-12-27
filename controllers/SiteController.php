@@ -150,6 +150,7 @@ class SiteController extends Controller
     /**
      * @return string|Response
      * @noinspection SpellCheckingInspection
+     * @throws \Exception
      */
     public function actionIolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8()
     {

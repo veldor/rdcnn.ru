@@ -73,6 +73,60 @@ class Telegram
                     $bot->sendMessage($message->getChat()->getId(),'Чёрный список вычищен');
                 }
             });
+// команда получения списка незагруженных материалов для конкретного центра за конкретный день
+            $bot->command('avr_today', static function ($message) use ($bot) {
+                /** @var Message $message */
+                // проверю, зарегистрирован ли пользователь как работающий у нас
+                if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                    $startOfInterval = Utils::getStartInterval(true);
+                    $endOfInterval = Utils::getEndInterval(true);
+                    // получу зарегистрированных сегодня в авроре
+                    $registeredToday = User::findRegistered('a', $startOfInterval, $endOfInterval);
+                    $list = '';
+                    if(!empty($registeredToday)){
+                        /** @var User $item */
+                        foreach ($registeredToday as $item) {
+                            if(!Table_availability::isConclusion($item)){
+                                $list .= "{$item->username}: нет заключения\n";
+                            }
+                            if(!Table_availability::isExecution($item)){
+                                $list .= "{$item->username}: нет снимков\n";
+                            }
+
+                        }
+                    }
+                    if(empty($list)){
+                        $bot->sendMessage($message->getChat()->getId(),'Всё загружено');
+                    }
+                }
+            });
+// команда получения списка незагруженных материалов для конкретного центра за конкретный день
+            $bot->command('nv_today', static function ($message) use ($bot) {
+                /** @var Message $message */
+                // проверю, зарегистрирован ли пользователь как работающий у нас
+                if(ViberPersonalList::iWorkHere($message->getChat()->getId())){
+                    $startOfInterval = Utils::getStartInterval(true);
+                    $endOfInterval = Utils::getEndInterval(true);
+                    // получу зарегистрированных сегодня в авроре
+                    $registeredToday = User::findRegistered('n', $startOfInterval, $endOfInterval);
+                    $list = '';
+                    if(!empty($registeredToday)){
+                        /** @var User $item */
+                        foreach ($registeredToday as $item) {
+                            if(!Table_availability::isConclusion($item)){
+                                $list .= "{$item->username}: нет заключения\n";
+                            }
+                            if(!Table_availability::isExecution($item)){
+                                $list .= "{$item->username}: нет снимков\n";
+                            }
+
+                        }
+                    }
+                    if(empty($list)){
+                        $bot->sendMessage($message->getChat()->getId(),'Всё загружено');
+                    }
+                }
+            });
 // команда для отображения версии сервера
             $bot->command('v', static function ($message) use ($bot) {
                 /** @var Message $message */

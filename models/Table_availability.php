@@ -122,4 +122,14 @@ class Table_availability extends ActiveRecord
         }
         return [];
     }
+
+    public static function isConclusion(User $item)
+    {
+        return self::find()->where(['userId' => $item->username, 'is_conclusion' => 1])->count();
+    }
+
+    public static function isExecution(User $item)
+    {
+        return self::find()->where(['userId' => $item->username, 'is_execution' => 1])->count();
+    }
 }

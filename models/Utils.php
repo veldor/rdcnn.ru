@@ -62,24 +62,36 @@ class Utils extends Model
 
     /**
      * Получение временной метки начала суток
+     * @param bool $forToday
      * @return int
      * @throws Exception
      */
-    public static function getStartInterval(): int
+    public static function getStartInterval($forToday = false): int
     {
-        $dtNow = self::setupDay();
+        if($forToday){
+            $dtNow = new DateTime();
+        }
+        else{
+            $dtNow = self::setupDay();
+        }
         $dtNow->modify('today');
         return $dtNow->getTimestamp();
     }
 
     /**
      * Получение временной метки завершения суток
+     * @param bool $forToday
      * @return int
      * @throws Exception
      */
-    public static function getEndInterval(): int
+    public static function getEndInterval($forToday = false): int
     {
-        $dtNow = self::setupDay();
+        if($forToday){
+            $dtNow = new DateTime();
+        }
+        else{
+            $dtNow = self::setupDay();
+        }
         $dtNow->modify('today');
         $endOfDay = clone $dtNow;
         $endOfDay->modify('tomorrow');

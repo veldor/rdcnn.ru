@@ -8,8 +8,8 @@ use app\models\ExecutionHandler;
 use app\models\Table_availability;
 use app\models\User;
 use app\models\Utils;
-use dixonstarter\pdfprint\Pdfprint;
-use edgardmessias\assets\nprogress\NProgressAsset;
+//use dixonstarter\pdfprint\Pdfprint;
+//use edgardmessias\assets\nprogress\NProgressAsset;
 use nirvana\showloading\ShowLoadingAsset;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -18,13 +18,13 @@ use yii\widgets\ActiveForm;
 
 AdminAsset::register($this);
 ShowLoadingAsset::register($this);
-NProgressAsset::register($this);
+//NProgressAsset::register($this);
 
 $this->title = 'Администрирование';
 
-echo Pdfprint::widget([
-    'elementClass' => '.btn-pdfprint'
-]);
+//echo Pdfprint::widget([
+//    'elementClass' => '.btn-pdfprint'
+//]);
 
 /* @var $this View */
 /* @var $executions User[] */
@@ -176,8 +176,6 @@ if ($executionsCounter === 0) {
 echo "<div class='col-xs-12 text-center'>";
 
 echo '</div>';
-
-echo "<a href='/auto-print/A69070.pdf' class='btn-pdfprint'>open</a>";
 ?>
 
 <label><textarea class="hidden" id="forPasswordCopy"></textarea></label>

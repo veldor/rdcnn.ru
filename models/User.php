@@ -128,6 +128,14 @@ class User extends ActiveRecord implements IdentityInterface
         return ++$username;
     }
 
+    public static function findRegistered(string $center, int $startOfInterval, int $endOfInterval)
+    {
+        if($center === 'a'){
+            return static::find()->where(['<>', 'username', self::ADMIN_NAME])->andWhere(['like', 'username', 'A%', false])->andWhere(['>' , 'created_at', $startOfInterval])->andWhere(['<' , 'created_at', $endOfInterval])->orderBy('created_at DESC')->all();
+        }
+        return static::find()->where(['<>', 'username', self::ADMIN_NAME])->andWhere(['like', 'username', '[0-9]%', false])->andWhere(['>' , 'created_at', $startOfInterval])->andWhere(['<' , 'created_at', $endOfInterval])->orderBy('created_at DESC')->all();
+    }
+
     public function validatePassword($password): bool
     {
         return Yii::$app->security->validatePassword($password, $this->password_hash);
