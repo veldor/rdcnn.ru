@@ -139,6 +139,7 @@ class Telegram
                 /** @var Message $message */
                 /** @var Message $message */
                 $version = FileUtils::getSoftwareVersion();
+                $bot->sendMessage($message->getChat()->getId(), 'Текущая версия: ' . $version);
                 if ($version !== null) {
                     self::sendMessage($bot, $message->getChat()->getId(), 'Текущая версия: ' . $version);
                 } else {
