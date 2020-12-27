@@ -14,6 +14,11 @@ class Management extends Model
 {
     public static function handleChanges()
     {
+        // проверю, не изменилась ли версия ПО, если изменилась- пришлю сообщение в телеграм-бот об этом
+        if(FileUtils::isSoftwareVersionChanged()){
+            Telegram::sendDebug("Изменилась версия по: " . FileUtils::getSoftwareVersion());
+        }
+
         // если обновление не в ходу и с последнего обновления прошло больше 10 минут- запущу его
         if (!FileUtils::isUpdateInProgress() && FileUtils::getLastUpdateTime() < (time() - 60)) {
             $file = Yii::$app->basePath . '\\yii.bat';

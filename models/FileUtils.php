@@ -501,4 +501,20 @@ class FileUtils
         }
         return null;
     }
+
+    /**
+     * @return bool
+     */
+    public static function isSoftwareVersionChanged(): bool
+    {
+        $oldVersionFile =  Yii::$app->basePath . '\\old_version.info';
+        if(!is_file($oldVersionFile)){
+            file_put_contents($oldVersionFile, '0');
+        }
+        if(self::getSoftwareVersion() !== file_get_contents($oldVersionFile)){
+            file_put_contents($oldVersionFile, self::getSoftwareVersion());
+            return true;
+        }
+        return false;
+    }
 }
