@@ -29,5 +29,6 @@ return [
     'api' => 'api/do',
     'rated' => 'user/rate-link-clicked',
     'rate' => 'user/rate',
+    'show-changes' => 'administrator/show-notifications',
     'review' => 'user/review'
 ];

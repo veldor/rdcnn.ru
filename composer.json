@@ -19,8 +19,8 @@
   },
   "minimum-stability": "stable",
   "require": {
-    "php": ">=7.3.4",
-    "yiisoft/yii2": "~2.0.14",
+    "php": "^7.4|^8.0",
+    "yiisoft/yii2": "~2.0.40",
     "yiisoft/yii2-bootstrap": "~2.0.0",
     "yiisoft/yii2-swiftmailer": "~2.0.0",
     "kartik-v/yii2-widget-fileinput": "@dev",
@@ -44,10 +44,7 @@
     "roave/security-advisories": "dev-master",
     "yiisoft/yii2-debug": "~2.0.0",
     "yiisoft/yii2-gii": "~2.0.0",
-    "yiisoft/yii2-faker": "~2.0.0",
-    "codeception/base": "~2.3.0",
-    "codeception/verify": "~0.4.0",
-    "codeception/specify": "~0.4.6"
+    "yiisoft/yii2-faker": "~2.0.0"
   },
   "config": {
     "process-timeout": 1800,

@@ -8,6 +8,8 @@ use app\models\database\ViberPersonalList;
 use app\models\utils\ComHandler;
 use app\models\utils\FilesHandler;
 use app\models\utils\GrammarHandler;
+use app\models\utils\MailHandler;
+use app\models\utils\MailSettings;
 use app\models\utils\Management;
 use app\priv\Info;
 use CURLFile;
@@ -368,7 +370,21 @@ class Telegram
                 }
             }
         }
-        catch (Exception $e){}
+        catch (Exception $e){
+            try{
+                // отправлю письмо с ошибкой на почту
+                $mail = Yii::$app->mailer->compose()
+                    ->setFrom([MailSettings::getInstance()->address => 'РДЦ'])
+                    ->setSubject('Не получилось отправить сообщение боту')
+                    ->setHtmlBody($e->getMessage())
+                    ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
+                // попробую отправить письмо, в случае ошибки- вызову исключение
+                $mail->send();
+            }
+            catch (Exception $e){
+                // ну тут уж ничего не сделать...
+            }
+        }
     }
 
     public static function downloadZip(string $fileId, $clientId): void

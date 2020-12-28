@@ -15,12 +15,13 @@ use Yii;
 use yii\base\Exception;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\Cookie;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class AdministratorController extends Controller
 {
-    public function behaviors():array
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -46,6 +47,7 @@ class AdministratorController extends Controller
                             'register-next-patient',
                             'send-info-mail',
                             'auto-print',
+                            'show-notifications',
                             'test'
                         ],
                         'roles' => [
@@ -68,10 +70,10 @@ class AdministratorController extends Controller
         if (Yii::$app->request->isAjax && Yii::$app->request->isGet) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new ExecutionHandler(['scenario' => ExecutionHandler::SCENARIO_ADD]);
-            return ['status' => 1, 'header' => 'Добавление обследования',  'view' => $this->renderAjax('add-execution-form', ['model' => $model])];
+            return ['status' => 1, 'header' => 'Добавление обследования', 'view' => $this->renderAjax('add-execution-form', ['model' => $model])];
         }
 
-        if(Yii::$app->request->isPost) {
+        if (Yii::$app->request->isPost) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new ExecutionHandler(['scenario' => ExecutionHandler::SCENARIO_ADD]);
             $model->load(Yii::$app->request->post());
@@ -86,7 +88,7 @@ class AdministratorController extends Controller
      */
     public function actionChangePassword(): array
     {
-        if(Yii::$app->request->isPost){
+        if (Yii::$app->request->isPost) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new AdministratorActions(['scenario' => AdministratorActions::SCENARIO_CHANGE_PASSWORD]);
             $model->load(Yii::$app->request->post());
@@ -102,7 +104,7 @@ class AdministratorController extends Controller
      */
     public function actionDeleteItem(): array
     {
-        if(Yii::$app->request->isPost){
+        if (Yii::$app->request->isPost) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new AdministratorActions(['scenario' => AdministratorActions::SCENARIO_DELETE_ITEM]);
             $model->load(Yii::$app->request->post());
@@ -118,10 +120,9 @@ class AdministratorController extends Controller
      */
     public function actionPatientsCheck(): array
     {
-        try{
+        try {
             $isCheckStarted = Management::handleChanges();
-        }
-        catch (\Exception $e){
+        } catch (\Exception $e) {
             $isCheckStarted = $e->getMessage();
         }
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -140,6 +141,7 @@ class AdministratorController extends Controller
         FileUtils::deleteUnhandledFolder();
         return ['status' => 1];
     }
+
     public function actionRenameUnhandledFolder(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -180,12 +182,31 @@ class AdministratorController extends Controller
     public function actionAutoPrint($fileName): void
     {
         $file = Yii::getAlias('@conclusionsDirectory') . '\\' . 'nb_' . $fileName;
-        if(is_file($file)){
+        if (is_file($file)) {
             Yii::$app->response->sendFile($file, 'заключение', ['inline' => true]);
-        }
-        else{
+        } else {
             $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $fileName;
             Yii::$app->response->sendFile($file, 'заключение', ['inline' => true]);
         }
+    }
+
+    public function actionShowNotifications()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $state = Yii::$app->request->post('state');
+        $cookies = Yii::$app->response->cookies;
+        if ($state === 'true') {
+
+// добавление новой куки в HTTP-ответ
+            $cookies->add(new Cookie([
+                'name' => 'show_notifications',
+                'value' => $state,
+                'httpOnly' => false,
+            ]));
+        }
+        else{
+            $cookies->remove('show_notifications');
+        }
+        return ['status' => 'success'];
     }
 }

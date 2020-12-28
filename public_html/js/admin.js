@@ -25,11 +25,11 @@ function handleLoader(element) {
     });
 }
 
-function unflagNewElement(){
+function removeFlagFromNewElement() {
     let elements = $('.new-element');
     elements.off('mouseleave.drop');
-    elements.on('mouseleave.drop', function (){
-       $(this).removeClass('new-element');
+    elements.on('mouseleave.drop', function () {
+        $(this).removeClass('new-element');
     });
 }
 
@@ -252,12 +252,26 @@ function handleDragDrop() {
 
 $(function () {
     let infoSwitcher = $('#showChangesSwitcher');
-    infoSwitcher.on('change.switchInfoShow', function (){
-        if($(this).prop('checked')){
+    if(getCookie('show_notifications')){
+        console.log('have cookie')
+        infoSwitcher.prop('checked', true);
+        showChanges = true;
+    }
+    else{
+        console.log('no cookie')
+    }
+    infoSwitcher.on('change.switchInfoShow', function () {
+        sendSilentAjax(
+            'post',
+            '/show-changes',
+            function () {
+            },
+            {'state': $(this).prop('checked')}
+        );
+        if ($(this).prop('checked')) {
             makeInformer('info', 'Успешно', 'Вы отслеживаете изменения');
             showChanges = true;
-        }
-        else{
+        } else {
             makeInformer('danger', 'Успешно', 'Вы не отслеживаете изменения');
             showChanges = false;
         }
@@ -312,7 +326,7 @@ $(function () {
     enableTooltips();
 
     let patients = $('tr.patient');
-    patients.each(function (){
+    patients.each(function () {
         handlePrint(this);
     });
 });
@@ -320,12 +334,12 @@ $(function () {
 function saveCopy(answer) {
     let namedList = [];
     let counter;
-    if(answer.hasOwnProperty('patientList')){
+    if (answer.hasOwnProperty('patientList')) {
         let list = answer.patientList;
-        if(list){
-            for(counter in list){
+        if (list) {
+            for (counter in list) {
                 let patient = list[counter];
-                if(patient){
+                if (patient) {
                     namedList[patient.id] = patient;
                 }
             }
@@ -444,7 +458,7 @@ function checkPatientDataFilling() {
                                 if (item['conclusionsCount'] > 0) {
                                     conclusionContainer.addClass('field-success').removeClass('field-danger');
                                     let cText = '';
-                                    if(item['conclusion_text']){
+                                    if (item['conclusion_text']) {
                                         cText = item['conclusion_text'];
                                     }
                                     if (item['conclusion_areas']) {
@@ -508,38 +522,37 @@ function checkPatientDataFilling() {
             }
         }
 
-        unflagNewElement();
-        if(showChanges){
+        removeFlagFromNewElement();
+        if (showChanges) {
             // сравню новый и старый списки
             let newList = saveCopy(answer);
-            if(lastCheckResult){
+            if (lastCheckResult) {
                 // сравню новых и старых пациентов
-                for(let key in newList){
-                    if(key && newList.hasOwnProperty(key)){
+                for (let key in newList) {
+                    if (key && newList.hasOwnProperty(key)) {
                         let newPatientInfo = newList[key];
-                        if(lastCheckResult.hasOwnProperty(key)){
+                        if (lastCheckResult.hasOwnProperty(key)) {
                             let oldPatientInfo = lastCheckResult[key];
                             // проверю старое и новое состояние
                             // проверю, не добавились ли данные пациента
-                            if(!oldPatientInfo.patient_name && newPatientInfo.patient_name){
+                            if (!oldPatientInfo.patient_name && newPatientInfo.patient_name) {
                                 // добавлено ФИО и, вероятно, область обследования, сообщу об этом
                                 makeInformer('info', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> ФИО: ' + newPatientInfo.patient_name + '<br/>Область обследования: ' + newPatientInfo.conclusion_areas)
                             }
                             // проверю, не добавилось ли обследование пациента
-                            if(!oldPatientInfo.execution && newPatientInfo.execution){
+                            if (!oldPatientInfo.execution && newPatientInfo.execution) {
                                 makeInformer('success', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> Добавлены снимки')
                             }
                             // проверю, не добавилась ли почта пациента
-                            if(!oldPatientInfo.hasMail && newPatientInfo.hasMail){
+                            if (!oldPatientInfo.hasMail && newPatientInfo.hasMail) {
                                 makeInformer('success', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> Добавлен адрес почты пациента')
                             }
-                            if(oldPatientInfo.conclusionsCount < newPatientInfo.conclusionsCount){
+                            if (oldPatientInfo.conclusionsCount < newPatientInfo.conclusionsCount) {
                                 // добавлено заключение по пациенту
                                 let informer = makeInformer('success', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> Добавлено заключение врача<br/><a href="#" class="printer" data-names="' + conclusion_text + '">Распечатать заключения</a>')
                                 handlePrint(informer);
                             }
-                        }
-                        else{
+                        } else {
                             makeInformer('info', 'Новый пациент', 'Зарегистрирован новый пациент: <a target="_blank" href="/person/' + key + '">' + key + '</a>')
                         }
                     }

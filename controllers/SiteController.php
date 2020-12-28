@@ -6,6 +6,7 @@ use app\models\AdministratorActions;
 use app\models\ExecutionHandler;
 use app\models\FileUtils;
 use app\models\LoginForm;
+use app\models\Telegram;
 use app\models\User;
 use app\models\Utils;
 use app\models\utils\DicomHandler;
@@ -116,6 +117,7 @@ class SiteController extends Controller
                 $model = new LoginForm(['scenario' => LoginForm::SCENARIO_USER_LOGIN]);
                 $model->load(Yii::$app->request->post());
                 if ($model->loginUser()) {
+                    Telegram::sendDebug("Залогинился пользователь " . $model->username);
                     // загружаю личный кабинет пользователя
                     return $this->redirect('/person/' . Yii::$app->user->identity->username, 301);
                 }

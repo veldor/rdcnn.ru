@@ -164,12 +164,8 @@ class LoginForm extends Model
             }
         }
         $admin->save();
-        try {
-            Telegram::sendDebug("Успешный вход в систему");
-        } catch (InvalidArgumentException $e) {
-        } catch (\TelegramBot\Api\Exception $e) {
-        }
-        return Yii::$app->user->login($admin, 60 * 60 * 30);
+        Telegram::sendDebug("Успешный вход в систему");
+        return Yii::$app->user->login($admin);
     }
 
     /**

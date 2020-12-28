@@ -323,11 +323,11 @@ function closeAlert(alertDiv) {
     const elemWidth = alertDiv[0].offsetWidth;
     alertDiv.animate({
         left: elemWidth
-    }, 500, function () {
+    }, 100, function () {
         alertDiv.animate({
             height: 0,
             opacity: 0
-        }, 300, function () {
+        }, 100, function () {
             alertDiv.remove();
         });
     });
