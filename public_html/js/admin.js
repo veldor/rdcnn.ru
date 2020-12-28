@@ -560,6 +560,7 @@ function checkPatientDataFilling() {
             }
             // сохраню предыдущую копию
             lastCheckResult = newList;
+            console.log(newList);
         }
     });
 }
