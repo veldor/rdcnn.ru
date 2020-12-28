@@ -549,7 +549,7 @@ function checkPatientDataFilling() {
                             }
                             if (oldPatientInfo.conclusionsCount < newPatientInfo.conclusionsCount) {
                                 // добавлено заключение по пациенту
-                                let informer = makeInformer('success', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> Добавлено заключение врача<br/><a href="#" class="printer" data-names="' + conclusion_text + '">Распечатать заключения</a>')
+                                let informer = makeInformer('success', 'Данные по пациенту', 'Пациент <a target="_blank" href="/person/' + key + '">' + key + '</a> <br/> Добавлено заключение врача<br/><a href="#" class="printer" data-names="' + newPatientInfo.conclusion_text + '">Распечатать заключения</a>')
                                 handlePrint(informer);
                             }
                         } else {
