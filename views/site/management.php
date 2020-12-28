@@ -137,7 +137,7 @@ $this->title = 'Всякие разные настройки';
             foreach ($files as $item) {
                 $stat = stat(Info::CONC_FOLDER . DIRECTORY_SEPARATOR . $item);
                 $changeTime = $stat['mtime'];
-                echo "<tr><td>$item</td><td>" . TimeHandler::timestampToDate($changeTime) . "</td></tr>";
+                echo "<tr><td>$item</td><td>" . TimeHandler::timestampToDate($changeTime) . "</td><td><a href='#' class='activator' data-action='/delete/conc/$item'><span class='glyphicon glyphicon-trash text-danger'></span></a></td></tr>";
             }
             echo "</table>";
         }

@@ -30,5 +30,6 @@ return [
     'rated' => 'user/rate-link-clicked',
     'rate' => 'user/rate',
     'show-changes' => 'administrator/show-notifications',
+    'delete/conc/<filename:.+>' => 'administrator/delete-conclusion-file',
     'review' => 'user/review'
 ];

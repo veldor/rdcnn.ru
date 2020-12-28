@@ -10,6 +10,7 @@ use app\models\FileUtils;
 use app\models\User;
 use app\models\utils\MailHandler;
 use app\models\utils\Management;
+use app\priv\Info;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -48,6 +49,7 @@ class AdministratorController extends Controller
                             'send-info-mail',
                             'auto-print',
                             'show-notifications',
+                            'delete-conclusion-file',
                             'test'
                         ],
                         'roles' => [
@@ -203,9 +205,18 @@ class AdministratorController extends Controller
                 'value' => $state,
                 'httpOnly' => false,
             ]));
-        }
-        else{
+        } else {
             $cookies->remove('show_notifications');
+        }
+        return ['status' => 'success'];
+    }
+
+    public function actionDeleteConclusionFile($filename): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $path = Info::CONC_FOLDER . DIRECTORY_SEPARATOR . $filename;
+        if (is_file($path)) {
+            unlink($path);
         }
         return ['status' => 'success'];
     }
