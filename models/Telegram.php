@@ -376,7 +376,7 @@ class Telegram
                 $mail = Yii::$app->mailer->compose()
                     ->setFrom([MailSettings::getInstance()->address => 'РДЦ'])
                     ->setSubject('Не получилось отправить сообщение боту')
-                    ->setHtmlBody($e->getMessage())
+                    ->setHtmlBody($errorInfo . "<br/>" . $e->getMessage())
                     ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
                 // попробую отправить письмо, в случае ошибки- вызову исключение
                 $mail->send();
