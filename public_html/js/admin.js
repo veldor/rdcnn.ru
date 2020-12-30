@@ -40,11 +40,9 @@ function handlePrint(element) {
         e.preventDefault();
         let addresses = $(this).attr('data-names');
         let names = addresses.split(" ");
-        console.log(names)
         if (names.length > 0) {
             let counter = 0;
             while (names[counter]) {
-                console.log(names[counter])
                 // Открою новое окно и в нём загружу на печать файл
                 let url = '/auto-print/' + names[counter];
                 window.open(url);
@@ -134,7 +132,7 @@ function sendFiles(location, files, totalLength) {
     xhr.upload.addEventListener('progress', uploadProgress, false);
     xhr.onreadystatechange = stateChange;
     xhr.open('POST', location);
-    var fd = new FormData
+    let fd = new FormData
     fd.append("file", file)
     xhr.send(fd)
 
@@ -154,7 +152,6 @@ function sendFiles(location, files, totalLength) {
     function stateChange(event) {
         if (event.target.readyState === 4) {
             if (event.target.status === 200) {
-                console.log(event);
                 // проверю, если загружены все файлы- покажу уведомление об успешной загрузке, иначе- гружу следующий файл
                 if (counter === files.length) {
                     deleteWaiter();
@@ -244,7 +241,6 @@ function handleDragDrop() {
     $('body')
         .on('dragenter', function () {
             $('div#mainWrap').addClass("blured");
-            console.log("show container");
             dragContainer.show();
             return false;
         });
@@ -253,12 +249,8 @@ function handleDragDrop() {
 $(function () {
     let infoSwitcher = $('#showChangesSwitcher');
     if(getCookie('show_notifications')){
-        console.log('have cookie')
         infoSwitcher.prop('checked', true);
         showChanges = true;
-    }
-    else{
-        console.log('no cookie')
     }
     infoSwitcher.on('change.switchInfoShow', function () {
         sendSilentAjax(
@@ -560,7 +552,6 @@ function checkPatientDataFilling() {
             }
             // сохраню предыдущую копию
             lastCheckResult = newList;
-            console.log(newList);
         }
     });
 }
