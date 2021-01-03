@@ -20,6 +20,7 @@ class PersonalApi
     public static function handleRequest(): array
     {
         $data = json_decode(file_get_contents('php://input'), true);
+        Telegram::sendDebug("Доступ к API: " . $data);
         return $data;
     }
 }
