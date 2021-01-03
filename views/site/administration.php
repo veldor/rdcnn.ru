@@ -100,7 +100,7 @@ echo "</div>
 echo "</div><div class='col-xs-12'>";
 
 /** @noinspection SpellCheckingInspection */
-echo Html::beginForm(['/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8'], 'post');
+echo Html::beginForm(['/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8']);
 
 echo "<div class='col-sm-4 col-xs-12'><label class='control-label' for='#centerSelect'>Центр</label><select id='centerSelect' name='center' onchange='this.form.submit();' class='form-control'><option value='all'>Все</option><option value='nv' {$centers['nv']}>Нижневолжская набережная</option><option value='aurora' {$centers['aurora']}>Аврора</option></select></div>";
 

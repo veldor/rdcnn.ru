@@ -27,6 +27,7 @@ return [
     'delete/conclusions/<executionNumber:[0-9a-zA-Z]+>' => 'management/delete-conclusions',
     '/dicom-viewer' => 'site/dicom-viewer',
     'api' => 'api/do',
+    'personal-api' => 'personal-api/do',
     'rated' => 'user/rate-link-clicked',
     'rate' => 'user/rate',
     'show-changes' => 'administrator/show-notifications',
