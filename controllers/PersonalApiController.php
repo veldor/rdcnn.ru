@@ -27,6 +27,10 @@ class PersonalApiController extends Controller
         return parent::beforeAction($action);
     }
 
+    /**
+     * @return array
+     * @throws \JsonException
+     */
     public function actionDo(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
