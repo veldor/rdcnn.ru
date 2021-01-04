@@ -27,6 +27,8 @@ class PersonalApi
                     return self::login();
                 case 'getTaskList':
                     return self::getTaskList();
+                case 'newTask':
+                    return self::createNewTask();
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];
@@ -58,6 +60,29 @@ class PersonalApi
             $user = PersonalItems::findOne(['access_token' => $token]);
             if($user !== null){
                 return ['status' => 'success', 'list' => PersonalTask::find()->where(['initiator' => $user->id])->all()];
+            }
+        }
+        return ['status' => 'failed', 'message' => 'invalid data'];
+    }
+
+    private static function createNewTask()
+    {
+        // получу учётную запись по токену
+        $token = self::$data['token'];
+        if(!empty($token)){
+            $user = PersonalItems::findOne(['access_token' => $token]);
+            if($user !== null){
+                // добавлю новую задачу
+                $theme = self::$data['theme'];
+                $text = self::$data['text'];
+                $task = new PersonalTask();
+                $task->initiator = $user->id;
+                $task->task_header = $theme ?: 'Без названия';
+                $task->task_body = $text;
+                $task->task_creation_time = time();
+                $task->task_status = 'created';
+                $task->save();
+                return ['status' => 'success'];
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];
