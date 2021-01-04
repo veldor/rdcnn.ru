@@ -48,19 +48,22 @@ class PersonalTask extends ActiveRecord
                         $task->executor = $executor->name;
                     }
                 }
+                else{
+                    $task->executor = '';
+                }
                 /** @var PersonalRoles $target */
                 $target = PersonalRoles::findOne($item->target);
                 if($target !== null){
                     $task->target = $target->role;
                 }
                 $task->task_creation_time = $item->task_creation_time;
-                $task->task_accept_time = $item->task_accept_time;
-                $task->task_planned_finish_time = $item->task_planned_finish_time;
-                $task->task_finish_time = $item->task_finish_time;
-                $task->task_header = $item->task_header;
+                $task->task_accept_time = $item->task_accept_time ?: 0;
+                $task->task_planned_finish_time = $item->task_planned_finish_time ?:0;
+                $task->task_finish_time = $item->task_finish_time ?:0;
+                $task->task_header = $item->task_header ?:'';
                 $task->task_body = $item->task_body;
                 $task->task_status = $item->task_status;
-                $task->executor_comment = $item->executor_comment;
+                $task->executor_comment = $item->executor_comment ?:'';
                 $result[] = $task;
             }
         }

@@ -52,7 +52,7 @@ class PersonalApi
         return ['status' => 'failed', 'message' => 'invalid data'];
     }
 
-    private static function getTaskList()
+    private static function getTaskList(): array
     {
         // получу учётную запись по токену
         $token = self::$data['token'];
