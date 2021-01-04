@@ -28,6 +28,8 @@ class PersonalApi
                     return self::login();
                 case 'getTaskList':
                     return self::getTaskList();
+                case 'getIncomingTaskList':
+                    return self::getIncomingTaskList();
                 case 'newTask':
                     return self::createNewTask();
             }
@@ -103,6 +105,19 @@ class PersonalApi
                 $task->save();
                 Telegram::sendDebug("Добавлена новая задача");
                 return ['status' => 'success'];
+            }
+        }
+        return ['status' => 'failed', 'message' => 'invalid data'];
+    }
+
+    private static function getIncomingTaskList()
+    {
+        // получу учётную запись по токену
+        $token = self::$data['token'];
+        if(!empty($token)){
+            $user = PersonalItems::findOne(['access_token' => $token]);
+            if($user !== null){
+                $tasks = PersonalTask::getTasksForExecutor($user);
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];

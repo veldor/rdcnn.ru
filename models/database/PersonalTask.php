@@ -69,4 +69,47 @@ class PersonalTask extends ActiveRecord
         }
         return $result;
     }
+
+    public static function getTasksForExecutor(PersonalItems $user)
+    {
+        // получу список задач, которые уже привязаны к данному пользователю, и тех, что относятся
+        // к его группе но не привязаны к нему
+        $tasks = self::find()->where(['executor' => $user->id])->orWhere(['executor' => null, 'target' => $user->role])->all();
+        $result = [];
+        if(!empty($tasks)){
+            /** @var PersonalTask $item */
+            foreach ($tasks as $item) {
+                $task = new Task();
+                $task->id = $item->id;
+                $initiator = PersonalItems::findOne(['id' => $item->initiator]);
+                if($initiator !== null){
+                    $task->initiator = $initiator->name;
+                }
+                if(!empty($item->executor)){
+                    $executor = PersonalItems::findOne(['id' => $item->executor]);
+                    if($executor !== null){
+                        $task->executor = $executor->name;
+                    }
+                }
+                else{
+                    $task->executor = '';
+                }
+                /** @var PersonalRoles $target */
+                $target = PersonalRoles::findOne($item->target);
+                if($target !== null){
+                    $task->target = $target->role;
+                }
+                $task->task_creation_time = $item->task_creation_time;
+                $task->task_accept_time = $item->task_accept_time ?: 0;
+                $task->task_planned_finish_time = $item->task_planned_finish_time ?:0;
+                $task->task_finish_time = $item->task_finish_time ?:0;
+                $task->task_header = $item->task_header ?:'';
+                $task->task_body = $item->task_body;
+                $task->task_status = $item->task_status;
+                $task->executor_comment = $item->executor_comment ?:'';
+                $result[] = $task;
+            }
+        }
+        return $result;
+    }
 }
