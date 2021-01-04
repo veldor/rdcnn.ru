@@ -65,7 +65,7 @@ class PersonalApi
         return ['status' => 'failed', 'message' => 'invalid data'];
     }
 
-    private static function createNewTask()
+    private static function createNewTask(): array
     {
         // получу учётную запись по токену
         $token = self::$data['token'];
@@ -73,15 +73,30 @@ class PersonalApi
             $user = PersonalItems::findOne(['access_token' => $token]);
             if($user !== null){
                 // добавлю новую задачу
-                $theme = self::$data['theme'];
+                $theme = self::$data['title'];
                 $text = self::$data['text'];
+                $target = self::$data['target'];
+                $t = 0;
+                switch ($target){
+                    case 'IT-отдел':
+                        $t = 2;
+                        break;
+                    case 'Инженерная служба':
+                        $t = 3;
+                        break;
+                    case 'Офис':
+                        $t = 4;
+                        break;
+                }
                 $task = new PersonalTask();
                 $task->initiator = $user->id;
                 $task->task_header = $theme ?: 'Без названия';
                 $task->task_body = $text;
                 $task->task_creation_time = time();
                 $task->task_status = 'created';
+                $task->target = $t;
                 $task->save();
+                Telegram::sendDebug("Добавлена новая задача");
                 return ['status' => 'success'];
             }
         }
