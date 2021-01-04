@@ -14,7 +14,7 @@ use yii\helpers\Url;
 
 /**
  * @property int $id [int(10) unsigned]
- * @property string $item [varchar(255)]
+ * @property string $role [varchar(255)]
  */
 class PersonalRoles extends ActiveRecord
 {

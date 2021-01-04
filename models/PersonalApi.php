@@ -59,7 +59,8 @@ class PersonalApi
         if(!empty($token)){
             $user = PersonalItems::findOne(['access_token' => $token]);
             if($user !== null){
-                return ['status' => 'success', 'list' => PersonalTask::find()->where(['initiator' => $user->id])->all()];
+                $list = PersonalTask::getTaskList($user->id);
+                return ['status' => 'success', 'list' => $list];
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];

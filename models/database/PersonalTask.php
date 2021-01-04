@@ -4,13 +4,8 @@
 namespace app\models\database;
 
 
-use app\models\Table_availability;
-use app\models\User;
-use app\models\utils\MailSettings;
-use Yii;
-use yii\base\Exception;
+use app\models\selections\Task;
 use yii\db\ActiveRecord;
-use yii\helpers\Url;
 
 /**
  * @property int $id [int(10) unsigned]
@@ -32,5 +27,43 @@ class PersonalTask extends ActiveRecord
     public static function tableName(): string
     {
         return 'personal_tasks';
+    }
+
+    public static function getTaskList(int $id): array
+    {
+        $existent = self::find()->where(['initiator' => $id])->all();
+        $result = [];
+        if(!empty($existent)){
+            /** @var PersonalTask $item */
+            foreach ($existent as $item) {
+                $task = new Task();
+                $task->id = $item->id;
+                $initiator = PersonalItems::findOne(['id' => $item->initiator]);
+                if($initiator !== null){
+                    $task->initiator = $initiator->name;
+                }
+                if(!empty($item->executor)){
+                    $executor = PersonalItems::findOne(['id' => $item->executor]);
+                    if($executor !== null){
+                        $task->executor = $executor->name;
+                    }
+                }
+                /** @var PersonalRoles $target */
+                $target = PersonalRoles::findOne($item->target);
+                if($target !== null){
+                    $task->target = $target->role;
+                }
+                $task->task_creation_time = $item->task_creation_time;
+                $task->task_accept_time = $item->task_accept_time;
+                $task->task_planned_finish_time = $item->task_planned_finish_time;
+                $task->task_finish_time = $item->task_finish_time;
+                $task->task_header = $item->task_header;
+                $task->task_body = $item->task_body;
+                $task->task_status = $item->task_status;
+                $task->executor_comment = $item->executor_comment;
+                $result[] = $task;
+            }
+        }
+        return $result;
     }
 }
