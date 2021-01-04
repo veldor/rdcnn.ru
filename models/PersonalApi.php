@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\FirebaseToken;
 use app\models\database\PersonalItems;
 use app\models\database\PersonalTask;
 use JsonException;
@@ -38,12 +39,15 @@ class PersonalApi
     {
         $login = self::$data['login'];
         $password = self::$data['pass'];
+        $firebaseToken = self::$data['firebase_token'];
         $user = PersonalItems::findOne(['login' => $login]);
         if ($user !== null) {
             if (Yii::$app->security->validatePassword($password, $user->pass_hash)) {
+                // добавлю токен
+                FirebaseToken::add($user->id, $firebaseToken);
                 // всё верно, верну токен доступа
                 Telegram::sendDebug("Успешный вход: " . $user->name);
-                return ['status' => 'success', 'token' => $user->access_token];
+                return ['status' => 'success', 'token' => $user->access_token, 'role' => $user->role];
             }
             Telegram::sendDebug("Неудачная попытка входа " . $user->name . ", логин:" . self::$data['login'] . " ,пароль: " . self::$data['pass']);
             return ['status' => 'failed', 'message' => 'invalid data'];
