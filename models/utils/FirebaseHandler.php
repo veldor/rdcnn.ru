@@ -46,4 +46,21 @@ class FirebaseHandler
         }
         $response = $client->send($message);
     }
+
+    public static function sendTestMessage()
+    {
+        $contacts = FirebaseToken::find()->all();
+        $server_key = Info::FIREBASE_SERVER_KEY;
+        $client = new Client();
+        $client->setApiKey($server_key);
+        $message = new Message();
+        $message->setPriority('high');
+        $message
+            ->setData(['key' => 'value']);
+        $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
+        foreach ($contacts as $contact) {
+            $message->addRecipient(new Device($contact->token));
+        }
+        $response = $client->send($message);
+    }
 }

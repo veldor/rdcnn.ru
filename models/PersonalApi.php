@@ -104,8 +104,8 @@ class PersonalApi
                 $task->task_status = 'created';
                 $task->target = $t;
                 $task->save();
-                Telegram::sendDebug("Добавлена новая задача");
                 FirebaseHandler::sendTaskCreated($task);
+                Telegram::sendDebug("Добавлена новая задача");
                 return ['status' => 'success'];
             }
         }
