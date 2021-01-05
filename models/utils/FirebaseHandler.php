@@ -29,8 +29,9 @@ class FirebaseHandler
         // отправлю сообщение всем контактам, которые зарегистрированы
         $executors = PersonalItems::find()->where(['role' => $task->target])->all();
         if(!empty($executors)){
+            /** @var PersonalItems $executor */
             foreach ($executors as $executor) {
-                $contacts = FirebaseToken::find()->where(['user' => $executor->id]);
+                $contacts = FirebaseToken::find()->where(['user' => $executor->id])->all();
                 if(!empty($contacts)){
                     $list = array_merge($list, $contacts);
                 }
