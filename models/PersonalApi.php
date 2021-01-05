@@ -7,6 +7,7 @@ namespace app\models;
 use app\models\database\FirebaseToken;
 use app\models\database\PersonalItems;
 use app\models\database\PersonalTask;
+use app\models\utils\FirebaseHandler;
 use JsonException;
 use Yii;
 
@@ -104,13 +105,14 @@ class PersonalApi
                 $task->target = $t;
                 $task->save();
                 Telegram::sendDebug("Добавлена новая задача");
+                FirebaseHandler::sendTaskCreated($task);
                 return ['status' => 'success'];
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];
     }
 
-    private static function getIncomingTaskList()
+    private static function getIncomingTaskList(): array
     {
         // получу учётную запись по токену
         $token = self::$data['token'];
@@ -118,6 +120,7 @@ class PersonalApi
             $user = PersonalItems::findOne(['access_token' => $token]);
             if($user !== null){
                 $tasks = PersonalTask::getTasksForExecutor($user);
+                return ['status' => 'success', 'list' => $tasks];
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];

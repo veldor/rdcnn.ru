@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5327296877715b6e0056e109ab731e8b",
+    "content-hash": "dfcf6498b1c15ee4d16191cd5a74afd1",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.171.6",
+            "version": "3.171.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "5587d22e63ef82ef74dffca5d47f307b84137b51"
+                "reference": "eeebac8f6efd141af09c44dbd9cca4f1d327ef21"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/5587d22e63ef82ef74dffca5d47f307b84137b51",
-                "reference": "5587d22e63ef82ef74dffca5d47f307b84137b51",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/eeebac8f6efd141af09c44dbd9cca4f1d327ef21",
+                "reference": "eeebac8f6efd141af09c44dbd9cca4f1d327ef21",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.171.6"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.171.11"
             },
-            "time": "2020-12-23T19:12:28+00:00"
+            "time": "2021-01-04T19:13:09+00:00"
         },
         {
             "name": "bogdaan/viber-bot-php",
@@ -172,7 +172,7 @@
             "version": "3.3.11",
             "source": {
                 "type": "git",
-                "url": "git@github.com:RobinHerbots/Inputmask.git",
+                "url": "https://github.com/RobinHerbots/Inputmask.git",
                 "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
             },
             "dist": {
@@ -1723,6 +1723,64 @@
             "time": "2020-12-03T13:40:03+00:00"
         },
         {
+            "name": "sngrl/php-firebase-cloud-messaging",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sngrl/php-firebase-cloud-messaging.git",
+                "reference": "e1a344c20c6d7dc4f89dcc5a56b17129d007d2b2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sngrl/php-firebase-cloud-messaging/zipball/e1a344c20c6d7dc4f89dcc5a56b17129d007d2b2",
+                "reference": "e1a344c20c6d7dc4f89dcc5a56b17129d007d2b2",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "*",
+                "php": ">=5.5"
+            },
+            "require-dev": {
+                "mockery/mockery": "*",
+                "phpunit/phpunit": "*"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "sngrl\\PhpFirebaseCloudMessaging\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sngrl",
+                    "email": "i@sngrl.ru"
+                }
+            ],
+            "description": "PHP API for Firebase Cloud Messaging from Google",
+            "homepage": "https://github.com/sngrl/php-firebase-cloud-messaging",
+            "keywords": [
+                "FCM",
+                "android",
+                "chrome",
+                "cloud",
+                "firebase",
+                "google",
+                "ios",
+                "notifications",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/sngrl/php-firebase-cloud-messaging/issues",
+                "source": "https://github.com/sngrl/php-firebase-cloud-messaging/tree/master"
+            },
+            "time": "2017-06-26T15:58:02+00:00"
+        },
+        {
             "name": "swiftmailer/swiftmailer",
             "version": "v5.4.12",
             "source": {
@@ -2610,12 +2668,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "49da07b20a780d3fca9fe12e1db27975a2910c18"
+                "reference": "a2c04f857299a7119e96448249a9dd5954e099c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/49da07b20a780d3fca9fe12e1db27975a2910c18",
-                "reference": "49da07b20a780d3fca9fe12e1db27975a2910c18",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/a2c04f857299a7119e96448249a9dd5954e099c1",
+                "reference": "a2c04f857299a7119e96448249a9dd5954e099c1",
                 "shasum": ""
             },
             "conflict": {
@@ -2749,7 +2807,7 @@
                 "phpmussel/phpmussel": ">=1,<1.6",
                 "phpmyadmin/phpmyadmin": "<4.9.6|>=5,<5.0.3",
                 "phpoffice/phpexcel": "<1.8.2",
-                "phpoffice/phpspreadsheet": "<1.8",
+                "phpoffice/phpspreadsheet": "<1.16",
                 "phpunit/phpunit": ">=4.8.19,<4.8.28|>=5.0.10,<5.6.3",
                 "phpwhois/phpwhois": "<=4.2.5",
                 "phpxmlrpc/extras": "<0.6.1",
@@ -2923,7 +2981,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-12-21T18:11:20+00:00"
+            "time": "2020-12-31T19:24:22+00:00"
         },
         {
             "name": "yiisoft/yii2-debug",
@@ -3124,6 +3182,7 @@
         "kartik-v/yii2-widget-fileinput": 20,
         "nirvana-msu/yii2-showloading": 20,
         "nanodocumet/nanodicom": 20,
+        "sngrl/php-firebase-cloud-messaging": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": false,
