@@ -5,6 +5,7 @@ namespace app\models\utils;
 
 
 use app\models\database\FirebaseToken;
+use app\models\database\PersonalItems;
 use app\models\database\PersonalTask;
 use app\priv\Info;
 use sngrl\PhpFirebaseCloudMessaging\Client;
@@ -24,15 +25,26 @@ class FirebaseHandler
 
     public static function sendTaskCreated(PersonalTask $task)
     {
+        $list = [];
         // отправлю сообщение всем контактам, которые зарегистрированы
-        // todo организовать отправку только выбранным контактам
-        $contacts = FirebaseToken::find()->all();
+        $executors = PersonalItems::find()->where(['role' => $task->target])->all();
+        if(!empty($executors)){
+            foreach ($executors as $executor) {
+                $contacts = FirebaseToken::find()->where(['user' => $executor->id]);
+                if(!empty($contacts)){
+                    $list = array_merge($list, $contacts);
+                }
+            }
+        }
 
         $message = new Message();
         $message->setPriority('high');
         $message
-            ->setData(['key' => 'value']);
-        self::sendMultipleMessage($contacts, $message);
+            ->setData([
+                'action' => 'task_created',
+                'task_id' => $task->id
+            ]);
+        self::sendMultipleMessage($list, $message);
     }
 
     private static function sendMultipleMessage(array $contacts, Message $message)

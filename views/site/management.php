@@ -23,8 +23,6 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateOutputInfo string */
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
-
-\app\models\utils\FirebaseHandler::sendTestMessage();
 ?>
 
 <div class="text-center">
