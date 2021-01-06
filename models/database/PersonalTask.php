@@ -125,7 +125,7 @@ class PersonalTask extends ActiveRecord
         }
     }
 
-    public static function setTaskCancelled($taskId, PersonalItems $user)
+    public static function setTaskCancelled($taskId, PersonalItems $user): void
     {
         $item = self::findOne($taskId);
         if ($item !== null) {

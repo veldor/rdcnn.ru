@@ -132,6 +132,10 @@ class PersonalApi
         return ['status' => 'failed', 'message' => 'invalid data'];
     }
 
+    /**
+     * @return array|string[]
+     * @throws exceptions\MyException
+     */
     private static function getTaskInfo(): array
     {
         // получу учётную запись по токену
@@ -140,13 +144,13 @@ class PersonalApi
             $user = PersonalItems::findOne(['access_token' => $token]);
             if ($user !== null) {
                 $taskId = self::$data['taskId'];
-                return ['status' => 'success', 'info' => PersonalTask::getTaskInfo($taskId)];
+                return ['status' => 'success', 'task_info' => PersonalTask::getTaskInfo($taskId)];
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];
     }
 
-    private static function confirmTask()
+    private static function confirmTask(): array
     {
         // получу учётную запись по токену
         $token = self::$data['token'];
@@ -162,7 +166,7 @@ class PersonalApi
         return ['status' => 'failed', 'message' => 'invalid data'];
     }
 
-    private static function cancelTask()
+    private static function cancelTask(): array
     {
         // получу учётную запись по токену
         $token = self::$data['token'];
