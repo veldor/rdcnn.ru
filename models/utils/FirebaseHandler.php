@@ -14,16 +14,16 @@ use sngrl\PhpFirebaseCloudMessaging\Recipient\Device;
 
 class FirebaseHandler
 {
-    public static function sendMessage($token, $message): void
-    {
-        $server_key = Info::FIREBASE_SERVER_KEY;
-        $client = new Client();
-        $client->setApiKey($server_key);
-        $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
-        $response = $client->send($message);
-    }
+//    public static function sendMessage($token, $message): void
+//    {
+//        $server_key = Info::FIREBASE_SERVER_KEY;
+//        $client = new Client();
+//        $client->setApiKey($server_key);
+//        $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
+//        $response = $client->send($message);
+//    }
 
-    public static function sendTaskCreated(PersonalTask $task)
+    public static function sendTaskCreated(PersonalTask $task): void
     {
         $list = [];
         // отправлю сообщение всем контактам, которые зарегистрированы
@@ -33,6 +33,7 @@ class FirebaseHandler
             foreach ($executors as $executor) {
                 $contacts = FirebaseToken::find()->where(['user' => $executor->id])->all();
                 if(!empty($contacts)){
+                    /** @noinspection SlowArrayOperationsInLoopInspection */
                     $list = array_merge($list, $contacts);
                 }
             }
@@ -48,7 +49,11 @@ class FirebaseHandler
         self::sendMultipleMessage($list, $message);
     }
 
-    private static function sendMultipleMessage(array $contacts, Message $message)
+    /**
+     * @param array $contacts
+     * @param Message $message
+     */
+    private static function sendMultipleMessage(array $contacts, Message $message): void
     {
         $server_key = Info::FIREBASE_SERVER_KEY;
         $client = new Client();
@@ -57,23 +62,50 @@ class FirebaseHandler
         foreach ($contacts as $contact) {
             $message->addRecipient(new Device($contact->token));
         }
-        $response = $client->send($message);
+        $client->send($message);
     }
 
-    public static function sendTestMessage()
+    /**
+     * @param $task PersonalTask
+     */
+    public static function sendTaskAccepted(PersonalTask $task): void
     {
-        $contacts = FirebaseToken::find()->all();
-        $server_key = Info::FIREBASE_SERVER_KEY;
-        $client = new Client();
-        $client->setApiKey($server_key);
-        $message = new Message();
-        $message->setPriority('high');
-        $message
-            ->setData(['key' => 'value']);
-        $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
-        foreach ($contacts as $contact) {
-            $message->addRecipient(new Device($contact->token));
+        // отправлю сообщение всем контактам, которые зарегистрированы
+        $initiator = PersonalItems::findOne($task->initiator);
+        if($initiator !== null){
+            $contacts = FirebaseToken::find()->where(['user' => $initiator->id])->all();
+            if(!empty($contacts)){
+                $message = new Message();
+                $message->setPriority('high');
+                $message
+                    ->setData([
+                        'action' => 'task_accepted',
+                        'task_id' => $task->id
+                    ]);
+                self::sendMultipleMessage($contacts, $message);
+            }
         }
-        $response = $client->send($message);
+
+    }
+
+    public static function sendTaskCancelled(PersonalTask $item): void
+    {
+        // если задаче назначен исполнитель- отправлю ему сообщение о отмене действия
+        if(!empty($item->executor)){
+            $executor = PersonalItems::findOne($item->executor);
+            if($executor !== null){
+                $contacts = FirebaseToken::find()->where(['user' => $executor->id])->all();
+                if(!empty($contacts)){
+                    $message = new Message();
+                    $message->setPriority('high');
+                    $message
+                        ->setData([
+                            'action' => 'task_cancelled',
+                            'task_id' => $item->id
+                        ]);
+                    self::sendMultipleMessage($contacts, $message);
+                }
+            }
+        }
     }
 }

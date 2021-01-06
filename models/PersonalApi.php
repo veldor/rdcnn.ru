@@ -33,6 +33,12 @@ class PersonalApi
                     return self::getIncomingTaskList();
                 case 'newTask':
                     return self::createNewTask();
+                case 'getTaskInfo':
+                    return self::getTaskInfo();
+                case 'confirmTask':
+                    return self::confirmTask();
+                case 'cancelTask':
+                    return self::cancelTask();
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];
@@ -63,9 +69,9 @@ class PersonalApi
     {
         // получу учётную запись по токену
         $token = self::$data['token'];
-        if(!empty($token)){
+        if (!empty($token)) {
             $user = PersonalItems::findOne(['access_token' => $token]);
-            if($user !== null){
+            if ($user !== null) {
                 $list = PersonalTask::getTaskList($user->id);
                 return ['status' => 'success', 'list' => $list];
             }
@@ -77,15 +83,15 @@ class PersonalApi
     {
         // получу учётную запись по токену
         $token = self::$data['token'];
-        if(!empty($token)){
+        if (!empty($token)) {
             $user = PersonalItems::findOne(['access_token' => $token]);
-            if($user !== null){
+            if ($user !== null) {
                 // добавлю новую задачу
                 $theme = self::$data['title'];
                 $text = self::$data['text'];
                 $target = self::$data['target'];
                 $t = 0;
-                switch ($target){
+                switch ($target) {
                     case 'IT-отдел':
                         $t = 2;
                         break;
@@ -116,11 +122,56 @@ class PersonalApi
     {
         // получу учётную запись по токену
         $token = self::$data['token'];
-        if(!empty($token)){
+        if (!empty($token)) {
             $user = PersonalItems::findOne(['access_token' => $token]);
-            if($user !== null){
+            if ($user !== null) {
                 $tasks = PersonalTask::getTasksForExecutor($user);
                 return ['status' => 'success', 'list' => $tasks];
+            }
+        }
+        return ['status' => 'failed', 'message' => 'invalid data'];
+    }
+
+    private static function getTaskInfo(): array
+    {
+        // получу учётную запись по токену
+        $token = self::$data['token'];
+        if (!empty($token)) {
+            $user = PersonalItems::findOne(['access_token' => $token]);
+            if ($user !== null) {
+                $taskId = self::$data['taskId'];
+                return ['status' => 'success', 'info' => PersonalTask::getTaskInfo($taskId)];
+            }
+        }
+        return ['status' => 'failed', 'message' => 'invalid data'];
+    }
+
+    private static function confirmTask()
+    {
+        // получу учётную запись по токену
+        $token = self::$data['token'];
+        if (!empty($token)) {
+            $user = PersonalItems::findOne(['access_token' => $token]);
+            if ($user !== null) {
+                $taskId = self::$data['taskId'];
+                $plannedTime = self::$data['plannedTime'];
+                PersonalTask::setTaskConfirmed($taskId, $plannedTime, $user);
+                return self::getTaskInfo();
+            }
+        }
+        return ['status' => 'failed', 'message' => 'invalid data'];
+    }
+
+    private static function cancelTask()
+    {
+        // получу учётную запись по токену
+        $token = self::$data['token'];
+        if (!empty($token)) {
+            $user = PersonalItems::findOne(['access_token' => $token]);
+            if ($user !== null) {
+                $taskId = self::$data['taskId'];
+                PersonalTask::setTaskCancelled($taskId, $user);
+                return self::getTaskInfo();
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];
