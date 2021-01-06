@@ -154,4 +154,18 @@ class PersonalTask extends ActiveRecord
             FirebaseHandler::sendTaskFinished($item);
         }
     }
+
+    public static function setTaskDismissed($taskId, $reason): void
+    {
+        $item = self::findOne($taskId);
+        if($item !== null){
+            $now = time();
+            $item->task_finish_time = $now;
+            $item->task_status = 'cancelled_by_executor';
+            $item->executor_comment = $reason;
+            $item->save();
+            // отправлю сообщение инициатору о том, что задача отменена
+            FirebaseHandler::sendTaskDismissed($item);
+        }
+    }
 }

@@ -44,6 +44,8 @@ class PersonalApi
                     return self::finishTask();
                 case 'getNewTasks':
                     return self::getNewTasks();
+                case 'dismissTask':
+                    return self::dismissTask();
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];
@@ -221,6 +223,22 @@ class PersonalApi
                 $taskId = self::$data['taskId'];
                 PersonalTask::setTaskFinished($taskId);
                 return self::getTaskInfo();
+            }
+        }
+        return ['status' => 'failed', 'message' => 'invalid data'];
+    }
+
+    private static function dismissTask()
+    {
+        // получу учётную запись по токену
+        $token = self::$data['token'];
+        if (!empty($token)) {
+            $user = PersonalItems::findOne(['access_token' => $token]);
+            if ($user !== null) {
+                $taskId = self::$data['taskId'];
+                $reason = self::$data['reason'];
+                PersonalTask::setTaskDismissed($taskId, $reason);
+                return ['status' => 'success'];
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];
