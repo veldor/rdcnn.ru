@@ -141,4 +141,17 @@ class PersonalTask extends ActiveRecord
     {
         return self::find()->where(['target' => $user->role, 'task_status' => 'created'])->count();
     }
+
+    public static function setTaskFinished($taskId): void
+    {
+        $item = self::findOne($taskId);
+        if ($item !== null && $item->task_status !== 'finished') {
+            $now = time();
+            $item->task_finish_time = $now;
+            $item->task_status = 'finished';
+            $item->save();
+            // отправлю сообщение инициатору о том, что задача принята
+            FirebaseHandler::sendTaskFinished($item);
+        }
+    }
 }

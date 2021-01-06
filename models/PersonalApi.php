@@ -19,6 +19,7 @@ class PersonalApi
      * Обработка запроса
      * @return array|string[]
      * @throws JsonException
+     * @throws exceptions\MyException
      */
     public static function handleRequest(): array
     {
@@ -39,6 +40,8 @@ class PersonalApi
                     return self::confirmTask();
                 case 'cancelTask':
                     return self::cancelTask();
+                case 'finishTask':
+                    return self::finishTask();
                 case 'getNewTasks':
                     return self::getNewTasks();
             }
@@ -152,6 +155,10 @@ class PersonalApi
         return ['status' => 'failed', 'message' => 'invalid data'];
     }
 
+    /**
+     * @return string[]
+     * @throws exceptions\MyException
+     */
     private static function confirmTask(): array
     {
         // получу учётную запись по токену
@@ -195,6 +202,25 @@ class PersonalApi
             $user = PersonalItems::findOne(['access_token' => $token]);
             if ($user !== null) {
                 return ['status' => 'success', 'new_tasks_count' => PersonalTask::findNew($user)];
+            }
+        }
+        return ['status' => 'failed', 'message' => 'invalid data'];
+    }
+
+    /**
+     * @return string[]
+     * @throws exceptions\MyException
+     */
+    private static function finishTask(): array
+    {
+        // получу учётную запись по токену
+        $token = self::$data['token'];
+        if (!empty($token)) {
+            $user = PersonalItems::findOne(['access_token' => $token]);
+            if ($user !== null) {
+                $taskId = self::$data['taskId'];
+                PersonalTask::setTaskFinished($taskId);
+                return self::getTaskInfo();
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];

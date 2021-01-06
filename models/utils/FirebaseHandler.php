@@ -85,7 +85,6 @@ class FirebaseHandler
                 self::sendMultipleMessage($contacts, $message);
             }
         }
-
     }
 
     public static function sendTaskCancelled(PersonalTask $item): void
@@ -105,6 +104,25 @@ class FirebaseHandler
                         ]);
                     self::sendMultipleMessage($contacts, $message);
                 }
+            }
+        }
+    }
+
+    public static function sendTaskFinished(PersonalTask $item): void
+    {
+        // отправлю сообщение всем контактам, которые зарегистрированы
+        $initiator = PersonalItems::findOne($item->initiator);
+        if($initiator !== null){
+            $contacts = FirebaseToken::find()->where(['user' => $initiator->id])->all();
+            if(!empty($contacts)){
+                $message = new Message();
+                $message->setPriority('high');
+                $message
+                    ->setData([
+                        'action' => 'task_finished',
+                        'task_id' => $item->id
+                    ]);
+                self::sendMultipleMessage($contacts, $message);
             }
         }
     }
