@@ -39,6 +39,8 @@ class PersonalApi
                     return self::confirmTask();
                 case 'cancelTask':
                     return self::cancelTask();
+                case 'getNewTasks':
+                    return self::getNewTasks();
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];
@@ -166,6 +168,10 @@ class PersonalApi
         return ['status' => 'failed', 'message' => 'invalid data'];
     }
 
+    /**
+     * @return string[]
+     * @throws exceptions\MyException
+     */
     private static function cancelTask(): array
     {
         // получу учётную запись по токену
@@ -174,8 +180,21 @@ class PersonalApi
             $user = PersonalItems::findOne(['access_token' => $token]);
             if ($user !== null) {
                 $taskId = self::$data['taskId'];
-                PersonalTask::setTaskCancelled($taskId, $user);
+                PersonalTask::setTaskCancelled($taskId);
                 return self::getTaskInfo();
+            }
+        }
+        return ['status' => 'failed', 'message' => 'invalid data'];
+    }
+
+    private static function getNewTasks(): array
+    {
+        // получу учётную запись по токену
+        $token = self::$data['token'];
+        if (!empty($token)) {
+            $user = PersonalItems::findOne(['access_token' => $token]);
+            if ($user !== null) {
+                return ['status' => 'success', 'new_tasks_count' => PersonalTask::findNew($user)];
             }
         }
         return ['status' => 'failed', 'message' => 'invalid data'];

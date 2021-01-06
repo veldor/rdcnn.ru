@@ -125,16 +125,20 @@ class PersonalTask extends ActiveRecord
         }
     }
 
-    public static function setTaskCancelled($taskId, PersonalItems $user): void
+    public static function setTaskCancelled($taskId): void
     {
         $item = self::findOne($taskId);
         if ($item !== null) {
             $now = time();
             $item->task_finish_time = $now;
-            $item->task_status = 'cancelled';
+            $item->task_status = 'cancelled_by_initiator';
             $item->save();
-            // отправлю сообщение инициатору о том, что задача принята
             FirebaseHandler::sendTaskCancelled($item);
         }
+    }
+
+    public static function findNew(PersonalItems $user)
+    {
+        return self::find()->where(['executor' => $user->id, 'task_status' => 'created'])->count();
     }
 }
