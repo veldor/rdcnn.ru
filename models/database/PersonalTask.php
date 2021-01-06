@@ -139,6 +139,6 @@ class PersonalTask extends ActiveRecord
 
     public static function findNew(PersonalItems $user)
     {
-        return self::find()->where(['executor' => $user->id, 'task_status' => 'created'])->count();
+        return self::find()->where(['target' => $user->role, 'task_status' => 'created'])->count();
     }
 }
