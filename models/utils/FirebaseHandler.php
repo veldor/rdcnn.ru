@@ -55,14 +55,16 @@ class FirebaseHandler
      */
     private static function sendMultipleMessage(array $contacts, Message $message): void
     {
-        $server_key = Info::FIREBASE_SERVER_KEY;
-        $client = new Client();
-        $client->setApiKey($server_key);
-        $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
-        foreach ($contacts as $contact) {
-            $message->addRecipient(new Device($contact->token));
+        if(!empty($contacts) && count($contacts) > 0){
+            $server_key = Info::FIREBASE_SERVER_KEY;
+            $client = new Client();
+            $client->setApiKey($server_key);
+            $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
+            foreach ($contacts as $contact) {
+                $message->addRecipient(new Device($contact->token));
+            }
+            $client->send($message);
         }
-        $client->send($message);
     }
 
     /**

@@ -18,6 +18,8 @@ use yii\helpers\Url;
  * @property string $access_token [varchar(255)]
  * @property string $login [varchar(255)]
  * @property string $pass_hash [varchar(255)]
+ * @property string $email [varchar(255)]
+ * @property string $phone [char(12)]
  * @property string $role [int(11)]
  */
 class PersonalItems extends ActiveRecord
