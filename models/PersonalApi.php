@@ -23,6 +23,7 @@ class PersonalApi
      */
     public static function handleRequest(): array
     {
+        Telegram::sendDebug(serialize($_POST));
         self::$data = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
         if (!empty(self::$data['cmd'])) {
             switch (self::$data['cmd']) {
