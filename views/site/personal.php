@@ -1,6 +1,7 @@
 <?php
 
 use app\assets\PersonalAsset;
+use app\models\database\Reviews;
 use app\models\database\TempDownloadLinks;
 use app\models\ExecutionHandler;
 use app\models\Table_availability;
@@ -95,7 +96,7 @@ if ($name !== null) {
     <div id="rateBlock" class="text-center">
         <?php
         $cookies = Yii::$app->request->cookies;
-        if (!$cookies->has("rate_received")) {
+        if (!$cookies->has("rate_received") || Reviews::haveNoRate($execution->username)) {
             ?>
             <div id="rateList">
                 <span class="glyphicon glyphicon-star-empty star" data-rate="1"></span>
@@ -106,7 +107,7 @@ if ($name !== null) {
             </div>
             <?php
         }
-        if (!$cookies->has("reviewed")) {
+        if (!$cookies->has("reviewed") || Reviews::haveNoReview($execution->username)) {
             ?>
             <form id="reviewForm">
                 <div class="form-group">

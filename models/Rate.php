@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\Reviews;
 use app\models\utils\MailSettings;
 use Exception;
 use Yii;
@@ -13,23 +14,29 @@ class Rate
 
     public static function handleReview($id): void
     {
-        $review =  Yii::$app->request->post('reviewArea');
-        $text = "Пользователь {$id} оставил отзыв: " . $review;
-        Telegram::sendDebug($text);
-        self::sendRate($text);
+        if (Reviews::haveNoReview($id)) {
+            $review = Yii::$app->request->post('reviewArea');
+            $text = "Пользователь {$id} оставил отзыв: " . $review;
+            Telegram::sendDebug($text);
+            self::sendRate($text);
+            Reviews::addReview($id, Yii::$app->request->post('reviewArea'));
+        }
     }
 
     public static function handleRate(string $id, string $rate): void
     {
-        $text = "Пользователь {$id} оценил нашу работу на {$rate}";
-        Telegram::sendDebug($text);
-        self::sendRate($text);
-
+        // проверю, не было ли ещё отзыва
+        if (Reviews::haveNoRate($id)) {
+            Reviews::addRate($id, $rate);
+            $text = "Пользователь {$id} оценил нашу работу на {$rate}";
+            Telegram::sendDebug($text);
+            self::sendRate($text);
+        }
     }
 
     private static function sendRate($text): void
     {
-        try{
+        try {
             // получу настройки почты
             $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
             $content = file_get_contents($settingsFile);
@@ -44,8 +51,7 @@ class Rate
                 // попробую отправить письмо, в случае ошибки- вызову исключение
                 $mail->send();
             }
-        }
-        catch (Exception $e){
+        } catch (Exception $e) {
 
         }
 
