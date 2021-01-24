@@ -36,9 +36,16 @@ class UserController extends Controller
                             'rate-link-clicked',
                             'rate',
                             'review',
-                            'enter',
                         ],
                         'roles' => ['reader'],
+                    ],
+
+                    [
+                        'allow' => true,
+                        'actions' => [
+                            'enter',
+                        ],
+                        'roles' => ['?', '@'],
                     ],
                 ],
             ],
