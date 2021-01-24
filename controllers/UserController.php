@@ -183,6 +183,7 @@ class UserController extends Controller
                 Yii::$app->user->login($user);
                 return $this->redirect('/person/' . $user->username, 301);
             }
+            Telegram::sendDebug("Попытка входа с токеном " . $accessToken);
         }
         throw new NotFoundHttpException();
     }

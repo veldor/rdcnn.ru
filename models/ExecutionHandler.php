@@ -315,6 +315,7 @@ class ExecutionHandler extends Model
         $auth_key = Yii::$app->getSecurity()->generateRandomString(32);
         $new->username = $name;
         $new->auth_key = $auth_key;
+        $new->access_token = Yii::$app->getSecurity()->generateRandomString(255);
         $new->password_hash = $hash;
         $new->status = 1;
         $new->created_at = time();

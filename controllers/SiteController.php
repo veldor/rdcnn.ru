@@ -202,8 +202,17 @@ class SiteController extends Controller
 
     public function actionTest(): void
     {
-        // попробую получить информацию о DICOM
-        DicomHandler::readInfoFromDicomdir();
+        // сгерегирую токены всем, у кого нет
+        $users = User::find()->all();
+        if(!empty($users)){
+            /** @var User $user */
+            foreach ($users as $user) {
+                if(empty($user->access_token)){
+                    $user->access_token = Yii::$app->getSecurity()->generateRandomString(255);
+                    $user->save();
+                }
+            }
+        }
     }
 
 
