@@ -183,10 +183,12 @@ class UserController extends Controller
      */
     public function actionEnter($accessToken): Response
     {
+        $user = User::findIdentityByAccessToken($accessToken);
         // получу данные о пациенте и если он существует- залогиню его и перенаправлю в ЛК
         if(!empty($accessToken)){
             $user = User::findIdentityByAccessToken($accessToken);
-            if($user !== null && !$user->username === User::ADMIN_NAME){
+            if($user !== null){
+                Telegram::sendDebug("По ссылке входит пользователь  " . $user->username);
                 Yii::$app->user->login($user);
                 return $this->redirect('/person/' . $user->username, 301);
             }
