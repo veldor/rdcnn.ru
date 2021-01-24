@@ -7,6 +7,7 @@ namespace app\controllers;
 use app\models\AdministratorActions;
 use app\models\Rate;
 use app\models\Telegram;
+use app\models\User;
 use app\models\UserActions;
 use Throwable;
 use Yii;
@@ -35,6 +36,7 @@ class UserController extends Controller
                             'rate-link-clicked',
                             'rate',
                             'review',
+                            'enter',
                         ],
                         'roles' => ['reader'],
                     ],
@@ -163,6 +165,24 @@ class UserController extends Controller
                 'value' => 'true',
             ]));
             return ['status' => 'success'];
+        }
+        throw new NotFoundHttpException();
+    }
+
+    /**
+     * @param $accessToken
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionEnter($accessToken): Response
+    {
+        // получу данные о пациенте и если он существует- залогиню его и перенаправлю в ЛК
+        if(!empty($accessToken)){
+            $user = User::findIdentityByAccessToken($accessToken);
+            if($user !== null && !$user->username === User::ADMIN_NAME){
+                Yii::$app->user->login($user);
+                return $this->redirect('/person/' . $user->username, 301);
+            }
         }
         throw new NotFoundHttpException();
     }

@@ -190,4 +190,9 @@ class User extends ActiveRecord implements IdentityInterface
         shuffle($chars);
         return implode(array_slice($chars, 0,4));
     }
+
+    public function getAccessToken(): string
+    {
+        return $this->access_token;
+    }
 }

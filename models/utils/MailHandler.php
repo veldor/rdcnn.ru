@@ -43,8 +43,7 @@ class MailHandler extends Model
                 <p class="text-center">
                 Спасибо, что выбрали нас для прохождения обследования МРТ.
                 Результаты обследования будут доступны в личном кабинете.
-                 <div class="text-center"><a class="btn btn-info fit-down" href="https://rdcnn.ru/person/' . $id . '">перейти в личный кабинет</a></div>
-                <b class="notice">Пароль</b> для входа в личный кабинет находится в <b class="notice">акте оказанных медицинских услуг</b>.
+                 <div class="text-center"><a class="btn btn-info fit-down" href="https://rdcnn.ru/enter/' . $user->getAccessToken() . '">перейти в личный кабинет</a></div>
                 </p>
             ';
                 // проверю наличие снимков

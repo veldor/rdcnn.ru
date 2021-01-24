@@ -6,6 +6,7 @@ return [
     'test' => 'site/test',
     'execution/add' => 'administrator/add-execution',
     'person/<executionNumber:[0-9a-zA-Z]+>' => 'site/index',
+    'enter/<accessToken:[0-9a-zA-Z]+>' => 'user/enter',
     'availability/check' => 'site/availability-check',
     'patients/check' => 'administrator/patients-check',
     'check/files/<executionNumber:[0-9a-zA-Z]+>' => 'administrator/files-check',
