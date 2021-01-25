@@ -65,6 +65,7 @@ class MailHandler extends Model
                                   </p>";
                     }
                 }
+                $attachments = [];
                 // проверю наличие заключения
                 $existentConclusions = Table_availability::findAll(['is_conclusion' => 1, 'userId' => $user->username]);
                 if($existentConclusions !== null){
@@ -83,17 +84,20 @@ class MailHandler extends Model
                                 $text .= "<p class='text-center'>
                                         Доступно заключение врача ({$existentConclusion->execution_area})<div class='text-center'> <a class='btn btn-info' href='" . Url::toRoute(['download/download-temp', 'link' => $existentLink->link], 'https') . "'>скачать заключение</a>
                                   </div></p>";
+                                $attachments[] = [$path, $existentConclusion->execution_area . ".pdf"];
                             }
                             else{
                                 $text .= "<p class='text-center'>
                                         Доступно заключение врача 
                                         <div class='text-center'><a class='btn btn-info' href='" . Url::toRoute(['download/download-temp', 'link' => $existentLink->link], 'https') . "'>скачать заключение</a></div>
                                   </p>";
+
+                                $attachments[] = [$path, "Заключение.pdf"];
                             }
                         }
                     }
                 }
-                if(self::sendMessage('Информация о пройденном обследовании', $text, $mail->address, $patientName)){
+                if(self::sendMessage('Информация о пройденном обследовании', $text, $mail->address, $patientName, $attachments)){
                     // Отмечу, что на данный адрес уже отправлялось письмо
                     if($mail->mailed_yet === 0){
                         $mail->mailed_yet = 1;
@@ -107,7 +111,7 @@ class MailHandler extends Model
         return ['status' => 1, 'message' => 'Не найден адрес почты'];
     }
 
-    private static function sendMessage($title, $text, $address, $sendTo): bool
+    private static function sendMessage($title, $text, $address, $sendTo, $attachments): bool
     {
         $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
         if(is_file($settingsFile)){
@@ -123,6 +127,11 @@ class MailHandler extends Model
                         ->setHtmlBody($text)
                         ->setTo([$address => $sendTo ?? '']);
                     // попробую отправить письмо, в случае ошибки- вызову исключение
+                if(!empty($attachments)){
+                    foreach ($attachments as $attachment) {
+                        $mail->attach($attachment[0], ['fileName' => $attachment[1]]);
+                    }
+                }
                     $mail->send();
                     return true;
             }
