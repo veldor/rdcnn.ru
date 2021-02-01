@@ -115,14 +115,14 @@ class Utils extends Model
          */ $executionsList, static function ($execution1, $execution2) {
             switch (self::getSort()) {
                 case 'byNumber':
-                    return $execution1->username < $execution2->username;
+                    return $execution1->username < $execution2->username ? 1 : 0;
                 case 'byExecutions':
-                    return ExecutionHandler::isExecution($execution1->username) > ExecutionHandler::isExecution($execution2->username);
+                    return ExecutionHandler::isExecution($execution1->username) > ExecutionHandler::isExecution($execution2->username)? 1 : 0;
                 case 'byConclusion':
-                    return ExecutionHandler::isConclusion($execution1->username) > ExecutionHandler::isConclusion($execution2->username);
+                    return ExecutionHandler::isConclusion($execution1->username) > ExecutionHandler::isConclusion($execution2->username)? 1 : 0;
                 case 'byTime':
                 default:
-                    return $execution1->created_at < $execution2->created_at;
+                    return $execution1->created_at < $execution2->created_at ? 1 : 0;
             }
         });
         return $executionsList;
