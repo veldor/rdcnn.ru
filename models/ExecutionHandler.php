@@ -435,7 +435,7 @@ class ExecutionHandler extends Model
         // посчитаю заключения по конкретному обследованию
         $entities = array_slice(scandir(Info::CONC_FOLDER), 2);
         $conclusionsCount = 0;
-        $pattern = '/^' . $username . '-\d.+\pdf$/';
+        $pattern = '/^' . $username . '-\d.+pdf$/';
         foreach ($entities as $entity) {
             if ($entity === $username . '.pdf' || preg_match($pattern, $entity)) {
                 $conclusionsCount++;

@@ -25,7 +25,7 @@ use yii\web\Response;
 class SiteController extends Controller
 {
     /**
-     * {@inheritdoc}
+     * access control
      */
     public function behaviors(): array
     {
