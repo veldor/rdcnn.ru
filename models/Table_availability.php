@@ -133,4 +133,10 @@ class Table_availability extends ActiveRecord
     {
         return self::find()->where(['userId' => $item->username, 'is_execution' => 1])->count();
     }
+
+    public static function isNewFile(string $md5, string $entity): bool
+    {
+        $existentEntity = self::findOne(['file_name' => $entity]);
+        return !(($existentEntity !== null) && $existentEntity->md5 === $md5);
+    }
 }

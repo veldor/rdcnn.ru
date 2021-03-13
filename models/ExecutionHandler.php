@@ -224,13 +224,15 @@ class ExecutionHandler extends Model
                             $md5 = md5_file($path);
                             $stat = stat($path);
                             $changeTime = $stat['mtime'];
-                            (new Table_availability([
-                                'file_name' => $entity,
-                                'is_execution' => true,
-                                'md5' => $md5,
-                                'file_create_time' => $changeTime,
-                                'userId' => $user->username
-                            ]))->save();
+                            if (Table_availability::isNewFile($md5, $entity)) {
+                                (new Table_availability([
+                                    'file_name' => $entity,
+                                    'is_execution' => true,
+                                    'md5' => $md5,
+                                    'file_create_time' => $changeTime,
+                                    'userId' => $user->username
+                                ]))->save();
+                            }
                             // оповещу мессенджеры о наличии файла
                             //Viber::notifyExecutionLoaded($user->username);
                         }
@@ -303,9 +305,9 @@ class ExecutionHandler extends Model
         // todo check notifications
         // получу список того, что ожидает отправки
         $waitForNotify = NotificationSendingInfo::getWaiting();
-        if(!empty($waitForNotify)){
+        if (!empty($waitForNotify)) {
             foreach ($waitForNotify as $waiting) {
-                if($waiting->create_time < time() - 900){
+                if ($waiting->create_time < time() - 900) {
                     // отправлю уведомление о том, что добавлен новый компонтент
                     $waiting->notify();
                 }
