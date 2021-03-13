@@ -183,7 +183,7 @@ function normalReload() {
     $(window).off('beforeunload');
 }
 
-function showWaiter() {
+function    showWaiter() {
     let shader = $('<div class="shader"><div class="col-sm-12 text-center shader-status"></div></div>');
     $('body').append(shader).css({'overflow': 'hidden'});
 

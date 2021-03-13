@@ -6,6 +6,7 @@ namespace app\models\database;
 
 use app\models\Table_availability;
 use app\models\User;
+use app\models\utils\GrammarHandler;
 use app\models\utils\MailSettings;
 use Yii;
 use yii\base\Exception;
@@ -47,16 +48,22 @@ class Emails extends ActiveRecord
                     );
                 }
                 if($existentLink !== null){
-                    // отправлю письмо со ссылкой
-                    $text = "Ссылка на скачивание контента: <a href='" . Url::base('https') . "/download/temp/{$existentLink->link}'>Скачать</a>";
-                    // отправлю письмо
-                    $mail = Yii::$app->mailer->compose()
-                        ->setFrom([MailSettings::getInstance()->address => 'Тест'])
-                        ->setSubject('Тест')
-                        ->setHtmlBody($text)
-                        ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
-                    // попробую отправить письмо, в случае ошибки- вызову исключение
-                    $mail->send();
+                    // обработаю несколько адресов
+                    $mailList = GrammarHandler::extractEmails($mail->address);
+                    if(!empty($mailList)){
+                        foreach ($mailList as $address) {
+                            // отправлю письмо со ссылкой
+                            $text = "Ссылка на скачивание контента: <a href='" . Url::base('https') . "/download/temp/{$existentLink->link}'>Скачать</a>";
+                            // отправлю письмо
+                            $mail = Yii::$app->mailer->compose()
+                                ->setFrom([MailSettings::getInstance()->address => 'Тест'])
+                                ->setSubject('Тест')
+                                ->setHtmlBody($text)
+                                ->setTo(['eldorianwin@gmail.com' => 'eldorianwin@gmail.com']);
+                            // попробую отправить письмо, в случае ошибки- вызову исключение
+                            $mail->send();
+                        }
+                    }
                 }
             }
         }
@@ -66,8 +73,7 @@ class Emails extends ActiveRecord
     public function rules():array
     {
         return [
-            [['address', 'patient_id'], 'required'],
-            ['address' , 'email']
+            [['address', 'patient_id'], 'required']
         ];
     }
 

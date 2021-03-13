@@ -15,8 +15,8 @@ echo $form->field($model, 'patient_id', ['template' => '{input}'])->hiddenInput(
     echo $form->field($model, 'address', ['template' =>
         '<div class="col-sm-5">{label}</div><div class="col-sm-7">{input}{error}{hint}</div>','inputOptions' =>
         ['autofocus' => 'autofocus', 'class' => 'form-control', 'tabindex' => '1']])
-        ->textInput(['autocomplete' => 'off', 'focus' => true, 'type' => 'email'])
-        ->hint('Адрес электронной почты')
+        ->textInput(['autocomplete' => 'off', 'focus' => true, 'type' => 'text'])
+        ->hint('Адрес электронной почты (можно ввести несколько, разделители: пробел, запятая, точка с запятой)')
         ->label('Email');
 
 echo Html::submitButton('Сохранить', ['class' => 'btn btn-success   ', 'id' => 'addSubmit', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'data-html' => 'true',]);

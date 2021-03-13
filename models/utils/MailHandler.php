@@ -10,30 +10,35 @@ use app\models\Table_availability;
 use app\models\User;
 use app\priv\Info;
 use Yii;
+use yii\base\Exception;
 use yii\base\Model;
 use yii\helpers\Url;
 
 class MailHandler extends Model
 {
-    public static function getMailText($text):string
+    public static function getMailText($text): string
     {
         return Yii::$app->controller->renderPartial('/site/mail-template', ['text' => $text]);
     }
 
+    /**
+     * @param $id
+     * @return array
+     * @throws Exception
+     */
     public static function sendInfoMail($id): array
     {
         $user = User::findIdentity($id);
-        if($user !== null){
+        if ($user !== null) {
             // первым делом, получу данные о почте
             $mail = Emails::findOne(['patient_id' => $id]);
-            if($mail !== null){
+            if ($mail !== null) {
                 // получу имя получателя, если оно есть
                 $patientName = Table_availability::getPatientName($user->username);
 
-                if($patientName !== null){
+                if ($patientName !== null) {
                     $patientPersonals = ', ' . GrammarHandler::handlePersonals($patientName);
-                }
-                else{
+                } else {
                     $patientPersonals = '';
                 }
 
@@ -49,13 +54,13 @@ class MailHandler extends Model
             ';
                 // проверю наличие снимков
                 $existentExecution = Table_availability::findOne(['is_execution' => 1, 'userId' => $user->username]);
-                if($existentExecution !== null){
+                if ($existentExecution !== null) {
                     // проверю существование файла
                     $path = Info::EXEC_FOLDER . DIRECTORY_SEPARATOR . $existentExecution->file_name;
-                    if(is_file($path)){
+                    if (is_file($path)) {
                         // проверю, существует ли уже ссылка на файл
                         $existentLink = TempDownloadLinks::findOne(['execution_id' => $id, 'file_type' => 'execution', 'file_name' => $existentExecution->file_name]);
-                        if($existentLink === null){
+                        if ($existentLink === null) {
                             // создам ссылку
                             $existentLink = TempDownloadLinks::createLink($user, 'execution', $existentExecution->file_name);
                         }
@@ -68,25 +73,24 @@ class MailHandler extends Model
                 $attachments = [];
                 // проверю наличие заключения
                 $existentConclusions = Table_availability::findAll(['is_conclusion' => 1, 'userId' => $user->username]);
-                if($existentConclusions !== null){
+                if ($existentConclusions !== null) {
                     foreach ($existentConclusions as $existentConclusion) {
                         // проверю существование файла
                         $path = Info::CONC_FOLDER . DIRECTORY_SEPARATOR . $existentConclusion->file_name;
-                        if(is_file($path)){
+                        if (is_file($path)) {
                             // проверю, существует ли уже ссылка на файл
                             $existentLink = TempDownloadLinks::findOne(['execution_id' => $id, 'file_type' => 'conclusion', 'file_name' => $existentConclusion->file_name]);
-                            if($existentLink === null){
+                            if ($existentLink === null) {
                                 // создам ссылку
                                 $existentLink = TempDownloadLinks::createLink($user, 'conclusion', $existentConclusion->file_name);
                             }
                             // получу данные по заключению
-                            if(!empty($existentConclusion->execution_area)){
+                            if (!empty($existentConclusion->execution_area)) {
                                 $text .= "<p class='text-center'>
                                         Доступно заключение врача ({$existentConclusion->execution_area})<div class='text-center'> <a class='btn btn-info' href='" . Url::toRoute(['download/download-temp', 'link' => $existentLink->link], 'https') . "'>скачать заключение</a>
                                   </div></p>";
                                 $attachments[] = [$path, $existentConclusion->execution_area . ".pdf"];
-                            }
-                            else{
+                            } else {
                                 $text .= "<p class='text-center'>
                                         Доступно заключение врача 
                                         <div class='text-center'><a class='btn btn-info' href='" . Url::toRoute(['download/download-temp', 'link' => $existentLink->link], 'https') . "'>скачать заключение</a></div>
@@ -97,9 +101,9 @@ class MailHandler extends Model
                         }
                     }
                 }
-                if(self::sendMessage('Информация о пройденном обследовании', $text, $mail->address, $patientName, $attachments)){
+                if (self::sendMessage('Информация о пройденном обследовании', $text, $mail->address, $patientName, $attachments)) {
                     // Отмечу, что на данный адрес уже отправлялось письмо
-                    if($mail->mailed_yet === 0){
+                    if ($mail->mailed_yet === 0) {
                         $mail->mailed_yet = 1;
                         $mail->save();
                     }
@@ -114,26 +118,33 @@ class MailHandler extends Model
     private static function sendMessage($title, $text, $address, $sendTo, $attachments): bool
     {
         $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
-        if(is_file($settingsFile)){
+        if (is_file($settingsFile)) {
             // получу данные
             $content = file_get_contents($settingsFile);
             $settingsArray = mb_split("\n", $content);
-            if(count($settingsArray) === 3){
+            if (count($settingsArray) === 3) {
+                $mailList = GrammarHandler::extractEmails($address);
+                if (!empty($mailList)) {
+                    $recipientsList = [];
+                    foreach ($mailList as $mailItem) {
+                        $recipientsList[$mailItem] = $sendTo ?? '';
+                    }
                     $text = self::getMailText($text);
                     // отправлю письмо
                     $mail = Yii::$app->mailer->compose()
                         ->setFrom([$settingsArray[0] => 'Региональный диагностический центр'])
                         ->setSubject($title)
                         ->setHtmlBody($text)
-                        ->setTo([$address => $sendTo ?? '']);
+                        ->setTo($recipientsList);
                     // попробую отправить письмо, в случае ошибки- вызову исключение
-                if(!empty($attachments)){
-                    foreach ($attachments as $attachment) {
-                        $mail->attach($attachment[0], ['fileName' => $attachment[1]]);
+                    if (!empty($attachments)) {
+                        foreach ($attachments as $attachment) {
+                            $mail->attach($attachment[0], ['fileName' => $attachment[1]]);
+                        }
                     }
-                }
                     $mail->send();
-                    return true;
+                }
+                return true;
             }
         }
         return false;

@@ -114,4 +114,21 @@ class GrammarHandler
         }
         return substr( $haystack, -$length ) === $needle;
     }
+
+    /**
+     * @param $emailsString
+     * @return array
+     */
+    public static function extractEmails($emailsString): array
+    {
+        $answer = [];
+        $emailsArray = preg_split("/[,; ]/", $emailsString);
+        foreach ($emailsArray as $item) {
+            $emailItem = trim($item);
+            if(!empty($emailItem) && filter_var($emailItem, FILTER_VALIDATE_EMAIL)){
+                $answer[] = $emailItem;
+            }
+        }
+        return $answer;
+    }
 }
