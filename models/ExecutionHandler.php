@@ -121,6 +121,7 @@ class ExecutionHandler extends Model
      */
     public static function check(): void
     {
+        Telegram::sendDebug("start global check");
         // для начала- получу все данные о зарегистрированных файлах
         $availData = Table_availability::getRegistered();
         // проверю наличие папок
