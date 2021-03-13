@@ -233,6 +233,15 @@ class ExecutionHandler extends Model
                                     'userId' => $user->username
                                 ]))->save();
                             }
+                            else{
+                                $existent = Table_availability::findOne(['file_name' => $entity]);
+                                if($existent !== null){
+                                    $existent->md5 = $md5;
+                                    $existent->is_notification_sent = 0;
+                                    $existent->file_create_time = $changeTime;
+                                    $existent->save();
+                                }
+                            }
                             // оповещу мессенджеры о наличии файла
                             //Viber::notifyExecutionLoaded($user->username);
                         }
