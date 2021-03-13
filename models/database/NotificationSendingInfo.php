@@ -40,11 +40,13 @@ class NotificationSendingInfo extends ActiveRecord
 
     public function notify(): void
     {
-        $availabilityInfo = Table_availability::findOne(['file_name' => $this->name]);
-        if($availabilityInfo !== null){
-            $availabilityInfo->is_notification_sent = 1;
-            $availabilityInfo->save();
-            //Telegram::sendDebug("Отмечено как отправленное: " . $this->name);
+        $availabilityInfo = Table_availability::findAll(['file_name' => $this->name, 'file_create_time' => $this->create_time]);
+        if(!empty($availabilityInfo)){
+            foreach ($availabilityInfo as $item) {
+                $item->is_notification_sent = 1;
+                $item->save();
+                Telegram::sendDebug("Отмечено как отправленное: " . $this->name);
+            }
         }
     }
 }
