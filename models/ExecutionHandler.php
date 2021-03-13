@@ -5,6 +5,7 @@ namespace app\models;
 
 
 use app\models\database\AuthAssignment;
+use app\models\database\NotificationSendingInfo;
 use app\models\database\TempDownloadLinks;
 use app\models\database\ViberSubscriptions;
 use app\models\utils\FilesHandler;
@@ -296,6 +297,17 @@ class ExecutionHandler extends Model
                     }
                 } catch (\Exception $e) {
                     echo 'ERROR CHECKING FILE' . $e->getMessage() . "\n";
+                }
+            }
+        }
+        // todo check notifications
+        // получу список того, что ожидает отправки
+        $waitForNotify = NotificationSendingInfo::getWaiting();
+        if(!empty($waitForNotify)){
+            foreach ($waitForNotify as $waiting) {
+                if($waiting->create_time < time() - 900){
+                    // отправлю уведомление о том, что добавлен новый компонтент
+                    $waiting->notify();
                 }
             }
         }

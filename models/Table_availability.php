@@ -16,6 +16,7 @@ use yii\db\ActiveRecord;
  * @property string $md5 [char(32)]
  * @property string $patient_name [varchar(255)]
  * @property string $execution_area [varchar(255)]
+ * @property bool $is_notification_sent [tinyint(1)]  Отправлялось ли уведомление
  */
 class Table_availability extends ActiveRecord
 {
