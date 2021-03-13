@@ -44,7 +44,7 @@ class NotificationSendingInfo extends ActiveRecord
         if($availabilityInfo !== null){
             $availabilityInfo->is_notification_sent = 1;
             $availabilityInfo->save();
-            Telegram::sendDebug("Отмечено как отправленное: " . $this->name);
+            //Telegram::sendDebug("Отмечено как отправленное: " . $this->name);
         }
     }
 }
