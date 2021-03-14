@@ -36,6 +36,9 @@ class Api
                     if (self::token_valid($request->bodyParams['token'])) {
                         return ['status' => 'success'];
                     }
+                    break;
+                case 'checkAuthToken':
+                    return ['status' => 'in work'];
             }
             return ['status' => 'failed'];
         }
