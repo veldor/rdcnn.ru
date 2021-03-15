@@ -529,6 +529,7 @@ class FileUtils
                 $path = Yii::getAlias('@conclusionsDirectory') . DIRECTORY_SEPARATOR . $fileName;
             }
             if(is_file($path)){
+                Telegram::sendDebug("sending file " . $path);
                 Yii::$app->response->sendFile($path, $fileName);
                 Yii::$app->response->send();
             }
