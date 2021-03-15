@@ -7,6 +7,7 @@ namespace app\models;
 use app\models\utils\GrammarHandler;
 use JsonException;
 use RuntimeException;
+use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\web\UploadedFile;
@@ -123,5 +124,28 @@ class Api
     {
         $user = User::findIdentityByAccessToken($token);
         return $user !== null && $user->username === User::ADMIN_NAME;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public static function handleFileRequest(): void
+    {
+        $request = Yii::$app->getRequest();
+        $cmd = $request->bodyParams['cmd'];
+        if($cmd === 'get_file'){
+            $authToken = $request->bodyParams['token'];
+            if (!empty($authToken)) {
+                $user = User::findIdentityByAccessToken($authToken);
+                if ($user !== null) {
+                    $file = $request->bodyParams['file_name'];
+                    try {
+                        FileUtils::loadFile($file);
+                    } catch (Throwable $e) {
+                        Telegram::sendDebug($e->getMessage());
+                    }
+                }
+            }
+        }
     }
 }

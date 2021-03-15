@@ -517,4 +517,21 @@ class FileUtils
         }
         return false;
     }
+
+    public static function loadFile($fileName): void
+    {
+        $file = Table_availability::findOne(['file_name' => $fileName]);
+        if($file !== null){
+            if($file->is_execution){
+                $path = Yii::getAlias('@executionsDirectory') . DIRECTORY_SEPARATOR . $fileName;
+            }
+            else{
+                $path = Yii::getAlias('@conclusionsDirectory') . DIRECTORY_SEPARATOR . $fileName;
+            }
+            if(is_file($path)){
+                Yii::$app->response->sendFile($path, $fileName);
+                Yii::$app->response->send();
+            }
+        }
+    }
 }
