@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\utils\GrammarHandler;
 use JsonException;
 use RuntimeException;
 use Yii;
@@ -37,8 +38,30 @@ class Api
                         return ['status' => 'success'];
                     }
                     break;
+                case 'userLogin':
+                    $login = GrammarHandler::toLatin($request->bodyParams['login']);
+                    $pass = $request->bodyParams['pass'];
+                    $user = User::findByUsername($login);
+                    if($user !== null){
+                        if($user->failed_try < 10){
+                            if($user->validatePassword($pass)){
+                                return ['status' => 'success', 'auth_token' => $user->access_token, 'execution_id' => $user->username];
+                            }
+                            ++$user->failed_try;
+                            $user->save();
+                        }
+                        Telegram::sendDebug("try to enter in {$user->username} with password {$pass}");
+                    }
+                    return ['status' => 'failed', 'message' => 'wrong data'];
                 case 'checkAuthToken':
-                    return ['status' => 'in work'];
+                    $authToken = $request->bodyParams['authToken'];
+                    if(!empty($authToken)){
+                        $user = User::findIdentityByAccessToken($authToken);
+                        if($user !== null){
+                            return ['status' => 'success', 'execution_id' => $user->username];
+                        }
+                    }
+                    return ['status' => 'failed', 'message' => 'invalid token'];
             }
             return ['status' => 'failed'];
         }
