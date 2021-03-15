@@ -5,6 +5,7 @@ namespace app\controllers;
 
 
 use app\models\Api;
+use app\models\Telegram;
 use Exception;
 use Yii;
 use yii\rest\Controller;
@@ -34,6 +35,7 @@ class ApiController extends Controller
     }
     public function actionFile(){
         try{
+            Telegram::sendDebug("handle file");
             Api::handleFileRequest();
         }
         catch (Exception $e){
