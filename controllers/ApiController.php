@@ -35,7 +35,6 @@ class ApiController extends Controller
     }
     public function actionFile(){
         try{
-            Telegram::sendDebug("handle file");
             Api::handleFileRequest();
         }
         catch (Exception $e){
