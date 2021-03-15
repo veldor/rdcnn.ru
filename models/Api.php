@@ -63,7 +63,7 @@ class Api
                     }
                     return ['status' => 'failed', 'message' => 'invalid token'];
                 case 'get_execution_info':
-                    $authToken = $request->bodyParams['authToken'];
+                    $authToken = $request->bodyParams['token'];
                     if (!empty($authToken)) {
                         $user = User::findIdentityByAccessToken($authToken);
                         if ($user !== null) {
