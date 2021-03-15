@@ -518,10 +518,10 @@ class FileUtils
         return false;
     }
 
-    public static function loadFile($fileName): void
+    public static function loadFile($fileName, User $user): void
     {
         $file = Table_availability::findOne(['file_name' => $fileName]);
-        if($file !== null){
+        if($file !== null && $file->userId === $user->username){
             if($file->is_execution){
                 $path = Yii::getAlias('@executionsDirectory') . DIRECTORY_SEPARATOR . $fileName;
             }
@@ -529,7 +529,6 @@ class FileUtils
                 $path = Yii::getAlias('@conclusionsDirectory') . DIRECTORY_SEPARATOR . $fileName;
             }
             if(is_file($path)){
-                Telegram::sendDebug("sending file " . $path);
                 Yii::$app->response->sendFile($path, $fileName);
                 Yii::$app->response->send();
             }
