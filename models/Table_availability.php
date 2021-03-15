@@ -34,18 +34,18 @@ class Table_availability extends ActiveRecord
         $answerArray = [];
         $answer = '';
         $persons = User::findAllRegistered();
-        if(!empty($persons)){
+        if (!empty($persons)) {
             foreach ($persons as $person) {
                 // если не найдено заключений по данному пациенту- верну его
-                if(!self::find()->where(['userId' => $person->username, 'is_conclusion' => 1])->count()){
+                if (!self::find()->where(['userId' => $person->username, 'is_conclusion' => 1])->count()) {
                     $answerArray[] = $person->username;
                 }
             }
         }
-        if(!empty($answerArray)){
+        if (!empty($answerArray)) {
             sort($answerArray, SORT_NATURAL);
             foreach ($answerArray as $item) {
-                $answer .= $item. "\n";
+                $answer .= $item . "\n";
             }
         }
         return $answer;
@@ -59,18 +59,18 @@ class Table_availability extends ActiveRecord
         $answerArray = [];
         $answer = '';
         $persons = User::findAllRegistered();
-        if(!empty($persons)){
+        if (!empty($persons)) {
             foreach ($persons as $person) {
                 // если не найдено заключений по данному пациенту- верну его
-                if(!self::find()->where(['userId' => $person->username, 'is_execution' => 1])->count()){
+                if (!self::find()->where(['userId' => $person->username, 'is_execution' => 1])->count()) {
                     $answerArray[] = $person->username;
                 }
             }
         }
-        if(!empty($answerArray)){
+        if (!empty($answerArray)) {
             sort($answerArray, SORT_NATURAL);
             foreach ($answerArray as $item) {
-                $answer .= $item. "\n";
+                $answer .= $item . "\n";
             }
         }
         return $answer;
@@ -88,7 +88,7 @@ class Table_availability extends ActiveRecord
     public static function getPatientName(string $username)
     {
         $existentItem = self::findOne(['userId' => $username, 'is_conclusion' => 1]);
-        if($existentItem !== null)
+        if ($existentItem !== null)
             return $existentItem->patient_name;
         return null;
     }
@@ -97,7 +97,7 @@ class Table_availability extends ActiveRecord
     {
         $answer = '';
         $items = self::findAll(['userId' => $username, 'is_conclusion' => 1]);
-        if($items !== null){
+        if ($items !== null) {
             foreach ($items as $item) {
                 $answer .= "{$item->execution_area} \n";
             }
@@ -107,14 +107,14 @@ class Table_availability extends ActiveRecord
 
     public static function isRegistered($conclusionFile)
     {
-        return (bool) self::find()->where(['file_name' => $conclusionFile])->count();
+        return (bool)self::find()->where(['file_name' => $conclusionFile])->count();
     }
 
     public static function getRegistered()
     {
         /** @var Table_availability[] $data */
         $data = self::find()->all();
-        if(!empty($data)){
+        if (!empty($data)) {
             $answer = [];
             foreach ($data as $item) {
                 $answer[$item->file_name] = $item;
@@ -138,5 +138,26 @@ class Table_availability extends ActiveRecord
     {
         $existentEntity = self::findOne(['file_name' => $entity]);
         return !(($existentEntity !== null) && $existentEntity->md5 === $md5);
+    }
+
+    public static function getFilesInfo(User $user): array
+    {
+        $name = self::getPatientName($user->username) ?? '';
+        $answer = [];
+        $existentFiles = self::findAll(['userId' => $user->username]);
+        if (!empty($existentFiles)) {
+            foreach ($existentFiles as $existentFile) {
+                if($existentFile->is_execution){
+                    $type = 'execution';
+                    $name = "{$name} Архив снимков по обследованию {$user->username}.zip";
+                }
+                else{
+                    $type = 'conclusion';
+                    $name = $existentFile->execution_area ? "{$name} заключение {$existentFile->execution_area}.pdf" : "{$name} заключение {$existentFile->file_name}";
+                }
+                $answer[] = ['name' => $name, 'type' => $type, 'fileName' => $existentFile->file_name];
+            }
+        }
+        return $answer;
     }
 }

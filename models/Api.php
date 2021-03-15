@@ -42,9 +42,9 @@ class Api
                     $login = GrammarHandler::toLatin($request->bodyParams['login']);
                     $pass = $request->bodyParams['pass'];
                     $user = User::findByUsername($login);
-                    if($user !== null){
-                        if($user->failed_try < 10){
-                            if($user->validatePassword($pass)){
+                    if ($user !== null) {
+                        if ($user->failed_try < 10) {
+                            if ($user->validatePassword($pass)) {
                                 return ['status' => 'success', 'auth_token' => $user->access_token, 'execution_id' => $user->username];
                             }
                             ++$user->failed_try;
@@ -55,13 +55,28 @@ class Api
                     return ['status' => 'failed', 'message' => 'wrong data'];
                 case 'checkAuthToken':
                     $authToken = $request->bodyParams['authToken'];
-                    if(!empty($authToken)){
+                    if (!empty($authToken)) {
                         $user = User::findIdentityByAccessToken($authToken);
-                        if($user !== null){
+                        if ($user !== null) {
                             return ['status' => 'success', 'execution_id' => $user->username];
                         }
                     }
                     return ['status' => 'failed', 'message' => 'invalid token'];
+                case 'get_execution_info':
+                    $authToken = $request->bodyParams['authToken'];
+                    if (!empty($authToken)) {
+                        $user = User::findIdentityByAccessToken($authToken);
+                        if ($user !== null) {
+                            $filesInfo = Table_availability::getFilesInfo($user);
+                            return [
+                                'status' => 'success',
+                                'execution_id' => $user->username,
+                                'patient_name' => Table_availability::getPatientName($user->username),
+                                'files' => $filesInfo
+                            ];
+                        }
+                        return ['status' => 'failed', 'message' => 'invalid token'];
+                    }
             }
             return ['status' => 'failed', 'message' => 'unknown action'];
         }
