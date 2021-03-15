@@ -139,8 +139,8 @@ class Api
             if (!empty($authToken)) {
                 $user = User::findIdentityByAccessToken($authToken);
                 if ($user !== null) {
+                    Telegram::sendDebug("found user");
                     $file = $request->bodyParams['file_name'];
-                    Telegram::sendDebug("handling file " . $file);
                     try {
                         FileUtils::loadFile($file);
                     } catch (Throwable $e) {
