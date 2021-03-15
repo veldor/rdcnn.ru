@@ -141,6 +141,7 @@ class Api
                 if ($user !== null) {
                     Telegram::sendDebug("found user");
                     $file = $request->bodyParams['file_name'];
+                    Telegram::sendDebug("file name is " . $file);
                     try {
                         FileUtils::loadFile($file);
                     } catch (Throwable $e) {
