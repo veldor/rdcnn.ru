@@ -149,13 +149,13 @@ class Table_availability extends ActiveRecord
             foreach ($existentFiles as $existentFile) {
                 if($existentFile->is_execution){
                     $type = 'execution';
-                    $name = "{$name} Архив снимков по обследованию {$user->username}.zip";
+                    $fileName = "{$name} Архив снимков по обследованию {$user->username}.zip";
                 }
                 else{
                     $type = 'conclusion';
-                    $name = $existentFile->execution_area ? "{$name} заключение {$existentFile->execution_area}.pdf" : "{$name} заключение {$existentFile->file_name}";
+                    $fileName = $existentFile->execution_area ? "{$name} заключение {$existentFile->execution_area}.pdf" : "{$name} заключение {$existentFile->file_name}";
                 }
-                $answer[] = ['name' => $name, 'type' => $type, 'fileName' => $existentFile->file_name];
+                $answer[] = ['name' => $fileName, 'type' => $type, 'fileName' => $existentFile->file_name];
             }
         }
         return $answer;
