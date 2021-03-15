@@ -63,7 +63,7 @@ class Api
                     }
                     return ['status' => 'failed', 'message' => 'invalid token'];
             }
-            return ['status' => 'failed'];
+            return ['status' => 'failed', 'message' => 'unknown action'];
         }
 
         if (!empty($request->bodyParams['json'])) {
