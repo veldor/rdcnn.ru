@@ -133,9 +133,9 @@ class Api
     {
         $request = Yii::$app->getRequest();
         $cmd = $request->bodyParams['cmd'];
-        Telegram::sendDebug($cmd);
         if($cmd === 'get_file'){
             $authToken = $request->bodyParams['token'];
+            Telegram::sendDebug($authToken);
             if (!empty($authToken)) {
                 $user = User::findIdentityByAccessToken($authToken);
                 if ($user !== null) {
