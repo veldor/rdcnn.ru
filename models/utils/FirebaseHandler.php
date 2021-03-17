@@ -25,7 +25,6 @@ class FirebaseHandler
 
     public static function sendConclusionLoaded(string $userId, string $fileName, string $double): void
     {
-        Telegram::sendDebug("send conclusion to {$userId}");
         $server_key = Info::FIREBASE_SERVER_KEY;
         $client = new Client();
         $client->setApiKey($server_key);
@@ -39,6 +38,7 @@ class FirebaseHandler
             foreach ($clients as $client) {
                 $message->addRecipient(new Device($client->token));
             }
+            Telegram::sendDebug("sending message for " . count($clients));
             $message
                 ->setNotification(new Notification('Добавлено заключение врача', 'Просмотреть заключение вы можете в приложении'))
                 ->setData([
@@ -47,6 +47,8 @@ class FirebaseHandler
                     'double' => $double
                     ]);
             $response = $client->send($message);
+            Telegram::sendDebug("message sent");
+            Telegram::sendDebug(implode($response));
         }
         else{
 
