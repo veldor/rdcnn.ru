@@ -6,6 +6,7 @@ use app\models\database\TempDownloadLinks;
 use app\models\ExecutionHandler;
 use app\models\Table_availability;
 use app\models\User;
+use chillerlan\QRCode\QRCode;
 use nirvana\showloading\ShowLoadingAsset;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -149,7 +150,10 @@ if ($name !== null) {
 <?php
 
 if(Yii::$app->user->can("manage")){
-    echo "<h3 class='text-center'><b>{$execution->access_token}</b></h3>";
+    $data = 'https://rdcnn.ru/enter/' . $execution->access_token;
+
+// quick and simple:
+    echo '<div class="text-center"><img src="'.(new QRCode)->render($data).'" alt="QR Code" /></div>';
 }
 
 
