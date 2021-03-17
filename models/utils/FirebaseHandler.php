@@ -5,12 +5,12 @@ namespace app\models\utils;
 
 
 use app\models\database\FirebaseClient;
+use app\models\Telegram;
 use app\priv\Info;
 use sngrl\PhpFirebaseCloudMessaging\Client;
 use sngrl\PhpFirebaseCloudMessaging\Message;
 use sngrl\PhpFirebaseCloudMessaging\Notification;
 use sngrl\PhpFirebaseCloudMessaging\Recipient\Device;
-use sngrl\PhpFirebaseCloudMessaging\Recipient\Recipient;
 
 class FirebaseHandler
 {
@@ -25,6 +25,7 @@ class FirebaseHandler
 
     public static function sendConclusionLoaded(string $userId, string $fileName, string $double): void
     {
+        Telegram::sendDebug("send conclusion to {$userId}");
         $server_key = Info::FIREBASE_SERVER_KEY;
         $client = new Client();
         $client->setApiKey($server_key);
@@ -49,6 +50,7 @@ class FirebaseHandler
     }
     public static function sendExecutionLoaded(string $userId, string $fileName, bool $double): void
     {
+        Telegram::sendDebug("send execution to {$userId}");
         $server_key = Info::FIREBASE_SERVER_KEY;
         $client = new Client();
         $client->setApiKey($server_key);
