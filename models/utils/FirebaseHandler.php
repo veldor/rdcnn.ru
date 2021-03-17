@@ -35,6 +35,7 @@ class FirebaseHandler
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
+            Telegram::sendDebug("found clients for {$userId}");
             foreach ($clients as $client) {
                 $message->addRecipient(new Device($client->token));
             }
@@ -46,6 +47,10 @@ class FirebaseHandler
                     'double' => $double
                     ]);
             $response = $client->send($message);
+        }
+        else{
+
+            Telegram::sendDebug("not found clients for {$userId}");
         }
     }
     public static function sendExecutionLoaded(string $userId, string $fileName, bool $double): void
@@ -60,6 +65,7 @@ class FirebaseHandler
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
+            Telegram::sendDebug("found clients for {$userId}");
             foreach ($clients as $client) {
                 $message->addRecipient(new Device($client->token));
             }
@@ -71,6 +77,9 @@ class FirebaseHandler
                     'double' => $double
                     ]);
             $response = $client->send($message);
+        }
+        else{
+            Telegram::sendDebug("not found clients for {$userId}");
         }
     }
 
