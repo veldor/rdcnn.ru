@@ -149,11 +149,11 @@ class Table_availability extends ActiveRecord
             foreach ($existentFiles as $existentFile) {
                 if($existentFile->is_execution){
                     $type = 'execution';
-                    $fileName = "{$name} Архив снимков по обследованию {$user->username}.zip";
+                    $fileName = "{$name}\n Архив снимков по обследованию {$user->username}.zip";
                 }
                 else{
                     $type = 'conclusion';
-                    $fileName = $existentFile->execution_area ? "{$name} заключение {$existentFile->execution_area}.pdf" : "{$name} заключение {$existentFile->file_name}";
+                    $fileName = $existentFile->execution_area ? "{$name}\n заключение {$existentFile->execution_area}.pdf" : "{$name}\n заключение {$existentFile->file_name}";
                 }
                 $answer[] = ['name' => $fileName, 'type' => $type, 'fileName' => $existentFile->file_name];
             }
@@ -164,8 +164,8 @@ class Table_availability extends ActiveRecord
 
     private static function sortFiles($a, $b)
     {
-        $firstFileEnding = mb_substr($a, -3);
-        $secondFileEnding = mb_substr($b, -3);
+        $firstFileEnding = mb_substr($a['fileName'], -3);
+        $secondFileEnding = mb_substr($b['fileName'], -3);
         if($firstFileEnding === $secondFileEnding){
             return 0;
         }
