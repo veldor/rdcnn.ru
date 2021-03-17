@@ -9,6 +9,8 @@ use app\priv\Info;
 use sngrl\PhpFirebaseCloudMessaging\Client;
 use sngrl\PhpFirebaseCloudMessaging\Message;
 use sngrl\PhpFirebaseCloudMessaging\Notification;
+use sngrl\PhpFirebaseCloudMessaging\Recipient\Device;
+use sngrl\PhpFirebaseCloudMessaging\Recipient\Recipient;
 
 class FirebaseHandler
 {
@@ -50,7 +52,7 @@ class FirebaseHandler
             $client->setApiKey($server_key);
             $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
             foreach ($contacts as $contact) {
-                $message->addRecipient($contact);
+                $message->addRecipient(new Device($contact));
             }
             $client->send($message);
         }
