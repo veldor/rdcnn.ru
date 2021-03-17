@@ -5,6 +5,7 @@ namespace app\models;
 
 
 use app\models\database\Emails;
+use app\models\utils\FirebaseHandler;
 use app\models\utils\GrammarHandler;
 use app\models\utils\TimeHandler;
 use app\priv\Info;
@@ -438,6 +439,12 @@ class FileUtils
                         'execution_area' => $actionResult['execution_area']
                     ]);
                     $item->save();
+
+                    FirebaseHandler::sendConclusionLoaded(
+                        $user->id,
+                        $conclusionFile,
+                        false
+                    );
                     // отправлю оповещение о добавленном контенте, если указан адрес почты
                     /*if (Emails::checkExistent($user->id)) {
                         Emails::sendEmail($item);
@@ -453,6 +460,11 @@ class FileUtils
                         $info->patient_name = $actionResult['patient_name'];
                         $info->execution_area = $actionResult['execution_area'];
                         $info->save();
+                        FirebaseHandler::sendConclusionLoaded(
+                            $user->id,
+                            $conclusionFile,
+                            true
+                        );
                     }
                 }
                 return $path;

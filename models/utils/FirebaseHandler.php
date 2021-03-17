@@ -23,7 +23,7 @@ class FirebaseHandler
 //        $response = $client->send($message);
 //    }
 
-    public static function sendAllPatientsNotification(string $text): void
+    public static function sendConclusionLoaded(string $userId, string $fileName, string $double): void
     {
         $server_key = Info::FIREBASE_SERVER_KEY;
         $client = new Client();
@@ -32,16 +32,44 @@ class FirebaseHandler
 
         $message = new Message();
         $message->setPriority('high');
-        $message->addRecipient(new Device('dw_5XCRrScyZYWULpuVLWW:APA91bF_ibV2MhtOKscHKD2JqZbWrPYfFzDrii0P0gcIYNraZv7Zu4FtYJYTc0OzoFJqi_VC5Cj9WF41uGzuCE-74Qwo6aI7apJAIIu0-oABhvuxyrmx1sN7Bj0TM6vTW798uzgWglPw'));
-        $message
-            ->setNotification(new Notification('some title', 'some body'))
-            ->setData(['key' => 'value'])
-        ;
+        $clients = FirebaseClient::findAll(['patient_id' => $userId]);
+        if (!empty($clients)) {
+            foreach ($clients as $client) {
+                $message->addRecipient(new Device($client->token));
+            }
+            $message
+                ->setNotification(new Notification('Добавлено заключение врача', 'Просмотреть заключение вы можете в приложении'))
+                ->setData([
+                    'type' => 'conclusion',
+                    'fileName' => $fileName,
+                    'double' => $double
+                    ]);
+            $response = $client->send($message);
+        }
+    }
+    public static function sendExecutionLoaded(string $userId, string $fileName, bool $double): void
+    {
+        $server_key = Info::FIREBASE_SERVER_KEY;
+        $client = new Client();
+        $client->setApiKey($server_key);
+        $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
 
-        $response = $client->send($message);
-        var_dump($response->getStatusCode());
-        var_dump($response->getBody()->getContents());
-        die;
+        $message = new Message();
+        $message->setPriority('high');
+        $clients = FirebaseClient::findAll(['patient_id' => $userId]);
+        if (!empty($clients)) {
+            foreach ($clients as $client) {
+                $message->addRecipient(new Device($client->token));
+            }
+            $message
+                ->setNotification(new Notification('Добавлен архив со снимками обследования', 'Архив будет загружен и отображён в приложении'))
+                ->setData([
+                    'type' => 'execution',
+                    'fileName' => $fileName,
+                    'double' => $double
+                    ]);
+            $response = $client->send($message);
+        }
     }
 
     /**

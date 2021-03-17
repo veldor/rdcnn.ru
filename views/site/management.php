@@ -24,8 +24,6 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
 
-// отправлю тестовое сообщение пользователям
-\app\models\utils\FirebaseHandler::sendAllPatientsNotification("Новое сообщение тут");
 ?>
 
 <div class="text-center">

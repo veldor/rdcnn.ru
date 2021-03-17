@@ -9,6 +9,7 @@ use app\models\database\NotificationSendingInfo;
 use app\models\database\TempDownloadLinks;
 use app\models\database\ViberSubscriptions;
 use app\models\utils\FilesHandler;
+use app\models\utils\FirebaseHandler;
 use app\models\utils\GrammarHandler;
 use app\models\utils\TimeHandler;
 use app\priv\Info;
@@ -217,6 +218,11 @@ class ExecutionHandler extends Model
                                 $existentFile->md5 = $md5;
                                 $existentFile->file_create_time = $changeTime;
                                 $existentFile->save();
+                                FirebaseHandler::sendExecutionLoaded(
+                                    $user->id,
+                                    $entity,
+                                    true
+                                );
                                 //Viber::notifyExecutionLoaded($user->username);
                             }
                         } else {
@@ -232,6 +238,12 @@ class ExecutionHandler extends Model
                                     'file_create_time' => $changeTime,
                                     'userId' => $user->username
                                 ]))->save();
+
+                                FirebaseHandler::sendExecutionLoaded(
+                                    $user->id,
+                                    $entity,
+                                    false
+                                );
                             }
                             else{
                                 $existent = Table_availability::findOne(['file_name' => $entity]);
@@ -240,6 +252,11 @@ class ExecutionHandler extends Model
                                     $existent->is_notification_sent = 0;
                                     $existent->file_create_time = $changeTime;
                                     $existent->save();
+                                    FirebaseHandler::sendExecutionLoaded(
+                                        $user->id,
+                                        $entity,
+                                        true
+                                    );
                                 }
                             }
                             // оповещу мессенджеры о наличии файла
