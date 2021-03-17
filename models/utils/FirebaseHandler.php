@@ -23,24 +23,25 @@ class FirebaseHandler
 //        $response = $client->send($message);
 //    }
 
-    public static function sendAllPatientsNotification(string $message): void
+    public static function sendAllPatientsNotification(string $text): void
     {
-        $list = [];
-        // отправлю сообщение всем контактам, которые зарегистрированы
-        $executors = FirebaseClient::find()->all();
-        if (!empty($executors)) {
-            foreach ($executors as $executor) {
-                $list[] = $executor->token;
-            }
-        }
-        $notification = new Notification("Тест", $message);
-        $firebaseMessage = new Message();
-        $firebaseMessage->setPriority('high');
-        $firebaseMessage
-        ->setData([
-            'action' => 'task_created',
-        ]);
-        self::sendMultipleMessage($list, $firebaseMessage);
+        $server_key = 'Info::FIREBASE_SERVER_KEY';
+        $client = new Client();
+        $client->setApiKey($server_key);
+        $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
+
+        $message = new Message();
+        $message->setPriority('high');
+        $message->addRecipient(new Device('dw_5XCRrScyZYWULpuVLWW:APA91bF_ibV2MhtOKscHKD2JqZbWrPYfFzDrii0P0gcIYNraZv7Zu4FtYJYTc0OzoFJqi_VC5Cj9WF41uGzuCE-74Qwo6aI7apJAIIu0-oABhvuxyrmx1sN7Bj0TM6vTW798uzgWglPw'));
+        $message
+            ->setNotification(new Notification('some title', 'some body'))
+            ->setData(['key' => 'value'])
+        ;
+
+        $response = $client->send($message);
+        var_dump($response->getStatusCode());
+        var_dump($response->getBody()->getContents());
+        die;
     }
 
     /**
