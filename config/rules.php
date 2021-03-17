@@ -30,7 +30,6 @@ return [
     '/dicom-viewer' => 'site/dicom-viewer',
     'api' => 'api/do',
     'get-file' => 'api/file',
-    'personal-api' => 'personal-api/do',
     'rated' => 'user/rate-link-clicked',
     'rate' => 'user/rate',
     'show-changes' => 'administrator/show-notifications',
