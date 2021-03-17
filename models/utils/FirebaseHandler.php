@@ -36,7 +36,10 @@ class FirebaseHandler
         $notification = new Notification("Тест", $message);
         $firebaseMessage = new Message();
         $firebaseMessage->setPriority('high');
-        $firebaseMessage->setNotification($notification);
+        $firebaseMessage
+        ->setData([
+            'action' => 'task_created',
+        ]);
         self::sendMultipleMessage($list, $firebaseMessage);
     }
 
