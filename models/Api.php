@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\FirebaseClient;
 use app\models\utils\GrammarHandler;
 use JsonException;
 use RuntimeException;
@@ -36,16 +37,35 @@ class Api
                     return ['status' => 'failed', 'message' => 'Неверный логин или пароль'];
                 case 'check_access_token':
                     if (self::token_valid($request->bodyParams['token'])) {
+                        try {
+                            $firebaseToken = $request->bodyParams['firebaseToken'];
+                        } catch (\Exception $e) {
+
+                        }
+                        if (!empty($firebaseToken)) {
+                            $user = User::findIdentityByAccessToken($request->bodyParams['token']);
+                            if ($user !== null) {
+                                FirebaseClient::register($user, $firebaseToken);
+                            }
+                        }
                         return ['status' => 'success'];
                     }
                     break;
                 case 'userLogin':
                     $login = GrammarHandler::toLatin($request->bodyParams['login']);
                     $pass = $request->bodyParams['pass'];
+                    try {
+                        $firebaseToken = $request->bodyParams['firebaseToken'];
+                    } catch (\Exception $e) {
+
+                    }
                     $user = User::findByUsername($login);
                     if ($user !== null) {
                         if ($user->failed_try < 10) {
                             if ($user->validatePassword($pass)) {
+                                if (!empty($firebaseToken)) {
+                                    FirebaseClient::register($user, $firebaseToken);
+                                }
                                 return ['status' => 'success', 'auth_token' => $user->access_token, 'execution_id' => $user->username];
                             }
                             ++$user->failed_try;
@@ -133,7 +153,7 @@ class Api
     {
         $request = Yii::$app->getRequest();
         $cmd = $request->bodyParams['cmd'];
-        if($cmd === 'get_file'){
+        if ($cmd === 'get_file') {
             $authToken = $request->bodyParams['token'];
             if (!empty($authToken)) {
                 $user = User::findIdentityByAccessToken($authToken);
