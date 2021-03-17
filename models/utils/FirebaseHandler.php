@@ -25,7 +25,7 @@ class FirebaseHandler
 
     public static function sendAllPatientsNotification(string $text): void
     {
-        $server_key = 'Info::FIREBASE_SERVER_KEY';
+        $server_key = Info::FIREBASE_SERVER_KEY;
         $client = new Client();
         $client->setApiKey($server_key);
         $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
