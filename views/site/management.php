@@ -23,12 +23,6 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateOutputInfo string */
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
-
-$sql = "/*[17-Mar 11:55:49][43 ms]*/ CREATE TABLE `rdcnn`.`person_firebase_tokens`( `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, `patient_id` INT(11) NOT NULL, `token` VARCHAR(255) NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `f_firebase_patient` FOREIGN KEY (`patient_id`) REFERENCES `rdcnn`.`person`(`id`) ON UPDATE CASCADE ON DELETE CASCADE ); 
-";
-$connection = Yii::$app->getDb();
-$command = $connection->createCommand($sql);
-$result = $command->queryAll();
 ?>
 
 <div class="text-center">
