@@ -158,6 +158,19 @@ class Table_availability extends ActiveRecord
                 $answer[] = ['name' => $fileName, 'type' => $type, 'fileName' => $existentFile->file_name];
             }
         }
+        usort($answer, array('ClassName','sortFiles'));
         return $answer;
+    }
+
+    private static function sortFiles($a, $b)
+    {
+        $firstFileEnding = mb_substr($a, -3);
+        $secondFileEnding = mb_substr($b, -3);
+        if($firstFileEnding === $secondFileEnding){
+            return 0;
+        }
+        if($firstFileEnding === 'zip'){
+            return -1;
+        }
     }
 }
