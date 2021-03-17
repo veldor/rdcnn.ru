@@ -37,17 +37,6 @@ class Api
                     return ['status' => 'failed', 'message' => 'Неверный логин или пароль'];
                 case 'check_access_token':
                     if (self::token_valid($request->bodyParams['token'])) {
-                        try {
-                            $firebaseToken = $request->bodyParams['firebaseToken'];
-                        } catch (\Exception $e) {
-
-                        }
-                        if (!empty($firebaseToken)) {
-                            $user = User::findIdentityByAccessToken($request->bodyParams['token']);
-                            if ($user !== null) {
-                                FirebaseClient::register($user, $firebaseToken);
-                            }
-                        }
                         return ['status' => 'success'];
                     }
                     break;
@@ -79,6 +68,14 @@ class Api
                     if (!empty($authToken)) {
                         $user = User::findIdentityByAccessToken($authToken);
                         if ($user !== null) {
+                            try {
+                                $firebaseToken = $request->bodyParams['firebaseToken'];
+                            } catch (\Exception $e) {
+
+                            }
+                            if (!empty($firebaseToken)) {
+                                FirebaseClient::register($user, $firebaseToken);
+                            }
                             return ['status' => 'success', 'execution_id' => $user->username];
                         }
                     }
