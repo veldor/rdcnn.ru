@@ -23,7 +23,10 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateOutputInfo string */
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
-
+$user = \app\models\User::findIdentity('9201');
+$files = \app\models\Table_availability::getFilesInfo($user);
+var_dump($files);
+die;
 ?>
 
 <div class="text-center">

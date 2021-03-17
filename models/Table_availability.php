@@ -158,7 +158,7 @@ class Table_availability extends ActiveRecord
                 $answer[] = ['name' => $fileName, 'type' => $type, 'fileName' => $existentFile->file_name];
             }
         }
-        //usort($answer, array('ClassName','sortFiles'));
+        usort($answer, array('ClassName','sortFiles'));
         return $answer;
     }
 
@@ -172,5 +172,6 @@ class Table_availability extends ActiveRecord
         if($firstFileEnding === 'zip'){
             return -1;
         }
+        return 1;
     }
 }
