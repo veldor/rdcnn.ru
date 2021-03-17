@@ -146,6 +146,11 @@ if ($name !== null) {
         </div>
     </div>
 </div>
+<?php
+
+if(Yii::$app->user->can("manage")){
+    echo "<h3 class='text-center'><b>{$execution->access_token}</b></h3>";
+}
 
 
 
