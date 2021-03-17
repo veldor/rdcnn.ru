@@ -158,7 +158,7 @@ class Table_availability extends ActiveRecord
                 $answer[] = ['name' => $fileName, 'type' => $type, 'fileName' => $existentFile->file_name];
             }
         }
-        usort($answer, array('Table_availability','sortFiles'));
+        usort($answer, array(self::class,'sortFiles'));
         return $answer;
     }
 
