@@ -34,11 +34,9 @@ class FirebaseHandler
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
-            Telegram::sendDebug("found clients for {$userId}");
             foreach ($clients as $clientItem) {
                 $message->addRecipient(new Device($clientItem->token));
             }
-            Telegram::sendDebug("sending message for " . count($clients));
             $message
                 ->setNotification(new Notification('Добавлено заключение врача', 'Просмотреть заключение вы можете в приложении'))
                 ->setData([
@@ -47,7 +45,6 @@ class FirebaseHandler
                     'double' => $double
                     ]);
             $response = $client->send($message);
-            Telegram::sendDebug("message sent");
         }
         else{
 
@@ -66,7 +63,6 @@ class FirebaseHandler
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
-            Telegram::sendDebug("found clients for {$userId}");
             foreach ($clients as $clientItem) {
                 $message->addRecipient(new Device($clientItem->token));
             }
@@ -78,9 +74,6 @@ class FirebaseHandler
                     'double' => $double
                     ]);
             $response = $client->send($message);
-        }
-        else{
-            Telegram::sendDebug("not found clients for {$userId}");
         }
     }
 

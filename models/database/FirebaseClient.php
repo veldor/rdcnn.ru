@@ -4,14 +4,11 @@
 namespace app\models\database;
 
 
-use app\models\Table_availability;
+use app\models\Telegram;
 use app\models\User;
-use app\models\utils\GrammarHandler;
-use app\models\utils\MailSettings;
-use Yii;
-use yii\base\Exception;
+use Throwable;
 use yii\db\ActiveRecord;
-use yii\helpers\Url;
+use yii\db\StaleObjectException;
 
 /**
  * @property int $patient_id [int(11)]
@@ -29,6 +26,17 @@ class FirebaseClient extends ActiveRecord
     public static function register(User $user, $firebaseToken): void
     {
         if(!self::find()->where(['token' => $firebaseToken, 'patient_id' => $user->id])->count()){
+            // при наличии- удалю записи, дублирующие токен
+            $existent = self::findAll(['token' => $firebaseToken]);
+            if(!empty($existent)){
+                foreach ($existent as $item) {
+                    try {
+                        $item->delete();
+                    } catch (StaleObjectException | Throwable $e) {
+                        Telegram::sendDebug("Не удалось удалить запись {$item->id}");
+                    }
+                }
+            }
             (new self(['token' => $firebaseToken, 'patient_id' => $user->id]))->save();
         }
     }
