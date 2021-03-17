@@ -35,8 +35,8 @@ class FirebaseHandler
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
             Telegram::sendDebug("found clients for {$userId}");
-            foreach ($clients as $client) {
-                $message->addRecipient(new Device($client->token));
+            foreach ($clients as $clientItem) {
+                $message->addRecipient(new Device($clientItem->token));
             }
             Telegram::sendDebug("sending message for " . count($clients));
             $message
@@ -48,7 +48,6 @@ class FirebaseHandler
                     ]);
             $response = $client->send($message);
             Telegram::sendDebug("message sent");
-            Telegram::sendDebug(implode($response));
         }
         else{
 
@@ -68,8 +67,8 @@ class FirebaseHandler
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
             Telegram::sendDebug("found clients for {$userId}");
-            foreach ($clients as $client) {
-                $message->addRecipient(new Device($client->token));
+            foreach ($clients as $clientItem) {
+                $message->addRecipient(new Device($clientItem->token));
             }
             $message
                 ->setNotification(new Notification('Добавлен архив со снимками обследования', 'Архив будет загружен и отображён в приложении'))
