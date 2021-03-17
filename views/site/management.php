@@ -24,6 +24,11 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
 
+\app\models\utils\FirebaseHandler::sendConclusionLoaded(
+        '9203',
+        'a1000.pdf',
+    false
+);
 ?>
 
 <div class="text-center">
