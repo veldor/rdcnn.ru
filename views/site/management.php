@@ -25,7 +25,13 @@ $this->title = 'Всякие разные настройки';
 /* @var $telegramInfo array */
 
 // отправлю тестовое сообщение пользователям
-\app\models\utils\FirebaseHandler::sendAllPatientsNotification("Новое сообщение тут");
+try{
+    \app\models\utils\FirebaseHandler::sendAllPatientsNotification("Новое сообщение тут");
+}
+catch (Exception $e){
+   echo  $e->getTraceAsString();
+   die;
+}
 ?>
 
 <div class="text-center">
