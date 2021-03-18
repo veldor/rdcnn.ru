@@ -23,9 +23,9 @@ $this->title = 'Вход для администраторов';
     ],
 ]); ?>
 
-    <?= $form->field($model, 'username', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'></div><div class='col-sm-12 text-center'>{error}</div>",])->textInput(['autofocus' => true,])->label("Логин") ?>
+    <?= $form->field($model, 'username', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'></div><div class='col-sm-12 text-center'>{error}</div>",])->textInput(['autofocus' => true, 'required' => true])->label("Логин") ?>
 
-    <?= $form->field($model, 'password', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'></button></div><div class='col-sm-12 text-center'>{error}</div>",])->passwordInput() ?>
+    <?= $form->field($model, 'password', ['template' => "<div class='col-sm-12 col-lg-offset-4 col-lg-4'>{label}</div><div class='col-sm-11 col-lg-offset-4 col-lg-4'>{input} </div><div class='col-lg-1'></button></div><div class='col-sm-12 text-center'>{error}</div>",])->passwordInput(['required' => true]) ?>
 
 <div class="form-group">
     <div class="col-lg-12 text-center">
