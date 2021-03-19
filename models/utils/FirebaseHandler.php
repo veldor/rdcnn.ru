@@ -5,7 +5,6 @@ namespace app\models\utils;
 
 
 use app\models\database\FirebaseClient;
-use app\models\Telegram;
 use app\priv\Info;
 use sngrl\PhpFirebaseCloudMessaging\Client;
 use sngrl\PhpFirebaseCloudMessaging\Message;
@@ -46,14 +45,9 @@ class FirebaseHandler
                     ]);
             $response = $client->send($message);
         }
-        else{
-
-            Telegram::sendDebug("not found clients for {$userId}");
-        }
     }
     public static function sendExecutionLoaded(string $userId, string $fileName, bool $double): void
     {
-        Telegram::sendDebug("send execution to {$userId}");
         $server_key = Info::FIREBASE_SERVER_KEY;
         $client = new Client();
         $client->setApiKey($server_key);
