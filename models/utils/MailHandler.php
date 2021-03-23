@@ -5,10 +5,12 @@ namespace app\models\utils;
 
 
 use app\models\database\Emails;
+use app\models\database\MailingSchedule;
 use app\models\database\TempDownloadLinks;
 use app\models\Table_availability;
 use app\models\User;
 use app\priv\Info;
+use Throwable;
 use Yii;
 use yii\base\Exception;
 use yii\base\Model;
@@ -152,6 +154,24 @@ class MailHandler extends Model
 
     public static function sendMailing(): array
     {
-        return ['status' => 1];
+        $id = trim(Yii::$app->request->post('id'));
+        if(!empty($id)){
+            $mailingItem = MailingSchedule::findOne(['id' => $id]);
+            if($mailingItem !== null){
+                try{
+                    self::sendMessage(
+                        $mailingItem->title,
+                        $mailingItem->text,
+                        $mailingItem->address,
+                        $mailingItem->name,
+                        null);
+                    $mailingItem->delete();
+                }
+                catch (\Exception | Throwable $e){
+                    return ['message' => 'Отправка не удалась, текст ошибки- "' . $e->getMessage() . '"'];
+                }
+            }
+        }
+        return ['message' => 'Не найден идентификатор сообщения.'];
     }
 }

@@ -16,7 +16,10 @@ function recursiveSendMessages(waitingMessages, sendingCouner) {
             function (data) {
                 if (data.status && data.status === 1) {
                     ++sendingCouner;
-                    makeInformer('success', 'Успешная отправка', 'Сообщение отправлено и удалено из очереди отправки');
+                    makeInformer('success',
+                        'Успешная отправка',
+                        'Сообщение отправлено и удалено из очереди отправки',
+                        true);
                     unsendedMessagesCounter.text(waitingMessages.length - sendingCouner);
                     targetMessage.removeClass('text-primary').addClass('text-success').text('Отправлено');
                     targetMessage.parents('tr').eq(0).remove();

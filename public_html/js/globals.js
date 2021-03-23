@@ -284,7 +284,7 @@ function sendAjaxWithFile(url, callback, form) {
 
 // ========================================================== ИНФОРМЕР
 // СОЗДАЮ ИНФОРМЕР
-function makeInformer(type, header, body) {
+function makeInformer(type, header, body, hideable) {
     if (!body)
         body = '';
     const container = $('div#alertsContentDiv');
@@ -294,12 +294,12 @@ function makeInformer(type, header, body) {
         closeAlert(informer)
     });
     container.append(informer);
-    showAlert(informer)
+    showAlert(informer, hideable)
     return informer;
 }
 
 // ПОКАЗЫВАЮ ИНФОРМЕР
-function showAlert(alertDiv) {
+function showAlert(alertDiv, hideable) {
     // считаю расстояние от верха страницы до места, где располагается информер
     const topShift = alertDiv[0].offsetTop;
     const elemHeight = alertDiv[0].offsetHeight;
@@ -310,10 +310,12 @@ function showAlert(alertDiv) {
         top: 0,
         opacity: 1
     }, 500, function () {
-        // запускаю таймер самоуничтожения через 5 секунд
-        /*setTimeout(function () {
-            closeAlert(alertDiv)
-        }, 5000);*/
+        if(hideable){
+            // запускаю таймер самоуничтожения через 5 секунд
+            setTimeout(function () {
+                closeAlert(alertDiv)
+            }, 5000);
+        }
     });
 
 }
