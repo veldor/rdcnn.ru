@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\PatientInfo;
 use app\models\utils\MailHandler;
 use DateTime;
 use Exception;
@@ -169,6 +170,18 @@ class Utils extends Model
         'om@rdcnn.ru',
         'Ольга Царапкина',
         null);
+    }
+
+    public static function handlePatientsTable()
+    {
+        // получить одновременно десять покупателей и перебрать их одного за другим
+        /** @var PatientInfo $patient */
+        foreach (PatientInfo::find()->each(10) as $patient) {
+            if($patient->unsubscribe_token === null){
+                $patient->unsubscribe_token = Yii::$app->security->generateRandomString(255);
+                $patient->save();
+            }
+        }
     }
 
 }

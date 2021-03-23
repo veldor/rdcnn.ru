@@ -24,7 +24,8 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
 
-\app\models\Utils::sendTest();
+//\app\models\Utils::sendTest();
+\app\models\Utils::handlePatientsTable();
 ?>
 
 <div class="text-center">
