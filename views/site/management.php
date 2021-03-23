@@ -24,7 +24,7 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
 
-echo 'Total patients: ' . \app\models\database\PatientInfo::find()->count();
+\app\models\Utils::handlePatientsTable();
 ?>
 
 <div class="text-center">

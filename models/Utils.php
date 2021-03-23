@@ -4,13 +4,14 @@
 namespace app\models;
 
 
+use app\models\database\MailingSchedule;
 use app\models\database\PatientInfo;
+use app\models\utils\GrammarHandler;
 use app\models\utils\MailHandler;
 use DateTime;
 use Exception;
 use Yii;
 use yii\base\Model;
-use yii\db\StaleObjectException;
 
 class Utils extends Model
 {
@@ -46,7 +47,7 @@ class Utils extends Model
         return !((Yii::$app->session['center'] === 'aurora' && $firstSymbol === 'A') || (Yii::$app->session['center'] === 'nv' && !empty((int)$firstSymbol)));
     }
 
-    public static function getSort()
+    public static function getSort(): string
     {
         if (!empty(Yii::$app->session['sortBy'])) {
             return Yii::$app->session['sortBy'];
@@ -71,10 +72,9 @@ class Utils extends Model
      */
     public static function getStartInterval($forToday = false): int
     {
-        if($forToday){
+        if ($forToday) {
             $dtNow = new DateTime();
-        }
-        else{
+        } else {
             $dtNow = self::setupDay();
         }
         $dtNow->modify('today');
@@ -89,10 +89,9 @@ class Utils extends Model
      */
     public static function getEndInterval($forToday = false): int
     {
-        if($forToday){
+        if ($forToday) {
             $dtNow = new DateTime();
-        }
-        else{
+        } else {
             $dtNow = self::setupDay();
         }
         $dtNow->modify('today');
@@ -111,7 +110,7 @@ class Utils extends Model
     public static function sortExecutions(array $executionsList): array
     {
         usort(
-            /**
+        /**
          * @param $execution1 User
          * @param $executon2 User
          * @return mixed
@@ -120,9 +119,9 @@ class Utils extends Model
                 case 'byNumber':
                     return $execution1->username < $execution2->username ? 1 : 0;
                 case 'byExecutions':
-                    return ExecutionHandler::isExecution($execution1->username) > ExecutionHandler::isExecution($execution2->username)? 1 : 0;
+                    return ExecutionHandler::isExecution($execution1->username) > ExecutionHandler::isExecution($execution2->username) ? 1 : 0;
                 case 'byConclusion':
-                    return ExecutionHandler::isConclusion($execution1->username) > ExecutionHandler::isConclusion($execution2->username)? 1 : 0;
+                    return ExecutionHandler::isConclusion($execution1->username) > ExecutionHandler::isConclusion($execution2->username) ? 1 : 0;
                 case 'byTime':
                 default:
                     return $execution1->created_at < $execution2->created_at ? 1 : 0;
@@ -131,7 +130,7 @@ class Utils extends Model
         return $executionsList;
     }
 
-    public static function showDate(int $timestamp)
+    public static function showDate(int $timestamp): string
     {
         setlocale(LC_ALL, 'ru_RU.utf8');
         return strftime('%d %h %H:%M', $timestamp);
@@ -156,7 +155,7 @@ class Utils extends Model
         return $dtNow;
     }
 
-    public static function sendTest()
+    public static function sendTest(): void
     {
         $username = 'Ольга Викторовна';
         $text = "<br/><br/>Добрый день, $username<br/> 
@@ -167,36 +166,31 @@ class Utils extends Model
 <a href='https://rdcnn.ru/unsubscribe/#'><b>Если не хотите получать от нас письма- нажмите сюда</b></a>
 ";
         MailHandler::sendMessage('Тест рассылки',
-        $text,
-        'om@rdcnn.ru',
-        'Ольга Царапкина',
-        null);
+            $text,
+            'om@rdcnn.ru',
+            'Ольга Царапкина',
+            null);
     }
 
-    public static function handlePatientsTable()
+    public static function handlePatientsTable(): void
     {
         // получить одновременно десять покупателей и перебрать их одного за другим
         /** @var PatientInfo $patient */
         foreach (PatientInfo::find()->each(10) as $patient) {
-            $dublicates = PatientInfo::find()->where(['email' => $patient->email])->count();
-            if($dublicates > 1){
-                $values = PatientInfo::findAll(['email' => $patient->email]);
-                if(!empty($values)){
-                    $counter = 0;
-                    foreach ($values as $value) {
-                        if($counter === 0){
-                            continue;
-                        }
-                        try {
-                            $value->delete();
-                        } catch (StaleObjectException | \Throwable $e) {}
-                    }
-                }
-            }
-//            if($patient->unsubscribe_token === null){
-//                $patient->unsubscribe_token = Yii::$app->security->generateRandomString(255);
-//                $patient->save();
-//            }
+            $username = GrammarHandler::handlePersonals($patient);
+            $text = "<br/><br/>Добрый день, $username<br/> 
+В Региональном диагностическом центре открылось отделение <b>компьютерной томографии</b> по адресу:<br/> <b>г. Нижний Новгород, ул. Советская, д.12 (пл. Ленина). </b><br/>
+Записаться на исследования вы можете по тел. <a href='tel:88312020200'>+7(831)20-20-200</a>. <br/>
+Подробная информация на нашем сайте <a href='http://www.мрт-кт.рф'>www.мрт-кт.рф</a><br/><br/><br/>
+<a href='http://xn----ttbeqkc.xn--p1ai/nn/kt'><img class='advice' src='https://rdcnn.ru/images/ct_advice.jpg' alt='ct_advice'></a><br/><br/><br/><br/>
+<a href='https://rdcnn.ru/unsubscribe/{$patient->unsubscribe_token}'><b>Если не хотите получать от нас письма- нажмите сюда</b></a>
+";
+            (new MailingSchedule([
+                'text' => $text,
+                'name' => $patient->name,
+                'title' => 'Открытие отделения компьютерной томографии',
+                'address' => $patient->email
+            ]))->save();
         }
     }
 

@@ -5,6 +5,7 @@ namespace app\controllers;
 
 
 use app\models\AdministratorActions;
+use app\models\database\PatientInfo;
 use app\models\Rate;
 use app\models\Telegram;
 use app\models\User;
@@ -44,6 +45,7 @@ class UserController extends Controller
                         'allow' => true,
                         'actions' => [
                             'enter',
+                            'unsubscribe',
                         ],
                         'roles' => ['?', '@'],
                     ],
@@ -195,5 +197,15 @@ class UserController extends Controller
             Telegram::sendDebug("Попытка входа с токеном " . $accessToken);
         }
         throw new NotFoundHttpException();
+    }
+
+    public function actionUnsubscribe($token): void
+    {
+        $user = PatientInfo::findOne(['unsubscribe_token' => $token]);
+        if($user !== null){
+            $user->unsubscribed = 1;
+            $user->save();
+        }
+        echo '<h2>Мы всё поняли и больше не будем вас беспокоить :)</h2>';
     }
 }
