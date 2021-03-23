@@ -25,8 +25,7 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
 
-
-$waiting = MailingSchedule::find()->limit(100)->all();
+$mailingCount = MailingSchedule::find()->count();
 ?>
 
 <div class="text-center">
@@ -42,7 +41,7 @@ $waiting = MailingSchedule::find()->limit(100)->all();
     <li><a href="#telegram_actions" data-toggle="tab">Телеграм</a></li>
     <li><a href="#existent_conclusions" data-toggle="tab">Файлы заключений</a></li>
     <li><a href="#existent_executions" data-toggle="tab">Обследования</a></li>
-    <li><a href="#mailing" data-toggle="tab">Очередь рассылки <span class="badge badge-info"><?=count($waiting)?></span></a></li>
+    <li><a href="#mailing" data-toggle="tab">Очередь рассылки <span class="badge badge-info"><?=$mailingCount?></span></a></li>
 </ul>
 
 <div class="tab-content">
@@ -177,6 +176,7 @@ $waiting = MailingSchedule::find()->limit(100)->all();
     </div>
     <div class="tab-pane margened" id="mailing">
         <?php
+        $waiting = MailingSchedule::find()->limit(100)->all();
         if (!empty($waiting)) {
             echo "<h1 class='margin text-center'>Рассылка</h1>";
             echo "<div class='margin text-center'><span>Сообщений в очереди- <span id='unsendedMessagesCounter'>" . count($waiting) . '</span></span></div>';
