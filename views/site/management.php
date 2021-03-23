@@ -23,6 +23,8 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateOutputInfo string */
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
+
+\app\models\Utils::sendTest();
 ?>
 
 <div class="text-center">
