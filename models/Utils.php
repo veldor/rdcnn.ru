@@ -10,6 +10,7 @@ use DateTime;
 use Exception;
 use Yii;
 use yii\base\Model;
+use yii\db\StaleObjectException;
 
 class Utils extends Model
 {
@@ -177,10 +178,25 @@ class Utils extends Model
         // получить одновременно десять покупателей и перебрать их одного за другим
         /** @var PatientInfo $patient */
         foreach (PatientInfo::find()->each(10) as $patient) {
-            if($patient->unsubscribe_token === null){
-                $patient->unsubscribe_token = Yii::$app->security->generateRandomString(255);
-                $patient->save();
+            $dublicates = PatientInfo::find()->where(['email' => $patient->email])->count();
+            if($dublicates > 1){
+                $values = PatientInfo::findAll(['email' => $patient->email]);
+                if(!empty($values)){
+                    $counter = 0;
+                    foreach ($values as $value) {
+                        if($counter === 0){
+                            continue;
+                        }
+                        try {
+                            $value->delete();
+                        } catch (StaleObjectException | \Throwable $e) {}
+                    }
+                }
             }
+//            if($patient->unsubscribe_token === null){
+//                $patient->unsubscribe_token = Yii::$app->security->generateRandomString(255);
+//                $patient->save();
+//            }
         }
     }
 
