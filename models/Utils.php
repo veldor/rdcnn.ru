@@ -177,7 +177,7 @@ class Utils extends Model
         // получить одновременно десять покупателей и перебрать их одного за другим
         /** @var PatientInfo $patient */
         foreach (PatientInfo::find()->each(10) as $patient) {
-            $username = GrammarHandler::handlePersonals($patient);
+            $username = GrammarHandler::handlePersonals($patient->name);
             $text = "<br/><br/>Добрый день, $username<br/> 
 В Региональном диагностическом центре открылось отделение <b>компьютерной томографии</b> по адресу:<br/> <b>г. Нижний Новгород, ул. Советская, д.12 (пл. Ленина). </b><br/>
 Записаться на исследования вы можете по тел. <a href='tel:88312020200'>+7(831)20-20-200</a>. <br/>
