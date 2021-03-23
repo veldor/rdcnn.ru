@@ -2,6 +2,7 @@
 /** @noinspection SpellCheckingInspection */
 return [
     'error' => 'site/error',
+    'send-message' => 'management/send-message',
     'enter/<authToken:.{256}>' => 'management/handle-mail',
     'unsubscribe/<token:.+>' => 'user/unsubscribe',
     'iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8' => 'site/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8',

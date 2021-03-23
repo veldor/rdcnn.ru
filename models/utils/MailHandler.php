@@ -149,4 +149,9 @@ class MailHandler extends Model
         }
         return false;
     }
+
+    public static function sendMailing(): array
+    {
+        return ['status' => 1];
+    }
 }

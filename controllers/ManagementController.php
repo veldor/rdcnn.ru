@@ -10,6 +10,7 @@ use app\models\FileUtils;
 use app\models\Table_blacklist;
 use app\models\User;
 use app\models\utils\ComHandler;
+use app\models\utils\MailHandler;
 use app\models\utils\MailSettings;
 use app\models\utils\Management;
 use Exception;
@@ -17,6 +18,7 @@ use Throwable;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class ManagementController extends Controller
@@ -46,6 +48,7 @@ class ManagementController extends Controller
                             'change-mail',
                             'delete-mail',
                             'delete-conclusions',
+                            'send-message',
                         ],
                         'roles' => [
                             'manager'
@@ -224,5 +227,14 @@ class ManagementController extends Controller
         // удалю все записи из чёрного списка
         Table_blacklist::clear();
         return ['status' => 1, 'message' => 'Чёрный список вычищен', 'reload' => true];
+    }
+
+    public function actionSendMessage(): array
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return MailHandler::sendMailing();
+        }
+        throw new NotFoundHttpException();
     }
 }

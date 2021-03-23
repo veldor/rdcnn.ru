@@ -176,7 +176,7 @@ $mailingCount = MailingSchedule::find()->count();
     </div>
     <div class="tab-pane margened" id="mailing">
         <?php
-        $waiting = MailingSchedule::find()->limit(100)->all();
+        $waiting = MailingSchedule::find()->limit(300)->all();
         if (!empty($waiting)) {
             echo "<h1 class='margin text-center'>Рассылка</h1>";
             echo "<div class='margin text-center'><span>Сообщений в очереди- <span id='unsendedMessagesCounter'>" . count($waiting) . '</span></span></div>';
