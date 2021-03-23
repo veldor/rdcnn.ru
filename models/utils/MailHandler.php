@@ -115,7 +115,7 @@ class MailHandler extends Model
         return ['status' => 1, 'message' => 'Не найден адрес почты'];
     }
 
-    private static function sendMessage($title, $text, $address, $sendTo, $attachments): bool
+    public static function sendMessage($title, $text, $address, $sendTo, $attachments): bool
     {
         $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
         if (is_file($settingsFile)) {

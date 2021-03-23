@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\utils\MailHandler;
 use DateTime;
 use Exception;
 use Yii;
@@ -160,8 +161,14 @@ class Utils extends Model
 в Региональном диагностическом центре открылось отделение компьютерной томографии по адресу:<br/> <b>г. Нижний Новгород, ул. Советская, д.12 (пл. Ленина). </b><br/>
 Записаться на исследования вы можете по тел. <a href='tel:88312020200'>+7(831)20-20-200</a>. <br/>
 Подробная информация на нашем сайте <a href='http://www.мрт-кт.рф'>www.мрт-кт.рф</a><br/>
-<img src=''>
+<img class='advice' src='https://rdcnn.ru/images/ct_advice.jpg' alt='ct_advice'><br/>
+<a href='https://rdcnn.ru/unsubscribe/#'><b>Если не хотите получать от нас письма- нажмите сюда</b></a>
 ";
+        MailHandler::sendMessage('Тест рассылки',
+        $text,
+        'eldorianwin@gmail.com',
+        'Сергей Кириллов',
+        null);
     }
 
 }

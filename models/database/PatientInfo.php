@@ -19,6 +19,8 @@ use yii\helpers\Url;
  * @property string $phone [varchar(255)]
  * @property string $sex [varchar(255)]
  * @property string $email [varchar(255)]
+ * @property string $unsubscribe_token [char(255)]
+ * @property bool $unsubscribed [tinyint(1)]
  */
 class PatientInfo extends ActiveRecord
 {
