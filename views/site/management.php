@@ -1,6 +1,7 @@
 <?php
 
 use app\assets\ManagementAsset;
+use app\models\database\MailingSchedule;
 use app\models\database\ViberPersonalList;
 use app\models\FileUtils;
 use app\models\utils\GrammarHandler;
@@ -23,6 +24,9 @@ $this->title = 'Всякие разные настройки';
 /* @var $updateOutputInfo string */
 /* @var $updateErrorsInfo string */
 /* @var $telegramInfo array */
+
+
+$waiting = MailingSchedule::find()->limit(100)->all();
 ?>
 
 <div class="text-center">
@@ -38,7 +42,7 @@ $this->title = 'Всякие разные настройки';
     <li><a href="#telegram_actions" data-toggle="tab">Телеграм</a></li>
     <li><a href="#existent_conclusions" data-toggle="tab">Файлы заключений</a></li>
     <li><a href="#existent_executions" data-toggle="tab">Обследования</a></li>
-    <li><a href="#mailing" data-toggle="tab">Очередь рассылки</a></li>
+    <li><a href="#mailing" data-toggle="tab">Очередь рассылки <span class="badge badge-info"><?=count($waiting)?></span></a></li>
 </ul>
 
 <div class="tab-content">
@@ -173,13 +177,12 @@ $this->title = 'Всякие разные настройки';
     </div>
     <div class="tab-pane margened" id="mailing">
         <?php
-        $waiting = \app\models\database\MailingSchedule::find()->all();
         if (!empty($waiting)) {
             echo "<h1 class='margin text-center'>Рассылка</h1>";
             echo "<div class='margin text-center'><span>Сообщений в очереди- <span id='unsendedMessagesCounter'>" . count($waiting) . '</span></span></div>';
             echo "<div class='text-center margin'><div class='btn-group-vertical'><button class='btn btn-default' id='beginSendingBtn'><span class='text-success'>Начать рассылку</span></button><button class='btn btn-default' id='clearSendingBtn'><span class='text-danger'>Очистить список</span></button></div></div>";
             echo '<table class="table table-bordered table-striped table-hover"><thead><tr><th>Тип</th><th>ФИО</th><th>Заголовок</th><th>Адрес почты</th><th>Статус</th><th>Действия</th></thead><tbody>';
-            /** @var \app\models\database\MailingSchedule $item */
+            /** @var MailingSchedule $item */
             foreach ($waiting as $item) {
                 // найду информацию о почте и о рассылке
                 echo "<tr class='text-center align-middle'><td><b class='text-info'>Рассылка</b></td><td>{$item->name}</td><td>" . urldecode($item->title) . "</td><td>{$item->address}</td><td><b class='text-info mailing-status' data-schedule-id='{$item->id}'>Ожидает отправки</b></td><td><button class='mailing-cancel btn btn-default' data-schedule-id='{$item->id}'><span class='text-danger'>Отменить отправку</span></button></td></tr>";
