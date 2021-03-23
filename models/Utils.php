@@ -188,7 +188,7 @@ class Utils extends Model
                         (new PatientInfo([
                             'name' => $patient->name,
                             'email' => $account,
-                            'unsubscribe_token' => Yii::$app->security->generateRandomString(256),
+                            'unsubscribe_token' => Yii::$app->security->generateRandomString(255),
                             'phone' => $patient->phone,
                             'sex' => $patient->sex
                         ]))->save();
