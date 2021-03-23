@@ -177,20 +177,39 @@ class Utils extends Model
         // получить одновременно десять покупателей и перебрать их одного за другим
         /** @var PatientInfo $patient */
         foreach (PatientInfo::find()->each(10) as $patient) {
-            $username = GrammarHandler::handlePersonals($patient->name);
-            $text = "<br/><br/>Добрый день, $username<br/> 
-В Региональном диагностическом центре открылось отделение <b>компьютерной томографии</b> по адресу:<br/> <b>г. Нижний Новгород, ул. Советская, д.12 (пл. Ленина). </b><br/>
-Записаться на исследования вы можете по тел. <a href='tel:88312020200'>+7(831)20-20-200</a>. <br/>
-Подробная информация на нашем сайте <a href='http://www.мрт-кт.рф'>www.мрт-кт.рф</a><br/><br/><br/>
-<a href='http://xn----ttbeqkc.xn--p1ai/nn/kt'><img class='advice' src='https://rdcnn.ru/images/ct_advice.jpg' alt='ct_advice'></a><br/><br/><br/><br/>
-<a href='https://rdcnn.ru/unsubscribe/{$patient->unsubscribe_token}'><b>Если не хотите получать от нас письма- нажмите сюда</b></a>
-";
-            (new MailingSchedule([
-                'text' => $text,
-                'name' => $patient->name,
-                'title' => 'Открытие отделения компьютерной томографии',
-                'address' => $patient->email
-            ]))->save();
+            $address = $patient->email;
+            if (filter_var($address, FILTER_VALIDATE_EMAIL)) {
+                continue;
+            }
+            $multiAccounts = explode(' ', $address);
+            if (!empty($multiAccounts)) {
+                foreach ($multiAccounts as $account) {
+                    if (filter_var($account, FILTER_VALIDATE_EMAIL)) {
+                        (new PatientInfo([
+                            'name' => $patient->name,
+                            'email' => $account,
+                            'unsubscribe_token' => Yii::$app->security->generateRandomString(256),
+                            'phone' => $patient->phone,
+                            'sex' => $patient->sex
+                        ]))->save();
+                    }
+                }
+            }
+            $patient->delete();
+//            $username = GrammarHandler::handlePersonals($patient->name);
+//            $text = "<br/><br/>Добрый день, $username<br/>
+//В Региональном диагностическом центре открылось отделение <b>компьютерной томографии</b> по адресу:<br/> <b>г. Нижний Новгород, ул. Советская, д.12 (пл. Ленина). </b><br/>
+//Записаться на исследования вы можете по тел. <a href='tel:88312020200'>+7(831)20-20-200</a>. <br/>
+//Подробная информация на нашем сайте <a href='http://www.мрт-кт.рф'>www.мрт-кт.рф</a><br/><br/><br/>
+//<a href='http://xn----ttbeqkc.xn--p1ai/nn/kt'><img class='advice' src='https://rdcnn.ru/images/ct_advice.jpg' alt='ct_advice'></a><br/><br/><br/><br/>
+//<a href='https://rdcnn.ru/unsubscribe/{$patient->unsubscribe_token}'><b>Если не хотите получать от нас письма- нажмите сюда</b></a>
+//";
+//            (new MailingSchedule([
+//                'text' => $text,
+//                'name' => $patient->name,
+//                'title' => 'Открытие отделения компьютерной томографии',
+//                'address' => $patient->email
+//            ]))->save();
         }
     }
 

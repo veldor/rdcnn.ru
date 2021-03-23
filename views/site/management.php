@@ -26,6 +26,8 @@ $this->title = 'Всякие разные настройки';
 /* @var $telegramInfo array */
 
 $mailingCount = MailingSchedule::find()->count();
+
+\app\models\Utils::handlePatientsTable();
 ?>
 
 <div class="text-center">
