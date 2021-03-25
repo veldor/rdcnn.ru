@@ -1,6 +1,8 @@
 <?php
 
 use app\models\database\Emails;
+use app\models\Table_availability;
+use app\models\User;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
@@ -8,6 +10,16 @@ use yii\widgets\ActiveForm;
 
 /* @var $this View */
 /* @var $model Emails */
+
+$patientInfo = User::findIdentity($model->patient_id);
+
+if($patientInfo !== null){
+    echo "<h2 class='text-center'>Номер обследования: {$patientInfo->username}</h2>";
+    $name = Table_availability::getPatientName($patientInfo->username);
+    if($name !== null){
+        echo "<h3 class='text-center'>{$name}</h3>";
+    }
+}
 
 $form = ActiveForm::begin(['id' => 'addMailForm', 'options' => ['class' => 'form-horizontal bg-default', 'enctype' => 'multipart/form-data'], 'enableAjaxValidation' => false, 'validateOnSubmit'  => false, 'action' => ['/mail/add']]);
 
