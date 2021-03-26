@@ -158,16 +158,26 @@ class Utils extends Model
     public static function sendTest(): void
     {
         $username = 'Ольга Викторовна';
-        $text = "<br/><br/>Добрый день, $username<br/> 
+        $text = "<br/><br/>Добрый день, $username<br/>
 В Региональном диагностическом центре открылось отделение <b>компьютерной томографии</b> по адресу:<br/> <b>г. Нижний Новгород, ул. Советская, д.12 (пл. Ленина). </b><br/>
 Записаться на исследования вы можете по тел. <a href='tel:88312020200'>+7(831)20-20-200</a>. <br/>
 Подробная информация на нашем сайте <a href='http://www.мрт-кт.рф'>www.мрт-кт.рф</a><br/><br/><br/>
 <a href='http://xn----ttbeqkc.xn--p1ai/nn/kt'><img class='advice' src='https://rdcnn.ru/images/ct_advice.jpg' alt='ct_advice'></a><br/><br/><br/><br/>
-<a href='https://rdcnn.ru/unsubscribe/#'><b>Если не хотите получать от нас письма- нажмите сюда</b></a>
+<a href='https://rdcnn.ru/unsubscribe/0000'><b>Если не хотите получать от нас письма- нажмите сюда</b></a>
 ";
         MailHandler::sendMessage('Тест рассылки',
             $text,
+            'o.maleeva1973@mail.ru',
+            'Ольга Царапкина',
+            null);
+        MailHandler::sendMessage('Тест рассылки',
+            $text,
             'om@rdcnn.ru',
+            'Ольга Царапкина',
+            null);
+        MailHandler::sendMessage('Тест рассылки',
+            $text,
+            'eldorianwin@gmail.com',
             'Ольга Царапкина',
             null);
     }
