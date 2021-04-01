@@ -6,6 +6,7 @@ namespace app\models\utils;
 
 use app\models\database\Emails;
 use app\models\database\MailingSchedule;
+use app\models\database\PatientInfo;
 use app\models\database\TempDownloadLinks;
 use app\models\Table_availability;
 use app\models\User;
@@ -21,6 +22,10 @@ class MailHandler extends Model
     public static function getMailText($text): string
     {
         return Yii::$app->controller->renderPartial('/site/mail-template', ['text' => $text]);
+    }
+    public static function getLightMailText($text): string
+    {
+        return Yii::$app->controller->renderPartial('/site/mail-template-light', ['text' => $text]);
     }
 
     /**
@@ -117,7 +122,7 @@ class MailHandler extends Model
         return ['status' => 1, 'message' => 'Не найден адрес почты'];
     }
 
-    public static function sendMessage($title, $text, $address, $sendTo, $attachments): bool
+    public static function sendMessage($title, $text, $address, $sendTo, $attachments, $isLight = false): bool
     {
         $settingsFile = Yii::$app->basePath . '\\priv\\mail_settings.conf';
         if (is_file($settingsFile)) {
@@ -131,7 +136,16 @@ class MailHandler extends Model
                     foreach ($mailList as $mailItem) {
                         $recipientsList[$mailItem] = $sendTo ?? '';
                     }
-                    $text = self::getMailText($text);
+                    if($isLight){
+                        $text = self::getLightMailText($text);
+                        $mailInfo = PatientInfo::findOne(['address' => $address]);
+                        if($mailInfo !== null){
+                            $text = str_replace('{patient_unsubscribe_token}', $mailInfo->unsubscribe_token, $text);
+                        }
+                    }
+                    else{
+                        $text = self::getMailText($text);
+                    }
                     // отправлю письмо
                     $mail = Yii::$app->mailer->compose()
                         ->setFrom([$settingsArray[0] => 'Региональный диагностический центр'])

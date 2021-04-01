@@ -129,17 +129,6 @@
 
     <tr>
         <td class="overline" colspan="2">
-            <p>Надеемся, что вы остались довольны посещением нашего центра.<br/>
-            Мы будем рады, если вы найдёте минуту и оставите о нас отзыв.</p>
-
-            <div class='text-center btns-block'><a class='btn btn-success' href='https://search.google.com/local/writereview?placeid=ChIJHXcPvNHVUUER5IWxpxP1DfM'>Оставить отзыв на Google</a><br/>
-            <a class='btn btn-success' href='https://prodoctorov.ru/new/rate/lpu/48447/'>Оставить отзыв на ПроДокторов</a><br/>
-            <a class='btn btn-success' href='https://yandex.ru/maps/47/nizhny-novgorod/?add-review=true&ll=43.957299%2C56.325628&mode=search&oid=1122933423&ol=biz&z=14'>Оставить отзыв на Яндекс</a></div>
-        </td>
-    </tr>
-
-    <tr>
-        <td class="overline" colspan="2">
             <!--Футер-->
             <h3 class="text-center">У вас есть вопросы?</h3>
             <p class="text-center"><a href="tel:88312020200">Кликните, чтобы позвонить нам<br/>+7(831)20-20-200</a></p>
@@ -164,6 +153,11 @@
                     <img class="advice" alt="advice image" src="http://xn----ttbeqkc.xn--p1ai/actions.png"/>
                 </a>
             </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <a href='https://rdcnn.ru/unsubscribe/{patient_unsubscribe_token}'><b>Если не хотите получать от нас письма- нажмите сюда</b></a>
         </td>
     </tr>
 </table>
