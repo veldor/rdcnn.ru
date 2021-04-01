@@ -139,7 +139,8 @@
         <td colspan="2" class="filled">
             <b>С заботой о Вас и Ваших близких!</b><br/>
             <b>Региональный Диагностический Центр</b><br/>
-            <a href="http://xn----ttbeqkc.xn--p1ai/">мрт-кт.рф</a>
+            <a href="http://xn----ttbeqkc.xn--p1ai/">мрт-кт.рф</a><br/>
+            <a href="tel:88312020200">+7(831)20-20-200</a>
         </td>
     </tr>
     </tbody>

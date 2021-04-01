@@ -164,22 +164,24 @@ class Utils extends Model
 Подробная информация на нашем сайте <a href='http://www.мрт-кт.рф'>www.мрт-кт.рф</a><br/><br/><br/>
 <a href='http://xn----ttbeqkc.xn--p1ai/nn/kt'><img class='advice' src='https://rdcnn.ru/images/ct_advice.jpg' alt='ct_advice'></a><br/><br/><br/><br/>
 ";
-//        MailHandler::sendMessage('Тест рассылки',
-//            $text,
-//            'o.maleeva1973@mail.ru',
-//            'Ольга Царапкина',
-//            null);
-//        MailHandler::sendMessage('Тест рассылки',
-//            $text,
-//            'om@rdcnn.ru',
-//            'Ольга Царапкина',
-//            null);
+        MailHandler::sendMessage('Тест рассылки',
+            $text,
+            'o.maleeva1973@mail.ru',
+            'Ольга Царапкина',
+            null,
+            true);
+        MailHandler::sendMessage('Тест рассылки',
+            $text,
+            'om@rdcnn.ru',
+            'Ольга Царапкина',
+            null,
+            true);
         MailHandler::sendMessage('Тест рассылки',
             $text,
             'eldorianwin@gmail.com',
             'Ольга Царапкина',
             null
-        ,true);
+            , true);
     }
 
     public static function handlePatientsTable(): void
