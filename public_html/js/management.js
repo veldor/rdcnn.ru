@@ -11,7 +11,7 @@ function recursiveSendMessages(waitingMessages, sendingCouner) {
     if (sendInProgress) {
         let targetMessage = waitingMessages.eq(sendingCouner);
         targetMessage.removeClass('text-info').addClass('text-primary').text('Отправка');
-        sendAjax('post',
+        sendSilentAjax('post',
             '/send-message',
             function (data) {
                 if (data.status && data.status === 1) {

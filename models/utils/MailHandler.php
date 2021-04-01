@@ -181,6 +181,7 @@ class MailHandler extends Model
                         null,
                         true);
                     $mailingItem->delete();
+                    sleep(1);
                     return ['status' => 1];
                 } catch (\Exception | Throwable $e) {
                     return ['message' => 'Отправка не удалась, текст ошибки- "' . $e->getMessage() . '"'];
