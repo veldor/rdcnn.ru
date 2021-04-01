@@ -138,7 +138,7 @@ class MailHandler extends Model
                     }
                     if($isLight){
                         $text = self::getLightMailText($text);
-                        $mailInfo = PatientInfo::findOne(['address' => $address]);
+                        $mailInfo = PatientInfo::findOne(['email' => $address]);
                         if($mailInfo !== null){
                             $text = str_replace('{patient_unsubscribe_token}', $mailInfo->unsubscribe_token, $text);
                         }
