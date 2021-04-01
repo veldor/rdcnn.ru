@@ -188,7 +188,7 @@ class Utils extends Model
     {
         // получить одновременно десять покупателей и перебрать их одного за другим
         /** @var PatientInfo $patient */
-        foreach (PatientInfo::find()->each(10) as $patient) {
+        foreach (PatientInfo::find()->each(3) as $patient) {
 //            $address = $patient->email;
 //            if (filter_var($address, FILTER_VALIDATE_EMAIL)) {
 //                continue;
@@ -221,6 +221,7 @@ class Utils extends Model
                 'title' => 'Открытие отделения компьютерной томографии',
                 'address' => $patient->email
             ]))->save();
+            return;
         }
     }
 

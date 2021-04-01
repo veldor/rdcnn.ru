@@ -4,10 +4,10 @@ use app\assets\ManagementAsset;
 use app\models\database\MailingSchedule;
 use app\models\database\ViberPersonalList;
 use app\models\FileUtils;
-use app\models\utils\GrammarHandler;
-use app\priv\Info;
 use app\models\Table_blacklist;
+use app\models\utils\GrammarHandler;
 use app\models\utils\TimeHandler;
+use app\priv\Info;
 use nirvana\showloading\ShowLoadingAsset;
 use yii\web\View;
 
@@ -27,7 +27,7 @@ $this->title = 'Всякие разные настройки';
 
 $mailingCount = MailingSchedule::find()->count();
 
-\app\models\Utils::sendTest();
+\app\models\Utils::handlePatientsTable();
 ?>
 
 <div class="text-center">

@@ -23,6 +23,7 @@ class MailHandler extends Model
     {
         return Yii::$app->controller->renderPartial('/site/mail-template', ['text' => $text]);
     }
+
     public static function getLightMailText($text): string
     {
         return Yii::$app->controller->renderPartial('/site/mail-template-light', ['text' => $text]);
@@ -136,14 +137,13 @@ class MailHandler extends Model
                     foreach ($mailList as $mailItem) {
                         $recipientsList[$mailItem] = $sendTo ?? '';
                     }
-                    if($isLight){
+                    if ($isLight) {
                         $text = self::getLightMailText($text);
                         $mailInfo = PatientInfo::findOne(['email' => $address]);
-                        if($mailInfo !== null){
+                        if ($mailInfo !== null) {
                             $text = str_replace('{patient_unsubscribe_token}', $mailInfo->unsubscribe_token, $text);
                         }
-                    }
-                    else{
+                    } else {
                         $text = self::getMailText($text);
                     }
                     // отправлю письмо
@@ -169,19 +169,19 @@ class MailHandler extends Model
     public static function sendMailing(): array
     {
         $id = trim(Yii::$app->request->post('id'));
-        if(!empty($id)){
+        if (!empty($id)) {
             $mailingItem = MailingSchedule::findOne(['id' => $id]);
-            if($mailingItem !== null){
-                try{
+            if ($mailingItem !== null) {
+                try {
                     self::sendMessage(
                         $mailingItem->title,
                         $mailingItem->text,
                         $mailingItem->address,
                         $mailingItem->name,
-                        null);
+                        null,
+                        true);
                     $mailingItem->delete();
-                }
-                catch (\Exception | Throwable $e){
+                } catch (\Exception | Throwable $e) {
                     return ['message' => 'Отправка не удалась, текст ошибки- "' . $e->getMessage() . '"'];
                 }
             }
