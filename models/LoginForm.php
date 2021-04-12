@@ -29,8 +29,8 @@ class LoginForm extends Model
         ];
     }
 
-    public ?string $username;
-    public ?string $password;
+    public ?string $username = null;
+    public ?string $password = null;
 
     private ?User $_user = null;
 
