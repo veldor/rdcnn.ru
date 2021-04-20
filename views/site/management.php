@@ -28,7 +28,7 @@ $this->title = 'Всякие разные настройки';
 
 $mailingCount = MailingSchedule::find()->count();
 
-\app\models\Utils::handlePatientsTable();
+//\app\models\Utils::handlePatientsTable();
 ?>
 
 <div class="text-center">
