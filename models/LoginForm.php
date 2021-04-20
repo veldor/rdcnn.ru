@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\models\utils\GrammarHandler;
-use TelegramBot\Api\InvalidArgumentException;
 use Throwable;
 use Yii;
 use yii\base\Exception;
@@ -30,10 +29,10 @@ class LoginForm extends Model
         ];
     }
 
-    public $username;
-    public $password;
+    public ?string $username = null;
+    public ?string $password = null;
 
-    private $_user = false;
+    private ?User $_user = null;
 
 
     /**
@@ -106,7 +105,7 @@ class LoginForm extends Model
                 $user->access_token = Yii::$app->getSecurity()->generateRandomString(255);
             }
             $user->save();
-            return Yii::$app->user->login($this->getUser(), 0);
+            return Yii::$app->user->login($this->getUser());
         }
         return false;
     }
@@ -118,7 +117,7 @@ class LoginForm extends Model
      */
     public function getUser(): User
     {
-        if ($this->_user === false) {
+        if ($this->_user === null) {
             $this->_user = User::findByUsername(trim($this->username));
         }
         return $this->_user;
@@ -129,29 +128,32 @@ class LoginForm extends Model
      */
     public function loginAdmin(): bool
     {
+        $ip = $_SERVER['REMOTE_ADDR'];
         $blocked = $this->checkBlacklist();
         if ($blocked) {
             $blocked->last_try = time();
             $blocked->save();
-            $this->addError('password', 'Компьютер в чёрном списке. Обратитесь к администратору!');
+            $this->addError('password', 'Компьютер в чёрном списке. Напишите или позвоните Сергею :) (Но скорее всего, он уже в курсе) !');
+            Telegram::sendDebug("$ip : Попытка входа в админку при том, что IP в чёрном списке с данными {$this->username} : {$this->password}");
             return false;
         }
 
         // получу админа
+        /** @var User $admin */
         $admin = User::getAdmin();
 
         // проверю, правильно ли введено имя
         if ($admin->username !== trim($this->username)) {
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
-            Telegram::sendDebug("Попытка входа с неверными данными\nЛогин: {$this->username}");
+            Telegram::sendDebug("$ip : Попытка входа администратора с неверными данными\nЛогин: {$this->username}");
             return false;
         }
 
         if (!$admin->validatePassword(trim($this->password))) {
             $this->registerWrongTry();
             $this->addError('password', 'Неверный логин или пароль');
-            Telegram::sendDebug("Попытка входа с неверными данными\nПароль: {$this->password}");
+            Telegram::sendDebug("$ip : Попытка входа администратора с неверными данными\nПароль: {$this->password}");
             return false;
         }
 
@@ -160,12 +162,13 @@ class LoginForm extends Model
             try {
                 $admin->access_token = Yii::$app->getSecurity()->generateRandomString(255);
             } catch (Exception $e) {
+                Telegram::sendDebug("$ip : Не удалось добавить токен администратора {$e->getTraceAsString()}");
                 die('не удалось добавить токен');
             }
         }
         $admin->save();
-        Telegram::sendDebug("Успешный вход в систему");
-        return Yii::$app->user->login($admin);
+        Telegram::sendDebug("$ip : Успешный вход в админку");
+        return Yii::$app->user->login($admin, 2678400);
     }
 
     /**
@@ -174,6 +177,7 @@ class LoginForm extends Model
      */
     public function loginUser(): bool
     {
+        $ip = $_SERVER['REMOTE_ADDR'];
         // проверю, не занесён ли IP в чёрный список
         $blocked = $this->checkBlacklist();
         if ($blocked) {
@@ -181,25 +185,30 @@ class LoginForm extends Model
             if(time() - $blocked->last_try > 60 * 60 * 24){
                 try {
                     $blocked->delete();
-                } catch (StaleObjectException $e) {
-                } catch (Throwable $e) {
-                    // ошибка при удалении блокировки
+                    Telegram::sendDebug("$ip : удалён из чёрного списка по таймауту");
+                } catch (StaleObjectException | Throwable $e) {
+
+                    Telegram::sendDebug("$ip : ошибка удаления из ЧС {$e->getTraceAsString()}");
                 }
             }
             // если количество неудачных попыток больше 3 и не прошло 10 минут- отправим ожидать
             elseif($blocked->try_count > 3 && (time() - $blocked->last_try < 600)){
                 $this->addError('username', 'Слишком много неверных попыток ввода пароля. Должно пройти не менее 10 минут с последней попытки');
+                Telegram::sendDebug("$ip : Слишком много неверных попыток ввода пароля {$this->username} : {$this->password}");
                 return false;
             }
             elseif ($blocked->missed_execution_number > 20){
                 $this->addError('username', 'Слишком много попыток ввода номера обследования. Попробуйте снова через сутки');
+                Telegram::sendDebug("$ip : Слишком много неверных попыток входа. Адрес заблокирован на сутки {$this->username} : {$this->password}");
                 return false;
             }
         }
         // проверю, не производится ли попытка зайти под админской учёткой
+        /** @var User $admin */
         $admin = User::getAdmin();
         if($this->username === $admin->username){
             $this->addError('password', 'Неверный номер обследования или пароль');
+            Telegram::sendDebug("$ip : Попытка зайти в клиентскую часть с админскими данными {$this->username} : {$this->password}");
             return false;
         }
 
@@ -208,6 +217,7 @@ class LoginForm extends Model
         if ($user !== null) {
             if ($user->failed_try > 20) {
                 $this->addError('username', 'Было выполнено слишком много неверных попыток ввода пароля. В целях безопасности данные были удалены. Вы можете обратиться к нам для восстановления доступа');
+                Telegram::sendDebug("$ip : Слишком много неверных попыток ввода пароля и учётная запись заблокирована {$this->username} : {$this->password}");
                 return false;
             }
             if (!$user->validatePassword(trim($this->password))) {
@@ -219,9 +229,11 @@ class LoginForm extends Model
                     $blocked->updateCounters(['try_count' => 1]);
                     $blocked->last_try = time();
                     $blocked->save();
+                    Telegram::sendDebug("$ip : Слишком много неверных попыток, учётная запись заблокирована {$this->username} : {$this->password}");
                 }
                 else{
                     $this->registerWrongTry();
+                    Telegram::sendDebug("$ip : Попытка входа в клиентскую часть с неверными данными {$this->username} : {$this->password}");
                 }
                 return false;
             }
@@ -231,9 +243,11 @@ class LoginForm extends Model
                 $user->access_token = Yii::$app->getSecurity()->generateRandomString(255);
             }
             $user->save();
-            return Yii::$app->user->login($user, 0);
+            Telegram::sendDebug("$ip : успешный вход пользователя {$user->username}");
+            return Yii::$app->user->login($user);
         }
         $this->addError('username', 'Неверный номер обследования или пароль');
+        Telegram::sendDebug("$ip : Попытка входа в клиентскую часть с неверными данными {$this->username} : {$this->password}");
         // добавлю пользователя в список подозрительных
         if($blocked){
             $blocked->updateCounters(['missed_execution_number' => 1]);
@@ -246,7 +260,7 @@ class LoginForm extends Model
     }
 
 
-    private function checkBlacklist()
+    private function checkBlacklist(): ?Table_blacklist
     {
         $ip = $_SERVER['REMOTE_ADDR'];
         return Table_blacklist::findOne(['ip' => $ip]);
@@ -264,6 +278,7 @@ class LoginForm extends Model
             $blacklist->try_count = 1;
             $blacklist->last_try = time();
             $blacklist->save();
+            Telegram::sendDebug("$ip : Первая попытка входа с неверными данными: {$this->username} : {$this->password}");
         }
     }
 }

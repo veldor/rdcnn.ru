@@ -4,7 +4,9 @@
 namespace app\models;
 
 
+use Throwable;
 use yii\db\ActiveRecord;
+use yii\db\StaleObjectException;
 
 /**
  * @property int $id [bigint(20) unsigned]  Глобальный идентификатор
@@ -16,7 +18,7 @@ use yii\db\ActiveRecord;
 
 class Table_blacklist extends ActiveRecord
 {
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'blacklist';
     }
@@ -26,7 +28,11 @@ class Table_blacklist extends ActiveRecord
         $results = self::find()->all();
         if(!empty($results)){
             foreach ($results as $result) {
-                $result->delete();
+                try {
+                    $result->delete();
+                } catch (StaleObjectException | Throwable $e) {
+                    Telegram::sendDebug("Ошибка удаления записи из БД: {$e->getTraceAsString()}");
+                }
             }
         }
     }
