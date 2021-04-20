@@ -6,6 +6,7 @@ namespace app\models;
 
 use app\models\database\MailingSchedule;
 use app\models\database\PatientInfo;
+use app\models\database\PatientInfoDouble;
 use app\models\utils\GrammarHandler;
 use app\models\utils\MailHandler;
 use DateTime;
@@ -186,9 +187,19 @@ class Utils extends Model
 
     public static function handlePatientsTable(): void
     {
-        // получить одновременно десять покупателей и перебрать их одного за другим
         /** @var PatientInfo $patient */
-        foreach (PatientInfo::find()->each(100) as $patient) {
+        foreach (PatientInfoDouble::find()->each(100) as $patient) {
+            // проверю, что адреса ещё нет в базе
+            if(PatientInfo::find()->where(['email' , $patient->email])->count() === 0){
+                $new = new PatientInfo();
+                $new->email = $patient->email;
+                $new->name = $patient->name;
+                $new->phone = $patient->phone;
+                $new->sex = $patient->sex;
+                $new->unsubscribe_token = $patient->unsubscribe_token;
+                $new->unsubscribed = $patient->unsubscribed;
+                $new->save();
+            }
 //            $address = $patient->email;
 //            if (filter_var($address, FILTER_VALIDATE_EMAIL)) {
 //                continue;
@@ -208,19 +219,19 @@ class Utils extends Model
 //                }
 //            }
 //            $patient->delete();
-            $username = GrammarHandler::handlePersonals($patient->name);
-            $text = "<br/><br/>Добрый день, $username<br/>
-В Региональном диагностическом центре открылось отделение <b>компьютерной томографии</b> по адресу:<br/> <b>г. Нижний Новгород, ул. Советская, д.12 (пл. Ленина). </b><br/>
-Записаться на исследования вы можете по тел. <a href='tel:88312020200'>+7(831)20-20-200</a>. <br/>
-Подробная информация на нашем сайте <a href='http://www.мрт-кт.рф'>www.мрт-кт.рф</a><br/><br/><br/>
-<a href='http://xn----ttbeqkc.xn--p1ai/nn/kt'><img class='advice' src='https://rdcnn.ru/images/ct_advice.jpg' alt='ct_advice'></a><br/><br/><br/><br/>
-";
-            (new MailingSchedule([
-                'text' => $text,
-                'name' => $patient->name,
-                'title' => 'Открытие отделения компьютерной томографии',
-                'address' => $patient->email
-            ]))->save();
+//            $username = GrammarHandler::handlePersonals($patient->name);
+//            $text = "<br/><br/>Добрый день, $username<br/>
+//В Региональном диагностическом центре открылось отделение <b>компьютерной томографии</b> по адресу:<br/> <b>г. Нижний Новгород, ул. Советская, д.12 (пл. Ленина). </b><br/>
+//Записаться на исследования вы можете по тел. <a href='tel:88312020200'>+7(831)20-20-200</a>. <br/>
+//Подробная информация на нашем сайте <a href='http://www.мрт-кт.рф'>www.мрт-кт.рф</a><br/><br/><br/>
+//<a href='http://xn----ttbeqkc.xn--p1ai/nn/kt'><img class='advice' src='https://rdcnn.ru/images/ct_advice.jpg' alt='ct_advice'></a><br/><br/><br/><br/>
+//";
+//            (new MailingSchedule([
+//                'text' => $text,
+//                'name' => $patient->name,
+//                'title' => 'Открытие отделения компьютерной томографии',
+//                'address' => $patient->email
+//            ]))->save();
         }
     }
 

@@ -2,6 +2,7 @@
 
 use app\assets\ManagementAsset;
 use app\models\database\MailingSchedule;
+use app\models\database\PatientInfo;
 use app\models\database\ViberPersonalList;
 use app\models\FileUtils;
 use app\models\Table_blacklist;
@@ -27,7 +28,7 @@ $this->title = 'Всякие разные настройки';
 
 $mailingCount = MailingSchedule::find()->count();
 
-//\app\models\Utils::handlePatientsTable();
+\app\models\Utils::handlePatientsTable();
 ?>
 
 <div class="text-center">
@@ -52,7 +53,10 @@ $mailingCount = MailingSchedule::find()->count();
             <div class="col-sm-12">Статус проверки новых
                 данных: <?= FileUtils::isUpdateInProgress() ? '<b class="text-danger">Проверяются</b>' : '<b class="text-success">Ожидание</b>' ?>
                 <br/>Последняя проверка: <?= TimeHandler::timestampToDate(FileUtils::getLastUpdateTime()) ?><br>Последняя
-                проверка обновлений: <?= TimeHandler::timestampToDate(FileUtils::getLastCheckUpdateTime()) ?></div>
+                проверка обновлений: <?= TimeHandler::timestampToDate(FileUtils::getLastCheckUpdateTime()) ?>
+            <br/>
+            Пациентов в базе: <?= PatientInfo::find()->count()?>
+            </div>
             <div class="col-sm-12">
                 <div class="btn-group-vertical">
                     <button class="btn btn-default activator" data-action="/management/check-update">
