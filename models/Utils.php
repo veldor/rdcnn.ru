@@ -190,7 +190,7 @@ class Utils extends Model
         /** @var PatientInfo $patient */
         foreach (PatientInfoDouble::find()->each(100) as $patient) {
             // проверю, что адреса ещё нет в базе
-            if(PatientInfo::find()->where(['email' , $patient->email])->count() === 0){
+            if(PatientInfo::find()->where(['email' => $patient->email])->count() === 0){
                 $new = new PatientInfo();
                 $new->email = $patient->email;
                 $new->name = $patient->name;
