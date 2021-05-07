@@ -18,6 +18,7 @@ use yii\filters\AccessControl;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\ErrorAction;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class SiteController extends Controller
@@ -31,7 +32,7 @@ class SiteController extends Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function () {
-                    return $this->redirect('error', 404);
+                    return $this->redirect('/error', 404);
                 },
                 'rules' => [
                     [
@@ -213,9 +214,12 @@ class SiteController extends Controller
     }
 
 
+    /**
+     * @throws NotFoundHttpException
+     */
     public function actionError(): string
     {
-        return $this->render('wooops');
+        throw new NotFoundHttpException();
     }
 
     public function actionLogout(): Response
