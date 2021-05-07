@@ -28,8 +28,7 @@ class AdministratorController extends Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function () {
-                    /** @noinspection SpellCheckingInspection */
-                    return $this->redirect('/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
+                    return $this->redirect('error', 404);
                 },
                 'rules' => [
                     [
