@@ -13,6 +13,7 @@ use app\models\utils\ComHandler;
 use app\models\utils\MailHandler;
 use app\models\utils\MailSettings;
 use app\models\utils\Management;
+use app\priv\Info;
 use Exception;
 use Throwable;
 use Yii;
@@ -29,8 +30,7 @@ class ManagementController extends Controller
             'access' => [
                 'class' => AccessControl::class,
                 'denyCallback' => function () {
-                    /** @noinspection SpellCheckingInspection */
-                    return $this->redirect('/iolj10zj1dj4sgaj45ijtse96y8wnnkubdyp5i3fg66bqhd5c8', 301);
+                    return $this->redirect('error', 404);
                 },
                 'rules' => [
                     [
@@ -53,7 +53,7 @@ class ManagementController extends Controller
                         'roles' => [
                             'manager'
                         ],
-                        //'ips' => Info::ACCEPTED_IPS,
+                        'ips' => Info::ACCEPTED_IPS,
                     ],
                 ],
             ],
