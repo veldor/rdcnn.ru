@@ -55,7 +55,7 @@ class AdministratorController extends Controller
                         'roles' => [
                             'manager'
                         ],
-                        //'ips' => Info::ACCEPTED_IPS,
+                        'ips' => Info::ACCEPTED_IPS,
                     ],
                 ],
             ],
