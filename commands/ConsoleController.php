@@ -83,6 +83,16 @@ class ConsoleController extends Controller
         MyErrorHandler::sendErrors();
     }
 
+    /**
+     * @throws Exception
+     * @throws \Google_Exception
+     * @throws \JsonException
+     */
+    public function actionCheckGdrive(): void
+    {
+        Gdrive::check();
+    }
+
     public function actionHandlePdf($fileDestination): int
     {
         FileUtils::addBackgroundToPDF($fileDestination);
