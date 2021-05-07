@@ -343,7 +343,12 @@ class FileUtils
                     if (is_file($javaPath)) {
                         $existentJavaPath = $javaPath;
                     } else {
-                        $existentJavaPath = 'java';
+                        $javaPath = 'C:\Program Files (x86)\java\bin\java.exe';
+                        if (is_file($javaPath)) {
+                            $existentJavaPath = $javaPath;
+                        } else {
+                            $existentJavaPath = 'java';
+                        }
                     }
                 }
             }
@@ -506,9 +511,10 @@ class FileUtils
         file_put_contents($versionFile, $message);
     }
 
-    public static function getLastTelegramLog(){
+    public static function getLastTelegramLog()
+    {
         $versionFile = Yii::$app->basePath . '\\logs\\last_tg_state.log';
-        if(is_file($versionFile)){
+        if (is_file($versionFile)) {
             return file_get_contents($versionFile);
         }
         return null;
@@ -519,11 +525,11 @@ class FileUtils
      */
     public static function isSoftwareVersionChanged(): bool
     {
-        $oldVersionFile =  Yii::$app->basePath . '\\old_version.info';
-        if(!is_file($oldVersionFile)){
+        $oldVersionFile = Yii::$app->basePath . '\\old_version.info';
+        if (!is_file($oldVersionFile)) {
             file_put_contents($oldVersionFile, '0');
         }
-        if(self::getSoftwareVersion() !== file_get_contents($oldVersionFile)){
+        if (self::getSoftwareVersion() !== file_get_contents($oldVersionFile)) {
             file_put_contents($oldVersionFile, self::getSoftwareVersion());
             return true;
         }
@@ -533,14 +539,13 @@ class FileUtils
     public static function loadFile($fileName, User $user): void
     {
         $file = Table_availability::findOne(['file_name' => $fileName]);
-        if($file !== null && $file->userId === $user->username){
-            if($file->is_execution){
+        if ($file !== null && $file->userId === $user->username) {
+            if ($file->is_execution) {
                 $path = Yii::getAlias('@executionsDirectory') . DIRECTORY_SEPARATOR . $fileName;
-            }
-            else{
+            } else {
                 $path = Yii::getAlias('@conclusionsDirectory') . DIRECTORY_SEPARATOR . $fileName;
             }
-            if(is_file($path)){
+            if (is_file($path)) {
                 Yii::$app->response->sendFile($path, $fileName);
                 Yii::$app->response->send();
             }
