@@ -90,7 +90,7 @@ class ConsoleController extends Controller
      */
     public function actionCheckGdrive(): void
     {
-        Gdrive::check();
+        Gdrive::requireToken();
     }
 
     public function actionHandlePdf($fileDestination): int

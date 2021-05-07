@@ -6,6 +6,7 @@ namespace app\models\utils;
 
 use app\models\FileUtils;
 use app\priv\Info;
+use Google\Client;
 use Google_Client;
 use Google_Exception;
 use Google_Service_Drive;
@@ -18,6 +19,46 @@ use yii\console\Exception;
 
 class Gdrive
 {
+
+    public static function requireToken()
+    {
+        $client = new Google_Client();
+        $client->setApplicationName('RDC remote');
+        $client->setScopes(Google_Service_Drive::DRIVE);
+        $client->setAuthConfig(dirname(__DIR__) . '\\..\\priv\\credentials.json');
+        $client->setAccessType('offline');
+        $client->setPrompt('select_account consent');
+        $tokenPath = dirname(__DIR__) . '\\..\\priv\\token.json';
+        // If there is no previous token or it's expired.
+        if ($client->isAccessTokenExpired()) {
+            // Refresh the token if possible, else fetch a new one.
+            if ($client->getRefreshToken()) {
+                $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+            } else {
+                // Request authorization from the user.
+                $authUrl = $client->createAuthUrl();
+                printf("Open the following link in your browser:\n%s\n", $authUrl);
+                print 'Enter verification code: ';
+                $authCode = trim(fgets(STDIN));
+
+                // Exchange authorization code for an access token.
+                $accessToken = $client->fetchAccessTokenWithAuthCode($authCode);
+                $client->setAccessToken($accessToken);
+
+                // Check to see if there was an error.
+                if (array_key_exists('error', $accessToken)) {
+                    throw new Exception(join(', ', $accessToken));
+                }
+            }
+            // Save the token to a file.
+            if (!file_exists(dirname($tokenPath))) {
+                if (!mkdir($concurrentDirectory = dirname($tokenPath), 0700, true) && !is_dir($concurrentDirectory)) {
+                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+                }
+            }
+            file_put_contents($tokenPath, json_encode($client->getAccessToken()));
+        }
+    }
 
     /**
      * @throws Exception
