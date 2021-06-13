@@ -532,6 +532,14 @@ class ExecutionHandler extends Model
         return $answer;
     }
 
+    public static function getTestExecutionList()
+    {
+        return [
+            ['date' => 123434, 'type' => 'mri'],
+            ['date' => 4343433, 'type' => 'ct'],
+        ];
+    }
+
     public function scenarios(): array
     {
         return [

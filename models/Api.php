@@ -95,6 +95,12 @@ class Api
                         }
                         return ['status' => 'failed', 'message' => 'invalid token'];
                     }
+
+                case 'get_executions_list':
+                    $authToken = $request->bodyParams['token'];
+                    // get list of executions for current user
+                    return ['status' => 'success', 'list' => ExecutionHandler::getTestExecutionList()];
+                    break;
             }
             return ['status' => 'failed', 'message' => 'unknown action'];
         }
