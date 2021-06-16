@@ -532,17 +532,13 @@ class ExecutionHandler extends Model
         return $answer;
     }
 
-    public static function getTestExecutionList(User $user)
+    public static function getTestExecutionList(User $user): array
     {
         $answer = [];
         // find all user executions
         $available = Table_availability::findAll(['userId' => $user->id]);
-        if (!empty($available)) {
-            foreach ($available as $item) {
-                if (empty($answer[$item->userId])) {
-                    $answer[$item->userId] = ['executionId' => $item->userId, 'executionDate' => $item->file_create_time, 'executionType' => 'МРТ'];
-                }
-            }
+        foreach ($available as $item) {
+            $answer[$item->userId] = ['executionId' => $item->userId, 'executionDate' => $item->file_create_time, 'executionType' => 'МРТ'];
         }
 //        return [
 //            ['executionId' => 'A333', 'executionDate' => 123434, 'executionType' => 'МРТ'],
