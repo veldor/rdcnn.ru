@@ -535,10 +535,8 @@ class ExecutionHandler extends Model
     public static function getTestExecutionList(User $user): array
     {
         $answer = [];
-        echo $user->id;
         // find all user executions
-        $available = Table_availability::findAll(['userId' => $user->id]);
-        var_dump($available);
+        $available = Table_availability::findAll(['userId' => $user->username]);
         foreach ($available as $item) {
             $answer[$item->userId] = ['executionId' => $item->userId, 'executionDate' => $item->file_create_time, 'executionType' => 'МРТ'];
         }
