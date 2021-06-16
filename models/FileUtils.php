@@ -326,7 +326,6 @@ class FileUtils
     public static function handleLoadedFile(string $loadedFile): ?array
     {
         $result = null;
-        $existentJavaPath = null;
         $javaPath = 'C:\Program Files (x86)\Java\jre1.8.0_241\bin\java.exe';
         if (is_file($javaPath)) {
             $existentJavaPath = $javaPath;

@@ -70,7 +70,7 @@ class ExecutionHandler extends Model
 
     }
 
-    public static function rmRec($path)
+    public static function rmRec($path): bool
     {
         if (is_file($path)) {
             return unlink($path);
@@ -88,7 +88,7 @@ class ExecutionHandler extends Model
 
     public static function isAdditionalConclusions(string $username): int
     {
-        $searchPattern = '/' . $username . '[-\.][0-9]+\.pdf/';
+        $searchPattern = '/' . $username . '[-.][0-9]+\.pdf/';
         $existentFiles = scandir(Info::CONC_FOLDER);
         $addsQuantity = 0;
         foreach ($existentFiles as $existentFile) {
@@ -101,7 +101,7 @@ class ExecutionHandler extends Model
 
     public static function deleteAddConcs($id): void
     {
-        $searchPattern = '/' . $id . '[-\.][0-9]+\.pdf/';
+        $searchPattern = '/' . $id . '[-.][0-9]+\.pdf/';
         $existentFiles = scandir(Info::CONC_FOLDER);
         foreach ($existentFiles as $existentFile) {
             if (preg_match($searchPattern, $existentFile)) {
@@ -400,8 +400,9 @@ class ExecutionHandler extends Model
         $registeredFile = Table_availability::findOne(['is_execution' => 1, 'userId' => $executionNumber]);
         if ($registeredFile === null) {
             // регистрирую файл
+            // todo при подключении КТ сделать проверку на тип обследования
             $md5 = md5_file($trueFileWay);
-            $item = new Table_availability(['file_name' => GrammarHandler::toLatin($executionNumber) . '.zip', 'is_execution' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username]);
+            $item = new Table_availability(['file_name' => GrammarHandler::toLatin($executionNumber) . '.zip', 'is_execution' => true, 'md5' => $md5, 'file_create_time' => time(), 'userId' => $user->username, 'execution_type' => 'МРТ']);
             $item->save();
         }
     }
@@ -535,8 +536,8 @@ class ExecutionHandler extends Model
     public static function getTestExecutionList()
     {
         return [
-            ['date' => 123434, 'type' => 'mri'],
-            ['date' => 4343433, 'type' => 'ct'],
+            ['executionId' => 'A333', 'executionDate' => 123434, 'executionType' => 'МРТ'],
+            ['executionId' => 'A334','executionDate' => 4343433, 'executionType' => 'КТ'],
         ];
     }
 

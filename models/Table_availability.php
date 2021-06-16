@@ -17,6 +17,8 @@ use yii\db\ActiveRecord;
  * @property string $patient_name [varchar(255)]
  * @property string $execution_area [varchar(255)]
  * @property bool $is_notification_sent [tinyint(1)]  Отправлялось ли уведомление
+ * @property int $execution_date [int(10) unsigned]  Время проведения обследования
+ * @property string $execution_type [varchar(255)]  Тип обследования
  */
 class Table_availability extends ActiveRecord
 {
@@ -53,6 +55,7 @@ class Table_availability extends ActiveRecord
 
     /**
      * @return string
+     * @throws Exception
      */
     public static function getWithoutExecutions(): string
     {
@@ -85,32 +88,33 @@ class Table_availability extends ActiveRecord
         return self::findAll(['userId' => $id, 'is_conclusion' => true]);
     }
 
-    public static function getPatientName(string $username)
+    public static function getPatientName(string $username): ?string
     {
         $existentItem = self::findOne(['userId' => $username, 'is_conclusion' => 1]);
-        if ($existentItem !== null)
+        if ($existentItem !== null) {
             return $existentItem->patient_name;
+        }
         return null;
     }
 
-    public static function getConclusionAreas(string $username)
+    public static function getConclusionAreas(string $username): string
     {
         $answer = '';
         $items = self::findAll(['userId' => $username, 'is_conclusion' => 1]);
         if ($items !== null) {
             foreach ($items as $item) {
-                $answer .= "{$item->execution_area} \n";
+                $answer .= "$item->execution_area \n";
             }
         }
         return $answer;
     }
 
-    public static function isRegistered($conclusionFile)
+    public static function isRegistered($conclusionFile): bool
     {
         return (bool)self::find()->where(['file_name' => $conclusionFile])->count();
     }
 
-    public static function getRegistered()
+    public static function getRegistered(): array
     {
         /** @var Table_availability[] $data */
         $data = self::find()->all();
@@ -149,11 +153,11 @@ class Table_availability extends ActiveRecord
             foreach ($existentFiles as $existentFile) {
                 if($existentFile->is_execution){
                     $type = 'execution';
-                    $fileName = "{$name}\n Архив снимков по обследованию {$user->username}.zip";
+                    $fileName = "$name\n Архив снимков по обследованию {$user->username}.zip";
                 }
                 else{
                     $type = 'conclusion';
-                    $fileName = $existentFile->execution_area ? "{$name}\n заключение {$existentFile->execution_area}.pdf" : "{$name}\n заключение {$existentFile->file_name}";
+                    $fileName = $existentFile->execution_area ? "$name\n заключение {$existentFile->execution_area}.pdf" : "{$name}\n заключение {$existentFile->file_name}";
                 }
                 $answer[] = ['name' => $fileName, 'type' => $type, 'fileName' => $existentFile->file_name];
             }
@@ -162,7 +166,7 @@ class Table_availability extends ActiveRecord
         return $answer;
     }
 
-    private static function sortFiles($a, $b)
+    private static function sortFiles($a, $b): int
     {
         $firstFileEnding = mb_substr($a['fileName'], -3);
         $secondFileEnding = mb_substr($b['fileName'], -3);
