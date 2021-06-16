@@ -88,8 +88,8 @@ class Api
                             $filesInfo = Table_availability::getFilesInfo($user);
                             return [
                                 'status' => 'success',
-                                'execution_id' => $user->username,
-                                'patient_name' => Table_availability::getPatientName($user->username),
+                                'executionId' => $user->username,
+                                'patientName' => Table_availability::getPatientName($user->username),
                                 'files' => $filesInfo
                             ];
                         }
