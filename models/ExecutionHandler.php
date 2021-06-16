@@ -244,10 +244,9 @@ class ExecutionHandler extends Model
                                     $entity,
                                     false
                                 );
-                            }
-                            else{
+                            } else {
                                 $existent = Table_availability::findOne(['file_name' => $entity]);
-                                if($existent !== null){
+                                if ($existent !== null) {
                                     $existent->md5 = $md5;
                                     $existent->is_notification_sent = 0;
                                     $existent->file_create_time = $changeTime;
@@ -533,12 +532,23 @@ class ExecutionHandler extends Model
         return $answer;
     }
 
-    public static function getTestExecutionList()
+    public static function getTestExecutionList(User $user)
     {
-        return [
-            ['executionId' => 'A333', 'executionDate' => 123434, 'executionType' => 'МРТ'],
-            ['executionId' => 'A334','executionDate' => 4343433, 'executionType' => 'КТ'],
-        ];
+        $answer = [];
+        // find all user executions
+        $available = Table_availability::findAll(['userId' => $user->id]);
+        if (!empty($available)) {
+            foreach ($available as $item) {
+                if (empty($answer[$item->userId])) {
+                    $answer[$item->userId] = ['executionId' => $item->userId, 'executionDate' => $item->file_create_time, 'executionType' => 'МРТ'];
+                }
+            }
+        }
+//        return [
+//            ['executionId' => 'A333', 'executionDate' => 123434, 'executionType' => 'МРТ'],
+//            ['executionId' => 'A334','executionDate' => 4343433, 'executionType' => 'КТ'],
+//        ];
+        return $answer;
     }
 
     public function scenarios(): array
