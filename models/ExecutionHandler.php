@@ -537,6 +537,7 @@ class ExecutionHandler extends Model
         $answer = [];
         // find all user executions
         $available = Table_availability::findAll(['userId' => $user->id]);
+        var_dump($available);
         foreach ($available as $item) {
             $answer[$item->userId] = ['executionId' => $item->userId, 'executionDate' => $item->file_create_time, 'executionType' => 'МРТ'];
         }
