@@ -540,11 +540,12 @@ class ExecutionHandler extends Model
         foreach ($available as $item) {
             $answer[$item->userId] = ['executionId' => $item->userId, 'executionDate' => $item->file_create_time, 'executionType' => 'МРТ'];
         }
+
 //        return [
 //            ['executionId' => 'A333', 'executionDate' => 123434, 'executionType' => 'МРТ'],
 //            ['executionId' => 'A334','executionDate' => 4343433, 'executionType' => 'КТ'],
 //        ];
-        return $answer;
+        return array_values($answer);
     }
 
     public function scenarios(): array
