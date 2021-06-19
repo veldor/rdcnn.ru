@@ -153,7 +153,7 @@ class Table_availability extends ActiveRecord
             foreach ($existentFiles as $existentFile) {
                 if($existentFile->is_execution){
                     $type = 'execution';
-                    $fileName = "$name\n Архив снимков";
+                    $fileName = "$user->username\n Архив снимков";
                 }
                 else{
                     $type = 'conclusion';
