@@ -37,6 +37,8 @@ class FirebaseHandler
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
+            Telegram::sendDebug("conclusion info $userId sent for persons: " . count($clients));
+
             foreach ($clients as $clientItem) {
                 $message->addRecipient(new Device($clientItem->token));
             }
@@ -81,6 +83,7 @@ class FirebaseHandler
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
+            Telegram::sendDebug("execution info $userId sent for persons: " . count($clients));
             foreach ($clients as $clientItem) {
                 $message->addRecipient(new Device($clientItem->token));
             }
@@ -133,7 +136,7 @@ class FirebaseHandler
                 }
             }
         }
-        return ['status' => 'success', 'sent' => count($files)];
+        return ['status' => 'success'];
     }
 
     /**
