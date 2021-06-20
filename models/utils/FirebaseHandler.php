@@ -37,7 +37,6 @@ class FirebaseHandler
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
-            echo "send message\n";
             Telegram::sendDebug("conclusion info $userId sent for persons: " . count($clients));
             foreach ($clients as $clientItem) {
                 $message->addRecipient(new Device($clientItem->token));
@@ -69,7 +68,6 @@ class FirebaseHandler
                     Telegram::sendDebug("exception when delete firebase contact: " . $e->getMessage());
                 }
             }
-            var_dump($result);
         }
     }
 
@@ -84,7 +82,6 @@ class FirebaseHandler
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
-            echo "send message\n";
             Telegram::sendDebug("execution info $userId sent for persons: " . count($clients));
             foreach ($clients as $clientItem) {
                 $message->addRecipient(new Device($clientItem->token));
@@ -116,7 +113,6 @@ class FirebaseHandler
                     Telegram::sendDebug("exception when delete firebase contact: " . $e->getMessage());
                 }
             }
-            var_dump($result);
         }
     }
 
