@@ -241,7 +241,7 @@ class ManagementController extends Controller
     }
     public function actionSendFirebaseTest(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+        if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return FirebaseHandler::sendTest();
         }
