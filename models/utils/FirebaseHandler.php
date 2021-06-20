@@ -38,7 +38,6 @@ class FirebaseHandler
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
             Telegram::sendDebug("conclusion info $userId sent for persons: " . count($clients));
-
             foreach ($clients as $clientItem) {
                 $message->addRecipient(new Device($clientItem->token));
             }
@@ -70,6 +69,7 @@ class FirebaseHandler
                     Telegram::sendDebug("exception when delete firebase contact: " . $e->getMessage());
                 }
             }
+            var_dump($result);
         }
     }
     public static function sendExecutionLoaded(string $userId, string $fileName, bool $double): void
@@ -115,6 +115,7 @@ class FirebaseHandler
                     Telegram::sendDebug("exception when delete firebase contact: " . $e->getMessage());
                 }
             }
+            var_dump($result);
         }
     }
 
@@ -129,9 +130,11 @@ class FirebaseHandler
         if(!empty($files)){
             foreach ($files as $file) {
                 if($file->is_conclusion){
+                    echo "try send conclusoin\n";
                     self::sendConclusionLoaded($file->userId, $file->file_name, "");
                 }
                 else{
+                    echo "try send execution\n";
                     self::sendExecutionLoaded($file->userId, $file->file_name, "");
                 }
             }
