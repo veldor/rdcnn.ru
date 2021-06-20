@@ -101,7 +101,7 @@ class Api
                     $user = User::findIdentityByAccessToken($authToken);
                     if ($user !== null) {
                         // get list of executions for current user
-                        return ['status' => 'success', 'list' => ExecutionHandler::getTestExecutionList($user)];
+                        return ['status' => 'success', 'executionId' => $user->getId() , 'list' => ExecutionHandler::getTestExecutionList($user)];
                     }
                     return ['status' => 'failed', 'message' => 'user not found'];
             }
