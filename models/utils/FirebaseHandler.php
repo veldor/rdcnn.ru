@@ -7,6 +7,7 @@ namespace app\models\utils;
 use app\models\database\FirebaseClient;
 use app\models\Table_availability;
 use app\models\Telegram;
+use app\models\User;
 use app\priv\Info;
 use Exception;
 use sngrl\PhpFirebaseCloudMessaging\Client;
@@ -32,11 +33,11 @@ class FirebaseHandler
         $client = new Client();
         $client->setApiKey($server_key);
         $client->injectGuzzleHttpClient(new \GuzzleHttp\Client());
-
         $message = new Message();
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
+            echo "send message\n";
             Telegram::sendDebug("conclusion info $userId sent for persons: " . count($clients));
             foreach ($clients as $clientItem) {
                 $message->addRecipient(new Device($clientItem->token));
@@ -47,23 +48,22 @@ class FirebaseHandler
                     'type' => 'conclusion',
                     'fileName' => $fileName,
                     'double' => $double
-                    ]);
+                ]);
             $result = $client->send($message);
             $json = $result->getBody()->getContents();
-            if(!empty($json)){
-                try{
+            if (!empty($json)) {
+                try {
                     $encoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
                     $results = $encoded['results'];
                     foreach ($results as $key => $resultItem) {
-                        if(!empty($resultItem['error']) && $resultItem['error'] === 'NotRegistered') {
+                        if (!empty($resultItem['error']) && $resultItem['error'] === 'NotRegistered') {
                             $target = $clients[$key];
-                            if($target !== null){
+                            if ($target !== null) {
                                 $target->delete();
                             }
                         }
                     }
-                }
-                catch (Exception $e){
+                } catch (Exception $e) {
                     Telegram::sendDebug("exception when parse message send: " . $e->getMessage());
                 } catch (Throwable $e) {
                     Telegram::sendDebug("exception when delete firebase contact: " . $e->getMessage());
@@ -72,6 +72,7 @@ class FirebaseHandler
             var_dump($result);
         }
     }
+
     public static function sendExecutionLoaded(string $userId, string $fileName, bool $double): void
     {
         $server_key = Info::FIREBASE_SERVER_KEY;
@@ -83,6 +84,7 @@ class FirebaseHandler
         $message->setPriority('high');
         $clients = FirebaseClient::findAll(['patient_id' => $userId]);
         if (!empty($clients)) {
+            echo "send message\n";
             Telegram::sendDebug("execution info $userId sent for persons: " . count($clients));
             foreach ($clients as $clientItem) {
                 $message->addRecipient(new Device($clientItem->token));
@@ -93,23 +95,22 @@ class FirebaseHandler
                     'type' => 'execution',
                     'fileName' => $fileName,
                     'double' => $double
-                    ]);
+                ]);
             $result = $client->send($message);
             $json = $result->getBody()->getContents();
-            if(!empty($json)){
-                try{
+            if (!empty($json)) {
+                try {
                     $encoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
                     $results = $encoded['results'];
                     foreach ($results as $key => $resultItem) {
-                        if(!empty($resultItem['error']) && $resultItem['error'] === 'NotRegistered') {
+                        if (!empty($resultItem['error']) && $resultItem['error'] === 'NotRegistered') {
                             $target = $clients[$key];
-                            if($target !== null){
+                            if ($target !== null) {
                                 $target->delete();
                             }
                         }
                     }
-                }
-                catch (Exception $e){
+                } catch (Exception $e) {
                     Telegram::sendDebug("exception when parse message send: " . $e->getMessage());
                 } catch (Throwable $e) {
                     Telegram::sendDebug("exception when delete firebase contact: " . $e->getMessage());
@@ -127,15 +128,15 @@ class FirebaseHandler
     {
         // get all available files
         $files = Table_availability::find()->all();
-        if(!empty($files)){
+        if (!empty($files)) {
             foreach ($files as $file) {
-                if($file->is_conclusion){
-                    echo "try send conclusoin\n";
-                    self::sendConclusionLoaded($file->userId, $file->file_name, "");
-                }
-                else{
-                    echo "try send execution\n";
-                    self::sendExecutionLoaded($file->userId, $file->file_name, "");
+                $user = User::findByUsername($file->userId);
+                if ($user !== null) {
+                    if ($file->is_conclusion) {
+                        self::sendConclusionLoaded($user->getId(), $file->file_name, "");
+                    } else {
+                        self::sendExecutionLoaded($user->getId(), $file->file_name, "");
+                    }
                 }
             }
         }
@@ -158,20 +159,19 @@ class FirebaseHandler
             }
             $result = $client->send($message);
             $json = $result->getBody()->getContents();
-            if(!empty($json)){
-                try{
+            if (!empty($json)) {
+                try {
                     $encoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
                     $results = $encoded['results'];
                     foreach ($results as $key => $resultItem) {
-                        if(!empty($resultItem['error']) && $resultItem['error'] === 'NotRegistered') {
+                        if (!empty($resultItem['error']) && $resultItem['error'] === 'NotRegistered') {
                             $target = $contacts[$key];
-                            if($target !== null){
+                            if ($target !== null) {
                                 $target->delete();
                             }
                         }
                     }
-                }
-                catch (Exception $e){
+                } catch (Exception $e) {
                     Telegram::sendDebug("exception when parse message send: " . $e->getMessage());
                 } catch (Throwable $e) {
                     Telegram::sendDebug("exception when delete firebase contact: " . $e->getMessage());
