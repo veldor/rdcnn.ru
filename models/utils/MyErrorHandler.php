@@ -10,6 +10,7 @@ use RuntimeException;
 use TelegramBot\Api\InvalidArgumentException;
 use Yii;
 use yii\helpers\Url;
+use yii\web\NotFoundHttpException;
 
 class MyErrorHandler
 {
@@ -45,7 +46,9 @@ class MyErrorHandler
         file_put_contents($root . '/errors/' . 'errors.txt', $errorInfo . "\r\n\r\n\r\n");
         // отправлю ошибки асинхронно
         //self::asyncSendErrors();
-        Telegram::sendDebug($errorInfo);
+        if(!($e instanceof NotFoundHttpException)){
+            Telegram::sendDebug($errorInfo);
+        }
     }
 
     /**
