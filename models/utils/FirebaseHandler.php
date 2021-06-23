@@ -152,6 +152,7 @@ class FirebaseHandler
         ->setNotification(new Notification('Тест рассылки', 'Рассылка для подписанных на топик!!'));
         $result = $client->send($message);
         var_dump($result);
+        return ['status' => 'success'];
     }
 
     /**
