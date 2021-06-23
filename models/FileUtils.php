@@ -443,6 +443,7 @@ class FileUtils
                         'execution_area' => $actionResult['execution_area']
                     ]);
                     $item->save();
+                    Telegram::sendDebug("conclusion added $conclusionFile");
 
                     FirebaseHandler::sendConclusionLoaded(
                         $user->id,

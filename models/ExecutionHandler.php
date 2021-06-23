@@ -129,6 +129,7 @@ class ExecutionHandler extends Model
         // проверю наличие папок
         if (!is_dir(Info::EXEC_FOLDER) && !mkdir($concurrentDirectory = Info::EXEC_FOLDER) && !is_dir($concurrentDirectory)) {
             FileUtils::writeUpdateLog('execution folder can\'t exists and cat\'t be created');
+            Telegram::sendDebug('execution folder can\'t exists and cat\'t be created');
             echo TimeHandler::timestampToDate(time()) . "execution folder can\'t exists and cat\'t be created";
         }
         // проверю устаревшие данные
@@ -140,6 +141,7 @@ class ExecutionHandler extends Model
                 if (($user->created_at + Info::DATA_SAVING_TIME) < time()) {
                     AdministratorActions::simpleDeleteItem($user->username);
                     echo TimeHandler::timestampToDate(time()) . "user {$user->username} удалён по таймауту\n";
+                    Telegram::sendDebug(TimeHandler::timestampToDate(time()) . "user {$user->username} удалён по таймауту\n");
                 }
             }
         }
@@ -163,6 +165,7 @@ class ExecutionHandler extends Model
                                 FilesHandler::handleDicomDir($path);
                             } catch (\Exception $e) {
                                 echo "У нас ошибка обработки " . $e->getMessage();
+                                Telegram::sendDebug("У нас ошибка обработки " . $e->getMessage());
                                 continue;
                             }
                         } else {
@@ -170,8 +173,10 @@ class ExecutionHandler extends Model
                             try {
                                 self::rmRec($path);
                                 echo TimeHandler::timestampToDate(time()) . "$entity удалена пустая папка \n";
+                                Telegram::sendDebug(TimeHandler::timestampToDate(time()) . "$entity удалена пустая папка \n");
                             } catch (\Exception $e) {
                                 FileUtils::writeUpdateLog('error delete dir ' . $path);
+                                Telegram::sendDebug('error delete dir ' . $path);
                             }
                         }
 
@@ -185,10 +190,12 @@ class ExecutionHandler extends Model
                         $result = FilesHandler::unzip($path);
                     } catch (\Exception $e) {
                         echo "У нас ошибка распаковки " . $e->getMessage();
+                        Telegram::sendDebug("У нас ошибка распаковки " . $e->getMessage());
                         continue;
                     }
                     if ($result !== null) {
                         echo "added zip $result \n";
+                        Telegram::sendDebug("added zip $result \n");
                     }
                 }
             }
@@ -245,6 +252,7 @@ class ExecutionHandler extends Model
                                     $entity,
                                     false
                                 );
+                                Telegram::sendDebug("added execution for $entity");
                             } else {
                                 $existent = Table_availability::findOne(['file_name' => $entity]);
                                 if ($existent !== null) {
