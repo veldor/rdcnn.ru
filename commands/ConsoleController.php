@@ -62,6 +62,7 @@ class ConsoleController extends Controller
                 ExecutionHandler::check();
             } catch (\Exception $e) {
                 echo "error handling changes with message {$e->getMessage()}";
+                Telegram::sendDebug( "error handling changes with message {$e->getMessage()}");
                 echo $e->getTraceAsString();
             }
             //

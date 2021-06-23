@@ -549,7 +549,7 @@ class ExecutionHandler extends Model
         return array_values($answer);
     }
 
-    public static function getExecutionInfo(User $user)
+    public static function getExecutionInfo(User $user): ExecutionInfo
     {
         $info = new ExecutionInfo();
         $info->executionId = $user->username;
