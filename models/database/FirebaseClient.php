@@ -25,7 +25,7 @@ class FirebaseClient extends ActiveRecord
 
     public static function register(User $user, $firebaseToken): void
     {
-        if(!self::find()->where(['token' => $firebaseToken])->count()){
+        if(!self::find()->where(['token' => $firebaseToken, 'patient_id' => $user->id])->count()){
             // при наличии- удалю записи, дублирующие токен
             $existent = self::findAll(['token' => $firebaseToken]);
             if(!empty($existent)){
@@ -33,7 +33,7 @@ class FirebaseClient extends ActiveRecord
                     try {
                         $item->delete();
                     } catch (StaleObjectException | Throwable $e) {
-                        Telegram::sendDebug("Не удалось удалить firebase запись {$item->id}");
+                        Telegram::sendDebug("Не удалось удалить запись {$item->id}");
                     }
                 }
             }
