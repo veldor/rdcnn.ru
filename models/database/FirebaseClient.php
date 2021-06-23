@@ -25,10 +25,10 @@ class FirebaseClient extends ActiveRecord
 
     public static function register(User $user, $firebaseToken): void
     {
-        if(!self::find()->where(['token' => $firebaseToken, 'patient_id' => $user->id])->count()){
+        if (!self::find()->where(['token' => $firebaseToken, 'patient_id' => $user->id])->count()) {
             // при наличии- удалю записи, дублирующие токен
             $existent = self::findAll(['token' => $firebaseToken]);
-            if(!empty($existent)){
+            if (!empty($existent)) {
                 foreach ($existent as $item) {
                     try {
                         $item->delete();
@@ -38,7 +38,7 @@ class FirebaseClient extends ActiveRecord
                 }
             }
             (new self(['token' => $firebaseToken, 'patient_id' => $user->id]))->save();
+            Telegram::sendDebug("registered firebase client for $user->username");
         }
-        Telegram::sendDebug("registered firebase client for $user->username");
     }
 }
