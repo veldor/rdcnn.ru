@@ -51,6 +51,7 @@ class ManagementController extends Controller
                             'delete-conclusions',
                             'send-message',
                             'send-firebase-test',
+                            'send-firebase-topic',
                         ],
                         'roles' => [
                             'manager'
@@ -239,11 +240,27 @@ class ManagementController extends Controller
         }
         throw new NotFoundHttpException();
     }
+
+    /**
+     * @throws NotFoundHttpException
+     */
     public function actionSendFirebaseTest(): array
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return FirebaseHandler::sendTest();
+        }
+        throw new NotFoundHttpException();
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    public function actionSendFirebaseTopic(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return FirebaseHandler::sendTopicTest();
         }
         throw new NotFoundHttpException();
     }

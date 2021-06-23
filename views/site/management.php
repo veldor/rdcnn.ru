@@ -71,6 +71,8 @@ $mailingCount = MailingSchedule::find()->count();
                         <span>Send test mail</span></button>
                     <button class="btn btn-default activator" data-action="/management/send-firebase-test">
                         <span>Send firebase mail</span></button>
+                    <button class="btn btn-default activator" data-action="/management/send-firebase-topic">
+                        <span>Send firebase topic notification</span></button>
                 </div>
             </div>
         </div>
