@@ -8,6 +8,7 @@ use app\models\database\AuthAssignment;
 use app\models\database\NotificationSendingInfo;
 use app\models\database\TempDownloadLinks;
 use app\models\database\ViberSubscriptions;
+use app\models\selections\ExecutionInfo;
 use app\models\utils\FilesHandler;
 use app\models\utils\FirebaseHandler;
 use app\models\utils\GrammarHandler;
@@ -546,6 +547,15 @@ class ExecutionHandler extends Model
 //            ['executionId' => 'A334','executionDate' => 4343433, 'executionType' => 'КТ'],
 //        ];
         return array_values($answer);
+    }
+
+    public static function getExecutionInfo(User $user)
+    {
+        $info = new ExecutionInfo();
+        $info->executionId = $user->username;
+        $info->executionType = "МРТ";
+        $info->executionDate = $user->created_at;
+        return $info;
     }
 
     public function scenarios(): array

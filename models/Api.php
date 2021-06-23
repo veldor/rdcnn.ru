@@ -95,13 +95,19 @@ class Api
                         }
                         return ['status' => 'failed', 'message' => 'invalid token'];
                     }
-                break;
+                    break;
                 case 'get_executions_list':
                     $authToken = $request->bodyParams['token'];
                     $user = User::findIdentityByAccessToken($authToken);
                     if ($user !== null) {
                         // get list of executions for current user
-                        return ['status' => 'success', 'list' => ExecutionHandler::getTestExecutionList($user)];
+                        $executionInfo = ExecutionHandler::getExecutionInfo($user);
+                        return ['status' => 'success',
+                            'list' => ExecutionHandler::getTestExecutionList($user),
+                            'executionId' => $executionInfo->executionId,
+                            'executionType' => $executionInfo->executionType,
+                            'executionDate' => $executionInfo->executionDate
+                        ];
                     }
                     return ['status' => 'failed', 'message' => 'user not found'];
             }
