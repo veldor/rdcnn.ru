@@ -43,6 +43,7 @@ class ConsoleController extends Controller
         FileUtils::writeUpdateLog('start update check : ' . TimeHandler::timestampToDate(time()));
         // проверю, не запущено ли уже обновление, если запущено- ничего не делаю
         if (FileUtils::isUpdateInProgress()) {
+            echo "in progress yet";
             return ExitCode::OK;
         }
         try {
