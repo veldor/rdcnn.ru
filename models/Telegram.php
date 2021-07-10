@@ -4,6 +4,7 @@
 namespace app\models;
 
 
+use app\models\database\TempDownloadLinks;
 use app\models\database\ViberPersonalList;
 use app\models\utils\ComHandler;
 use app\models\utils\FilesHandler;
@@ -293,6 +294,8 @@ class Telegram
                                         $answer = '';
                                         foreach ($existentFiles as $file) {
                                             $answer .= $file['name'] . "\n";
+                                            $link = TempDownloadLinks::createLink($user, $file['type'], $file['fileName']);
+                                            $answer .= "$link->link\n";
                                         }
                                         $bot->sendMessage($message->getChat()->getId(), $answer);
 
@@ -300,6 +303,9 @@ class Telegram
                                     else{
                                         $bot->sendMessage($message->getChat()->getId(), 'Файлов по данному обследованию не найдено');
                                     }
+                                }
+                                else{
+                                    $bot->sendMessage($message->getChat()->getId(), 'Файлов по данному обследованию не найдено');
                                 }
                                 return $executionId;
                             }
