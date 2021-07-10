@@ -282,6 +282,11 @@ class Telegram
                                 $bot->sendMessage($message->getChat()->getId(), 'Вы подписаны на получение ошибок');
                                 return;
                             }
+                            if(ViberPersonalList::iWorkHere($message->getChat()->getId()) && GrammarHandler::startsWith($msg_text, "/dl_")){
+                                // find all files and create a temp links for it
+                                $executionId = substr($msg_text, 4);
+                                return $executionId;
+                            }
                         }
                     } else {
                         $msg_text = $message->getText();
@@ -317,11 +322,6 @@ class Telegram
                 // регистрирую получателя
                 ViberPersonalList::register($message->getChat()->getId());
                 return 'Ага, вы работаете на нас :) /help для списка команд';
-        }
-        if(GrammarHandler::startsWith($msg_text, "/dl_")){
-            // find all files and create a temp links for it
-            $executionId = substr($msg_text, 4);
-            return $executionId;
         }
         return 'Не понимаю, о чём вы :( (вы написали ' . $msg_text . ')';
     }
