@@ -658,7 +658,7 @@ class Viber extends Model
             else{
                 Telegram::sendDebug("Попытка скачать файл незарегистрированного пользователя: $linkInfo->execution_id");
             }
-            $linkInfo->delete();
+            //$linkInfo->delete();
             if (!empty($file) && !empty($fileName) && is_file($file)) {
                 // отдам файл на выгрузку
                 Yii::$app->response->sendFile($file, $fileName);

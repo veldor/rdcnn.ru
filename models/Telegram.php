@@ -296,7 +296,7 @@ class Telegram
                                             $answer .= $file['name'] . "\n";
                                             $link = TempDownloadLinks::createLink($user, $file['type'], $file['fileName']);
                                             $answer .= "https://rdcnn.ru/dl/$link->link\n";
-                                            $answer .= 'Ссылка действительна только для одной загрузки!';
+                                            //$answer .= 'Ссылка действительна только для одной загрузки!';
                                         }
                                         $bot->sendMessage($message->getChat()->getId(), $answer);
 
