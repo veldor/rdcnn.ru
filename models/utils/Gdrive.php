@@ -201,6 +201,11 @@ class Gdrive
                     $service->files->delete($file->getId());
                 }
             }
+            else{
+                // just remove file
+                echo "delete $file->getName()";
+                $service->files->delete($file->getId());
+            }
         } catch (\Exception $e) {
             echo "skipped file {$file->getName()} with error {$e->getMessage()}";
         }
