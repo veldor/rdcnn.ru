@@ -282,11 +282,13 @@ class Telegram
                                 $bot->sendMessage($message->getChat()->getId(), 'Вы подписаны на получение ошибок');
                                 return;
                             }
-                            if(ViberPersonalList::iWorkHere($message->getChat()->getId()) && GrammarHandler::startsWith($msg_text, "/dl_")){
+                            if(GrammarHandler::startsWith($msg_text, "/dl_")){
                                 // find all files and create a temp links for it
                                 $executionId = substr($msg_text, 4);
+                                $bot->sendMessage($message->getChat()->getId(), $executionId);
                                 return $executionId;
                             }
+                            $bot->sendMessage($message->getChat()->getId(), $msg_text);
                         }
                     } else {
                         $msg_text = $message->getText();
