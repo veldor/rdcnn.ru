@@ -96,7 +96,7 @@ class Gdrive
                 // удалю все файлы из корзины
                 $service->files->emptyTrash();
             }
-            echo "All files load from Gdrive\n";
+            echo "All files load from Gdrive (" . count($results->getFiles()) . ")\n";
         }
         else{
             echo "No client\n";
