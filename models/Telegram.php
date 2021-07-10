@@ -285,7 +285,22 @@ class Telegram
                             if(GrammarHandler::startsWith($msg_text, "/dl_")){
                                 // find all files and create a temp links for it
                                 $executionId = substr($msg_text, 4);
-                                $bot->sendMessage($message->getChat()->getId(), $executionId);
+                                // find files
+                                $user = User::findByUsername($executionId);
+                                if($user !== null){
+                                    $existentFiles = Table_availability::getFilesInfo($user);
+                                    if(!empty($existentFiles)){
+                                        $answer = '';
+                                        foreach ($existentFiles as $file) {
+                                            $answer .= $file['name'] . "\n";
+                                        }
+                                        $bot->sendMessage($message->getChat()->getId(), $answer);
+
+                                    }
+                                    else{
+                                        $bot->sendMessage($message->getChat()->getId(), 'Файлов по данному обследованию не найдено');
+                                    }
+                                }
                                 return $executionId;
                             }
                             $bot->sendMessage($message->getChat()->getId(), $msg_text);
