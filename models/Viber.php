@@ -645,7 +645,6 @@ class Viber extends Model
             if ($executionInfo !== null) {
                 // получу путь к файлу
                 if ($linkInfo->file_type === 'execution') {
-                    Telegram::sendDebug('access to execution');
                     $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
                     $fileName = $executionInfo->username . '.zip';
                 } else if ($linkInfo->file_type === 'conclusion') {
@@ -656,12 +655,21 @@ class Viber extends Model
                     }
                 }
             }
+            else{
+                Telegram::sendDebug("Попытка скачать файл незарегистрированного пользователя: $linkInfo->execution_id");
+            }
             $linkInfo->delete();
             if (!empty($file) && !empty($fileName) && is_file($file)) {
                 // отдам файл на выгрузку
                 Yii::$app->response->sendFile($file, $fileName);
                 return;
             }
+            else{
+                Telegram::sendDebug("Файл не найден: $file");
+            }
+        }
+        else{
+            Telegram::sendDebug("Попытка скачать файл по несуществующей ссылке: $link");
         }
         // страница не найдена, видимо, ссылка истекла
         throw new NotFoundHttpException('Не удалось найти файлы по данной ссылке, видимо, они удалены по истечению срока давности. Вы можете обратиться к нам за повторной публикацией файлов');
