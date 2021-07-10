@@ -90,6 +90,7 @@ class Gdrive
                 print "TimeHandler::timestampToDate(time()) . Files:\n";
                 /** @var Google_Service_Drive_DriveFile $file */
                 foreach ($results->getFiles() as $file) {
+                    echo "handle file\n";
                     // скачаю и удалю файл
                     self::getFile($service, $file);
                 }
@@ -197,6 +198,7 @@ class Gdrive
                         }
                     }
                     // удалю файл с облачного диска
+                    echo "delete $file->getName()";
                     $service->files->delete($file->getId());
                 }
             }
