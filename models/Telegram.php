@@ -318,6 +318,11 @@ class Telegram
                 ViberPersonalList::register($message->getChat()->getId());
                 return 'Ага, вы работаете на нас :) /help для списка команд';
         }
+        if(GrammarHandler::startsWith($msg_text, "/dl_")){
+            // find all files and create a temp links for it
+            $executionId = substr($msg_text, 4);
+            return $executionId;
+        }
         return 'Не понимаю, о чём вы :( (вы написали ' . $msg_text . ')';
     }
 
