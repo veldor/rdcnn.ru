@@ -645,6 +645,7 @@ class Viber extends Model
             if ($executionInfo !== null) {
                 // получу путь к файлу
                 if ($linkInfo->file_type === 'execution') {
+                    Telegram::sendDebug('access to execution');
                     $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
                     $fileName = $executionInfo->username . '.zip';
                 } else if ($linkInfo->file_type === 'conclusion') {
