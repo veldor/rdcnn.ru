@@ -635,4 +635,34 @@ class Viber extends Model
             ->setText('Показать доступные команды'),
         ];
     }
+
+    public static function downloadOnceFile($link)
+    {
+        // получу данные
+        $linkInfo = TempDownloadLinks::findOne(['link' => $link]);
+        if ($linkInfo !== null) {
+            $executionInfo = User::findIdentity($linkInfo->execution_id);
+            if ($executionInfo !== null) {
+                // получу путь к файлу
+                if ($linkInfo->file_type === 'execution') {
+                    $file = Yii::getAlias('@executionsDirectory') . '\\' . $linkInfo->file_name;
+                    $fileName = $executionInfo->username . '.zip';
+                } else if ($linkInfo->file_type === 'conclusion') {
+                    $availData = Table_availability::findOne(['file_name' => $linkInfo->file_name]);
+                    if ($availData !== null) {
+                        $file = Yii::getAlias('@conclusionsDirectory') . '\\' . $linkInfo->file_name;
+                        $fileName = 'МРТ ' . $availData->execution_area . ' ' . $availData->patient_name . '.pdf';
+                    }
+                }
+            }
+            $linkInfo->delete();
+            if (!empty($file) && !empty($fileName) && is_file($file)) {
+                // отдам файл на выгрузку
+                Yii::$app->response->sendFile($file, $fileName);
+                return;
+            }
+        }
+        // страница не найдена, видимо, ссылка истекла
+        throw new NotFoundHttpException('Не удалось найти файлы по данной ссылке, видимо, они удалены по истечению срока давности. Вы можете обратиться к нам за повторной публикацией файлов');
+    }
 }

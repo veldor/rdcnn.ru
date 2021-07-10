@@ -15,7 +15,7 @@ use yii\web\UploadedFile;
 
 class DownloadController extends Controller
 {
-    public function behaviors():array
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -36,7 +36,9 @@ class DownloadController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['download-temp'],
+                        'actions' => [
+                            'download-temp',
+                            'download-once'],
                         'roles' => ['@', '?'],
                     ],
                     [
@@ -58,9 +60,9 @@ class DownloadController extends Controller
      * @inheritdoc
      * @throws BadRequestHttpException
      */
-    public function beforeAction($action):bool
+    public function beforeAction($action): bool
     {
-        if ($action->id === 'download-temp' || $action->id === 'drop') {
+        if ($action->id === 'download-temp' || $action->id === 'drop' || $action->id === 'download-once') {
             // отключу csrf для возможности запроса
             $this->enableCsrfValidation = false;
         }
@@ -104,6 +106,14 @@ class DownloadController extends Controller
     public function actionDownloadTemp($link): void
     {
         Viber::downloadTempFile($link);
+    }
+    /**
+     * @param $link
+     * @throws NotFoundHttpException
+     */
+    public function actionDownloadOnce($link): void
+    {
+        Viber::downloadOnceFile($link);
     }
 
     public function actionDrop(): void
