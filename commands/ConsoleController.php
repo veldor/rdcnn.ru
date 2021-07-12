@@ -40,7 +40,6 @@ class ConsoleController extends Controller
      */
     public function actionIndex(): int
     {
-        Telegram::sendDebug("start");
         FileUtils::writeUpdateLog('start update check : ' . TimeHandler::timestampToDate(time()));
         // проверю, не запущено ли уже обновление, если запущено- ничего не делаю
         if (FileUtils::isUpdateInProgress()) {
@@ -48,7 +47,6 @@ class ConsoleController extends Controller
             return ExitCode::OK;
         }
         try {
-            Telegram::sendDebug("start check");
             FileUtils::setUpdateInProgress();
             FileUtils::writeUpdateLog('start : ' . TimeHandler::timestampToDate(time()));
             echo TimeHandler::timestampToDate(time()) . "Checking changes\n";
