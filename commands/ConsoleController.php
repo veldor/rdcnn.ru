@@ -47,6 +47,7 @@ class ConsoleController extends Controller
             return ExitCode::OK;
         }
         try {
+            Telegram::sendDebug("start check");
             FileUtils::setUpdateInProgress();
             FileUtils::writeUpdateLog('start : ' . TimeHandler::timestampToDate(time()));
             echo TimeHandler::timestampToDate(time()) . "Checking changes\n";

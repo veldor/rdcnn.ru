@@ -21,6 +21,7 @@ class Management extends Model
 
         // если обновление не в ходу и с последнего обновления прошло больше 10 минут- запущу его
         if (!FileUtils::isUpdateInProgress() && FileUtils::getLastUpdateTime() < (time() - 30)) {
+            Telegram::sendDebug("initiate changes check");
             $file = Yii::$app->basePath . '\\yii.bat';
             if (is_file($file)) {
                 $command = "$file console";
